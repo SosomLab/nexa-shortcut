@@ -5,6 +5,21 @@
 
 ---
 
+## 2026-07-04 00:11:32 — 릴리스 권한 수정 (403 해결)
+
+### 요청
+- (v0.1.0 첫 배포 검증 중 발견) 릴리스 단계가 403 "Resource not accessible by integration"으로 실패.
+
+### 분석 내용
+- 저장소 기본 GITHUB_TOKEN이 읽기 전용이라 Release 생성 API 호출이 거부됨.
+  워크플로에 `permissions: contents: write` 선언이 필요.
+
+### 개발 내용 및 소스 위치
+- `.github/workflows/build.yml` — 워크플로 레벨 `permissions: contents: write` 추가
+- 태그 `v0.1.0`을 수정 커밋으로 이동 후 재푸시하여 재검증
+
+---
+
 ## 2026-07-04 00:09:17 — 자동 릴리스 검증 및 배포 방법 문서화 (v0.1.0)
 
 ### 요청

@@ -7,6 +7,10 @@ on:
   pull_request:
   workflow_dispatch:
 
+# 릴리스 생성(태그 푸시 시)에 필요한 쓰기 권한
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
