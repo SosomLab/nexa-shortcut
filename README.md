@@ -3,6 +3,10 @@
 윈도우용 초경량 단축키 유틸리티 모음. GUI 프레임워크와 CRT 없이 순수 Win32 API로만 작성해
 실행 파일 크기와 메모리 사용을 최소화한다.
 
+- **SosomLab 홈페이지**: https://sosomlab.com
+- **제품 소개 페이지**: https://sosomlab.com/apps/nexa-shortcut/
+- **다운로드**: [GitHub Releases](https://github.com/SosomLab/nexa-shortcut/releases)
+
 ## nShiftSpace (목표 1 — 완료)
 
 **Nexa ShiftSpace** — Shift+Space로 한/영 전환만 하는 단일 기능 상주 프로그램.

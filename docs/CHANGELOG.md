@@ -5,6 +5,17 @@
 
 ---
 
+## 2026-07-04 00:36:10 — 제품 소개 페이지·홈페이지 링크 등록
+
+### 요청
+- 제품 소개 페이지(https://sosomlab.com/apps/nexa-shortcut/)를 문서에 등록할 것.
+- SosomLab 홈페이지(https://sosomlab.com)도 함께 등록.
+
+### 개발 내용 및 소스 위치
+- `README.md` — 상단에 SosomLab 홈페이지, 제품 소개 페이지, GitHub Releases 다운로드 링크 추가
+
+---
+
 ## 2026-07-04 00:15:14 — 릴리스 자산을 zip 압축 형태로 변경
 
 ### 요청
