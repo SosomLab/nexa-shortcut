@@ -5,6 +5,26 @@
 
 ---
 
+## 2026-07-04 00:03:21 — GitHub Actions 자동 빌드 등록
+
+### 요청
+- 프로그램 빌드를 GitHub Actions에 등록해서 진행할 수 있게 할 것.
+
+### 분석 내용
+- 기존 Makefile은 mingw-w64 크로스 컴파일 기반이라 Linux 러너(ubuntu-latest)에서
+  `apt-get install gcc-mingw-w64`만으로 그대로 재사용 가능 — Windows 러너 불필요.
+
+### 설계 방향
+- 트리거: main 푸시 / PR / 수동 실행(workflow_dispatch) / `v*` 태그.
+- 빌드 후 exe를 아티팩트로 업로드, `v*` 태그 푸시 시에는 GitHub Release에 exe 자동 첨부.
+- 초경량 회귀 검사 단계 추가: exe가 8KB를 초과하면 빌드 실패 처리
+  (의존성·CRT가 슬그머니 늘어나는 것을 CI에서 차단).
+
+### 개발 내용 및 소스 위치
+- `.github/workflows/build.yml` (신규) — 설치 → make → 크기 검사 → 아티팩트 업로드 → 릴리스
+
+---
+
 ## 2026-07-03 23:49:12 — 아이콘 미세 조정: ㄱ 가로획 2px 확대
 
 ### 요청

@@ -1,0 +1,47 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install mingw-w64 toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends gcc-mingw-w64 make python3
+
+      - name: Build (x64 + x86)
+        run: make
+
+      - name: Verify size budget (초경량 회귀 검사)
+        run: |
+          ls -la dist/
+          for f in dist/*.exe; do
+            size=$(stat -c%s "$f")
+            echo "$f: $size bytes"
+            if [ "$size" -gt 8192 ]; then
+              echo "::error::$f 가 8KB를 초과했습니다 ($size bytes) — 초경량 원칙 위반"
+              exit 1
+            fi
+          done
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: nShiftSpace
+          path: dist/*.exe
+
+      - name: Release (태그 푸시 시 exe 첨부)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*.exe
+          generate_release_notes: true
