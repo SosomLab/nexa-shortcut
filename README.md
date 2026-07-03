@@ -42,6 +42,15 @@ build.bat               # dist\nShiftSpace-x64.exe 생성
 
 MSVC에서도 CRT를 링크하지 않으므로(/NODEFAULTLIB + /ENTRY:start) 초경량 결과물이 나온다.
 
+### 배포 (자동 릴리스)
+
+`v*` 형식의 태그를 푸시하면 GitHub Actions가 빌드 후 x64/x86 실행 파일 2개를
+GitHub Release에 자동 첨부한다:
+
+```bash
+git tag v0.1.0 && git push origin v0.1.0
+```
+
 ### 시작 프로그램 등록
 
 `Win+R` → `shell:startup` → 폴더에 exe 바로가기를 넣으면 로그인 시 자동 실행.
