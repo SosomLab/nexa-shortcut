@@ -12,7 +12,9 @@
 - C + Win32 API만 사용. GUI 프레임워크·CRT 미사용 (`-nostdlib`, 진입점 `start`).
 - 링크 라이브러리는 kernel32 / user32 / shell32 로 제한.
 - 큰 구조체는 전역(.bss)에 두어 컴파일러의 `memset` 호출 생성을 회피.
-- 결과물 기준: 목표 1은 4KB 달성 (원본 jwShiftSpaceKey.exe 12KB 대비 1/3).
+- 결과물 기준: 목표 1은 4.5KB 달성 (원본 jwShiftSpaceKey.exe 12KB 대비 1/3 수준).
+- 아이콘도 초경량: 16×16 1bpp 단일 이미지 ICO(198바이트)를 스크립트(`tools/make_icon.py`)로
+  생성해 리소스로 내장. 다중 해상도·트루컬러 ICO(수십 KB)는 사용하지 않는다.
 
 ## 목표 1 아키텍처 (구현됨: `src/nShiftSpace.c`)
 

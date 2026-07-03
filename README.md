@@ -7,8 +7,9 @@
 
 **Nexa ShiftSpace** — Shift+Space로 한/영 전환만 하는 단일 기능 상주 프로그램.
 
-- 파일 크기: **4KB** (참고: 원조 jwShiftSpaceKey.exe는 12KB)
+- 파일 크기: **4.5KB** (참고: 원조 jwShiftSpaceKey.exe는 12KB)
 - 동작: Shift+Space 입력 시 한/영 키(VK_HANGUL)를 대신 눌러줌
+- 자체 아이콘 내장: '가·A' 픽셀 아트, 198바이트 1bpp ICO (`tools/make_icon.py`로 생성)
 - 트레이 아이콘 우클릭 → 종료
 - 중복 실행 방지, 탐색기 재시작 시 트레이 아이콘 자동 복구
 

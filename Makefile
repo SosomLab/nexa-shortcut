@@ -6,6 +6,8 @@
 
 CC64 := x86_64-w64-mingw32-gcc
 CC32 := i686-w64-mingw32-gcc
+RES64 := x86_64-w64-mingw32-windres
+RES32 := i686-w64-mingw32-windres
 
 # CRT 미링크 + 크기 최소화 플래그
 CFLAGS := -Os -s -mwindows -nostdlib -DUNICODE -D_UNICODE \
@@ -15,22 +17,33 @@ CFLAGS := -Os -s -mwindows -nostdlib -DUNICODE -D_UNICODE \
 LIBS   := -lkernel32 -luser32 -lshell32
 
 SRC := src/nShiftSpace.c
+RC  := res/nShiftSpace.rc
+ICO := res/nShiftSpace.ico
 
 all: x64 x86
 
 x64: dist/nShiftSpace-x64.exe
 x86: dist/nShiftSpace-x86.exe
 
-dist:
-	mkdir -p dist
+dist build:
+	mkdir -p $@
 
-dist/nShiftSpace-x64.exe: $(SRC) | dist
-	$(CC64) $(CFLAGS) -Wl,-e,start $< -o $@ $(LIBS)
+$(ICO): tools/make_icon.py
+	python3 tools/make_icon.py $@
 
-dist/nShiftSpace-x86.exe: $(SRC) | dist
-	$(CC32) $(CFLAGS) -Wl,-e,_start $< -o $@ $(LIBS)
+build/rsrc-x64.o: $(RC) $(ICO) | build
+	$(RES64) $(RC) -O coff -o $@
+
+build/rsrc-x86.o: $(RC) $(ICO) | build
+	$(RES32) $(RC) -O coff -o $@
+
+dist/nShiftSpace-x64.exe: $(SRC) build/rsrc-x64.o | dist
+	$(CC64) $(CFLAGS) -Wl,-e,start $(SRC) build/rsrc-x64.o -o $@ $(LIBS)
+
+dist/nShiftSpace-x86.exe: $(SRC) build/rsrc-x86.o | dist
+	$(CC32) $(CFLAGS) -Wl,-e,_start $(SRC) build/rsrc-x86.o -o $@ $(LIBS)
 
 clean:
-	rm -rf dist
+	rm -rf dist build
 
 .PHONY: all x64 x86 clean

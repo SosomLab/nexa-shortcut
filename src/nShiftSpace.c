@@ -14,6 +14,7 @@
 #define HOTKEY_ID   1
 #define WM_TRAYICON (WM_USER + 1)
 #define IDM_EXIT    10
+#define IDI_TRAY    1  /* res/nShiftSpace.rc 의 아이콘 리소스 ID */
 
 static NOTIFYICONDATAW g_nid;
 static WNDCLASSW       g_wc;
@@ -26,8 +27,9 @@ static void add_tray_icon(HWND hwnd)
     g_nid.uID              = 1;
     g_nid.uFlags           = NIF_ICON | NIF_MESSAGE | NIF_TIP;
     g_nid.uCallbackMessage = WM_TRAYICON;
-    g_nid.hIcon            = LoadIconW(NULL, IDI_APPLICATION);
-    lstrcpynW(g_nid.szTip, L"nShiftSpace: Shift+Space 한/영", 64);
+    g_nid.hIcon            = LoadIconW(GetModuleHandleW(NULL),
+                                       MAKEINTRESOURCEW(IDI_TRAY));
+    lstrcpynW(g_nid.szTip, L"nShiftSpace: Shift+Space 한/영 전환", 64);
     Shell_NotifyIconW(NIM_ADD, &g_nid);
 }
 
