@@ -102,3 +102,24 @@ jobs:
         with:
           name: chocolatey-package
           path: nshiftspace.*.nupkg
+
+  # 태그 배포 시 winget-pkgs 매니페스트 업데이트 PR 자동 제출.
+  # 최초 등록(0.1.0)은 수동 PR로 완료 — 이 잡은 그 이후 버전부터 동작.
+  # WINGET_TOKEN: public_repo 권한의 GitHub PAT (없으면 잡 스킵)
+  winget:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: windows-latest
+    env:
+      WINGET_TOKEN: ${{ secrets.WINGET_TOKEN }}
+    steps:
+      - name: Submit manifest update (wingetcreate)
+        if: env.WINGET_TOKEN != ''
+        shell: pwsh
+        run: |
+          $version = '${{ github.ref_name }}'.TrimStart('v')
+          $base = 'https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}'
+          Invoke-WebRequest https://aka.ms/wingetcreate/latest -OutFile wingetcreate.exe
+          ./wingetcreate.exe update SosomLab.nShiftSpace --version $version `
+            --urls "$base/nShiftSpace-x64.zip" "$base/nShiftSpace-x86.zip" `
+            --submit --token $env:WINGET_TOKEN

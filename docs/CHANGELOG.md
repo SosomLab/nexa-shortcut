@@ -5,6 +5,32 @@
 
 ---
 
+## 2026-07-04 00:58:49 — winget 배포 진행 (SosomLab.nShiftSpace 0.1.0 PR 제출)
+
+### 요청
+- winget에 배포하는 과정을 진행할 것. (포크 kiros33/winget-pkgs 는 사용자가 미리 생성)
+
+### 분석 내용
+- winget은 microsoft/winget-pkgs 저장소에 매니페스트 YAML 3종(version/installer/defaultLocale)을
+  PR로 제출하는 방식. zip 안의 포터블 exe는 `InstallerType: zip` + `NestedInstallerType: portable`로 표현.
+- 매니페스트에 릴리스 zip의 SHA256이 고정되므로 **게시된 태그(v0.1.0)는 이후 재발행 금지**
+  (재태깅 시 체크섬 불일치로 winget 설치가 깨짐).
+
+### 설계 방향
+- 패키지 식별자 `SosomLab.nShiftSpace`, 명령 별칭(moniker/alias) `nshiftspace`.
+- 최초 등록은 GitHub API로 포크에 브랜치·파일 생성 후 수동 PR
+  (신규 패키지는 wingetcreate update 불가). 매니페스트 사본을 packaging/winget/에 보관.
+- 이후 버전은 CI `winget` 잡이 wingetcreate로 업데이트 PR 자동 제출
+  (`WINGET_TOKEN` 시크릿 필요 — public_repo 권한 PAT, 없으면 스킵).
+
+### 개발 내용 및 소스 위치
+- `packaging/winget/manifests/s/SosomLab/nShiftSpace/0.1.0/` (신규) — 매니페스트 3종
+- `.github/workflows/build.yml` — `winget` 잡 추가 (태그 트리거)
+- `README.md` — 설치 섹션에 winget 명령 추가
+- 제출된 PR: https://github.com/microsoft/winget-pkgs/pull/397365 (검증 파이프라인 + 심사 대기)
+
+---
+
 ## 2026-07-04 00:53:41 — Chocolatey 첫 게시 완료 (nshiftspace v0.1.0)
 
 ### 요청

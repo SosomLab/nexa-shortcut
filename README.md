@@ -46,9 +46,11 @@ build.bat               # dist\nShiftSpace-x64.exe 생성
 
 MSVC에서도 CRT를 링크하지 않으므로(/NODEFAULTLIB + /ENTRY:start) 초경량 결과물이 나온다.
 
-### 설치 (Chocolatey)
+### 설치 (winget / Chocolatey)
 
 ```powershell
+winget install SosomLab.nShiftSpace
+# 또는
 choco install nshiftspace
 ```
 
