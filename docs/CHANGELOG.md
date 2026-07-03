@@ -5,24 +5,16 @@
 
 ---
 
-## 2026-07-03 23:36:26 — Windows 빌드 도구 설치 안내를 winget 기준으로 보강
+## 2026-07-03 23:39:51 — winget 설치 안내 되돌림 (revert)
 
 ### 요청
-- (choco가 없는 환경을 위해) 도구 설치 안내를 winget 기준으로 설명할 것.
-
-### 분석 내용
-- winget은 Windows 10 1709+ / 11에 기본 포함된 공식 패키지 관리자 — 별도 설치 없이 사용 가능.
-- MSYS2(`MSYS2.MSYS2`)와 Visual Studio Build Tools(`Microsoft.VisualStudio.2022.BuildTools`)
-  모두 winget 공식 저장소에 등록되어 있음. Build Tools는 C++ 워크로드(VCTools)를
-  `--override` 인자로 함께 지정해야 cl.exe가 설치됨.
-
-### 설계 방향
-- README 빌드 방법 2(MSYS2)·3(MSVC)의 도구 설치 단계를 winget 명령 한 줄로 제시,
-  기존 수동 다운로드 경로는 대안으로 병기.
+- 윈도우 (빌드 도구) 설치 방법 부분을 revert 처리할 것.
 
 ### 개발 내용 및 소스 위치
-- `README.md` — 방법 2에 `winget install MSYS2.MSYS2`,
-  방법 3에 `winget install Microsoft.VisualStudio.2022.BuildTools --override "... VCTools ..."` 추가
+- 커밋 b0c4491("docs: Windows 빌드 도구 설치 안내를 winget 기준으로 보강")을 `git revert`로 되돌림
+  (이미 원격에 푸시된 커밋이므로 히스토리 재작성 대신 revert 커밋 생성).
+- `README.md` — 방법 2/3의 winget 설치 명령 제거, 기존 안내(MSYS2 공식 사이트,
+  Visual Studio 워크로드 설치)로 복원. 본 문서의 해당 항목(23:36:26)도 함께 제거됨.
 
 ---
 
