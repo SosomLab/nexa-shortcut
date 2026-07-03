@@ -13,12 +13,39 @@
 - 트레이 아이콘 우클릭 → 종료
 - 중복 실행 방지, 탐색기 재시작 시 트레이 아이콘 자동 복구
 
-### 빌드 (macOS/Linux에서 크로스 컴파일)
+### 빌드
+
+#### 방법 1 — macOS/Linux에서 크로스 컴파일
 
 ```bash
 brew install mingw-w64   # 또는 apt install gcc-mingw-w64
 make                     # dist/nShiftSpace-x64.exe, dist/nShiftSpace-x86.exe 생성
 ```
+
+#### 방법 2 — Windows에서 컴파일 (MSYS2 / MinGW-w64)
+
+1. [MSYS2](https://www.msys2.org/) 설치 후 **MSYS2 UCRT64** 셸 실행
+2. 도구 설치 및 빌드:
+
+```bash
+pacman -S mingw-w64-ucrt-x86_64-toolchain make python
+make x64 CC64=gcc RES64=windres    # dist/nShiftSpace-x64.exe 생성
+```
+
+32비트 빌드는 **MSYS2 MINGW32** 셸에서 `pacman -S mingw-w64-i686-toolchain` 후
+`make x86 CC32=gcc RES32=windres`.
+
+#### 방법 3 — Windows에서 컴파일 (Visual Studio / MSVC)
+
+1. Visual Studio(또는 Build Tools)의 "C++ 데스크톱 개발" 워크로드 설치
+2. 시작 메뉴에서 **x64 Native Tools Command Prompt for VS** 실행
+3. 저장소 폴더에서:
+
+```bat
+build.bat               # dist\nShiftSpace-x64.exe 생성
+```
+
+MSVC에서도 CRT를 링크하지 않으므로(/NODEFAULTLIB + /ENTRY:start) 초경량 결과물이 나온다.
 
 ### 시작 프로그램 등록
 

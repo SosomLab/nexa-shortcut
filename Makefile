@@ -32,10 +32,10 @@ $(ICO): tools/make_icon.py
 	python3 tools/make_icon.py $@
 
 build/rsrc-x64.o: $(RC) $(ICO) | build
-	$(RES64) $(RC) -O coff -o $@
+	$(RES64) --include-dir res $(RC) -O coff -o $@
 
 build/rsrc-x86.o: $(RC) $(ICO) | build
-	$(RES32) $(RC) -O coff -o $@
+	$(RES32) --include-dir res $(RC) -O coff -o $@
 
 dist/nShiftSpace-x64.exe: $(SRC) build/rsrc-x64.o | dist
 	$(CC64) $(CFLAGS) -Wl,-e,start $(SRC) build/rsrc-x64.o -o $@ $(LIBS)

@@ -3,6 +3,37 @@
 모든 변경은 이 문서에 시간 역순(최신이 위)으로 기록한다.
 각 항목은 **요청 / 분석 내용 / 설계 방향 / 개발 내용 및 소스 위치**를 남긴다.
 
+---
+
+## 2026-07-03 23:29:14 — Windows 네이티브 빌드 방법 추가
+
+### 요청
+- Windows에서 컴파일하는 방법을 (README 빌드) 메뉴에 추가.
+
+### 분석 내용
+- 기존 빌드 문서는 macOS/Linux 크로스 컴파일만 안내.
+- Windows 네이티브 빌드 경로 2가지 검토: MSYS2/MinGW-w64(GNU 툴체인, 기존 Makefile 재사용 가능)와
+  Visual Studio/MSVC(cl.exe, 별도 스크립트 필요).
+- 리소스 스크립트 호환성 문제 발견: MS `rc.exe`는 .rc 안의 상대 경로를 .rc 파일 위치 기준으로,
+  GNU `windres`는 실행 위치(cwd) 기준으로 해석 → 경로 표기를 통일해야 양쪽에서 빌드 가능.
+
+### 설계 방향
+- Makefile의 도구 변수(CC64/RES64 등)를 커맨드라인에서 덮어쓸 수 있는 점을 활용,
+  MSYS2에서는 `make x64 CC64=gcc RES64=windres`로 동일 Makefile 재사용 (중복 빌드 스크립트 방지).
+- MSVC용은 `build.bat` 신설. 초경량 원칙 동일 적용: `/NODEFAULTLIB` + `/ENTRY:start`(CRT 미링크),
+  `/O1`(크기 최적화), `/GS-`(스택 쿠키 제거 — CRT 없이는 쿠키 초기화 불가), `/utf-8`(소스 인코딩).
+- .rc 내부 경로를 파일명만("nShiftSpace.ico")으로 바꾸고 windres에 `--include-dir res` 부여
+  → rc.exe(파일 기준)와 windres(include dir) 모두에서 해석 가능.
+
+### 개발 내용 및 소스 위치
+- `build.bat` (신규) — MSVC 네이티브 빌드 스크립트 (cl.exe 존재 검사 포함)
+- `res/nShiftSpace.rc` — 아이콘 경로를 파일명만으로 변경 (rc.exe/windres 호환)
+- `Makefile` — windres 호출에 `--include-dir res` 추가
+- `README.md` — 빌드 섹션을 3가지 방법(크로스 컴파일 / MSYS2 / Visual Studio)으로 확장
+- 크로스 빌드 회귀 확인: x64/x86 각 4,608바이트 동일 (2026-07-03 23:29)
+
+---
+
 ## 2026-07-03 23:27:07 — 초경량 자체 아이콘 제작 및 리소스 내장
 
 ### 요청
