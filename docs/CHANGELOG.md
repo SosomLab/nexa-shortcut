@@ -5,6 +5,18 @@
 
 ---
 
+## 2026-07-04 00:53:41 — Chocolatey 첫 게시 완료 (nshiftspace v0.1.0)
+
+### 요청
+- CHOCO_API_KEY 시크릿 등록 완료에 따라 실제 게시 진행.
+
+### 개발 내용 및 소스 위치
+- v0.1.0 태그 재발행 → CI chocolatey 잡에서 `choco push` 성공,
+  chocolatey.org에 nshiftspace 0.1.0 제출됨 (커뮤니티 모더레이션 심사 대기).
+- 패키지 페이지: https://community.chocolatey.org/packages/nshiftspace
+
+---
+
 ## 2026-07-04 00:43:18 — Chocolatey 패키지 등록 파이프라인 구성
 
 ### 요청
