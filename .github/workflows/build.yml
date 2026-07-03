@@ -43,9 +43,18 @@ jobs:
           name: nShiftSpace
           path: dist/*.exe
 
-      - name: Release (태그 푸시 시 exe 첨부)
+      - name: Package (exe별 zip 압축)
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          cd dist
+          for f in *.exe; do
+            zip -9 "${f%.exe}.zip" "$f"
+          done
+          ls -la *.zip
+
+      - name: Release (태그 푸시 시 zip 첨부)
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/*.exe
+          files: dist/*.zip
           generate_release_notes: true
