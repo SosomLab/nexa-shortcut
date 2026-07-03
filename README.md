@@ -48,15 +48,20 @@ MSVC에서도 CRT를 링크하지 않으므로(/NODEFAULTLIB + /ENTRY:start) 초
 
 ### 설치 (winget / Chocolatey)
 
+> ⏳ **두 패키지 관리자 모두 최초 등록 심사가 진행 중입니다** (2026-07-04 제출).
+> 심사 완료 전에는 아래 명령이 동작하지 않으며, [GitHub Releases](https://github.com/SosomLab/nexa-shortcut/releases)에서
+> zip을 직접 내려받아 사용할 수 있습니다. 등록 상태·확인 방법은
+> [docs/PACKAGING.md](docs/PACKAGING.md) 참고.
+
 ```powershell
 winget install SosomLab.nShiftSpace
 # 또는
 choco install nshiftspace
 ```
 
-패키지 명세는 [packaging/chocolatey/](packaging/chocolatey/)에 있으며, `v*` 태그 배포 시
-CI가 릴리스 zip의 체크섬을 주입해 자동으로 chocolatey.org에 게시한다
-(저장소 시크릿 `CHOCO_API_KEY` 필요).
+패키지 명세는 [packaging/](packaging/)에 있으며, `v*` 태그 배포 시 CI가
+chocolatey.org 게시와 winget-pkgs 업데이트 PR 제출을 자동으로 수행한다.
+상세 절차와 진행 이력은 [docs/PACKAGING.md](docs/PACKAGING.md) 참고.
 
 ### 배포 (자동 릴리스)
 
