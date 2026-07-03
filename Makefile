@@ -14,20 +14,20 @@ CFLAGS := -Os -s -mwindows -nostdlib -DUNICODE -D_UNICODE \
           -finput-charset=UTF-8
 LIBS   := -lkernel32 -luser32 -lshell32
 
-SRC := src/hangul_toggle.c
+SRC := src/nShiftSpace.c
 
 all: x64 x86
 
-x64: dist/nexa-hangul-x64.exe
-x86: dist/nexa-hangul-x86.exe
+x64: dist/nShiftSpace-x64.exe
+x86: dist/nShiftSpace-x86.exe
 
 dist:
 	mkdir -p dist
 
-dist/nexa-hangul-x64.exe: $(SRC) | dist
+dist/nShiftSpace-x64.exe: $(SRC) | dist
 	$(CC64) $(CFLAGS) -Wl,-e,start $< -o $@ $(LIBS)
 
-dist/nexa-hangul-x86.exe: $(SRC) | dist
+dist/nShiftSpace-x86.exe: $(SRC) | dist
 	$(CC32) $(CFLAGS) -Wl,-e,_start $< -o $@ $(LIBS)
 
 clean:

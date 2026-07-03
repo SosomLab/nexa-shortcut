@@ -2,7 +2,7 @@
 
 ## 목표
 
-1. **nexa-hangul** — Shift+Space 한/영 전환 단일 기능. 초경량(파일 크기·메모리). ✅ 완료
+1. **nShiftSpace** (Nexa ShiftSpace) — Shift+Space 한/영 전환 단일 기능. 초경량(파일 크기·메모리). ✅ 완료
 2. **nexa-mapper** — 사용자가 간단한 키 매핑을 직접 설정해 쓰는 범용 매퍼.
    자주 안 쓰는 키를 다른 용도로 재매핑하는 수준의 단순한 기능. 초경량 원칙 유지.
 3. **exe 내보내기** — 설정한 매핑만 담긴 독립 exe를 생성하는 기능.
@@ -14,7 +14,7 @@
 - 큰 구조체는 전역(.bss)에 두어 컴파일러의 `memset` 호출 생성을 회피.
 - 결과물 기준: 목표 1은 4KB 달성 (원본 jwShiftSpaceKey.exe 12KB 대비 1/3).
 
-## 목표 1 아키텍처 (구현됨: `src/hangul_toggle.c`)
+## 목표 1 아키텍처 (구현됨: `src/nShiftSpace.c`)
 
 ```
 start() ─ 뮤텍스(중복실행 방지)

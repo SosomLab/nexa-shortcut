@@ -1,5 +1,5 @@
 /*
- * nexa-hangul — Shift+Space 한/영 전환 단일 기능 상주 유틸.
+ * nShiftSpace (Nexa ShiftSpace) — Shift+Space 한/영 전환 단일 기능 상주 유틸.
  *
  * 초경량 원칙: CRT를 링크하지 않는다 (-nostdlib, 진입점 start).
  *  - 큰 구조체는 전역(.bss)에 두어 memset 호출 생성을 피한다.
@@ -27,8 +27,7 @@ static void add_tray_icon(HWND hwnd)
     g_nid.uFlags           = NIF_ICON | NIF_MESSAGE | NIF_TIP;
     g_nid.uCallbackMessage = WM_TRAYICON;
     g_nid.hIcon            = LoadIconW(NULL, IDI_APPLICATION);
-    /* "nexa-hangul: Shift+Space 한/영" */
-    lstrcpynW(g_nid.szTip, L"nexa-hangul: Shift+Space 한/영", 64);
+    lstrcpynW(g_nid.szTip, L"nShiftSpace: Shift+Space 한/영", 64);
     Shell_NotifyIconW(NIM_ADD, &g_nid);
 }
 
@@ -88,7 +87,7 @@ void start(void)
     MSG       msg;
 
     /* 중복 실행 방지 */
-    CreateMutexW(NULL, TRUE, L"nexa-hangul-single-instance");
+    CreateMutexW(NULL, TRUE, L"nShiftSpace-single-instance");
     if (GetLastError() == ERROR_ALREADY_EXISTS)
         ExitProcess(1);
 
@@ -96,11 +95,11 @@ void start(void)
 
     g_wc.lpfnWndProc   = wnd_proc;
     g_wc.hInstance     = hinst;
-    g_wc.lpszClassName = L"nexa-hangul";
+    g_wc.lpszClassName = L"nShiftSpace";
     RegisterClassW(&g_wc);
 
     /* 화면에 표시하지 않는 메시지 수신용 윈도우 */
-    hwnd = CreateWindowExW(0, L"nexa-hangul", L"nexa-hangul", 0,
+    hwnd = CreateWindowExW(0, L"nShiftSpace", L"nShiftSpace", 0,
                            0, 0, 0, 0, NULL, NULL, hinst, NULL);
 
     if (!RegisterHotKey(hwnd, HOTKEY_ID, MOD_SHIFT | MOD_NOREPEAT, VK_SPACE)) {
@@ -108,7 +107,7 @@ void start(void)
         MessageBoxW(NULL,
             L"Shift+Space 단축키 등록에 "
             L"실패했습니다.",
-            L"nexa-hangul", MB_ICONERROR);
+            L"nShiftSpace", MB_ICONERROR);
         ExitProcess(1);
     }
 
