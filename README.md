@@ -46,6 +46,16 @@ build.bat               # dist\nShiftSpace-x64.exe 생성
 
 MSVC에서도 CRT를 링크하지 않으므로(/NODEFAULTLIB + /ENTRY:start) 초경량 결과물이 나온다.
 
+### 설치 (Chocolatey)
+
+```powershell
+choco install nshiftspace
+```
+
+패키지 명세는 [packaging/chocolatey/](packaging/chocolatey/)에 있으며, `v*` 태그 배포 시
+CI가 릴리스 zip의 체크섬을 주입해 자동으로 chocolatey.org에 게시한다
+(저장소 시크릿 `CHOCO_API_KEY` 필요).
+
 ### 배포 (자동 릴리스)
 
 `v*` 형식의 태그를 푸시하면 GitHub Actions가 빌드 후 x64/x86 실행 파일 2개를

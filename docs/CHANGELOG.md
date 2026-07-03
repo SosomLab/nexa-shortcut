@@ -5,6 +5,34 @@
 
 ---
 
+## 2026-07-04 00:43:18 — Chocolatey 패키지 등록 파이프라인 구성
+
+### 요청
+- Chocolatey에 제품 등록을 진행할 것.
+
+### 분석 내용
+- chocolatey.org 게시는 계정 API 키가 필요 — 자동화 가능 범위는 패키지 제작과
+  태그 배포 시 자동 게시 잡 구성까지. 커뮤니티 저장소 특성상 최초 등록은 모더레이션 심사를 거침.
+- 원격 다운로드형 패키지는 릴리스 zip의 SHA256 체크섬을 설치 스크립트에 명시해야 함
+  → 체크섬은 릴리스가 만들어진 뒤에만 계산 가능하므로 CI에서 주입하는 구조 필요.
+
+### 설계 방향
+- 패키지 id `nshiftspace`, GitHub Release zip을 내려받아 설치하는 원격형 패키지.
+- 템플릿(`__VERSION__`, `__CHECKSUM32/64__`) 방식: CI의 chocolatey 잡(windows-latest)이
+  릴리스 zip을 내려받아 체크섬 계산 → 주입 → `choco pack` → `choco push`.
+- `CHOCO_API_KEY` 시크릿이 없으면 pack까지만 수행하고 nupkg를 아티팩트로 업로드 (안전 기본값).
+- 트레이 GUI 프로그램이므로 shim이 콘솔을 붙잡지 않도록 `.gui` 마커 생성,
+  업그레이드/제거 전 실행 중 프로세스를 종료하는 `chocolateybeforemodify.ps1` 포함.
+
+### 개발 내용 및 소스 위치
+- `packaging/chocolatey/nshiftspace.nuspec` (신규) — 패키지 메타데이터
+- `packaging/chocolatey/tools/chocolateyinstall.ps1` (신규) — zip 설치 + .gui 마커
+- `packaging/chocolatey/tools/chocolateybeforemodify.ps1` (신규) — 프로세스 정리
+- `.github/workflows/build.yml` — `chocolatey` 잡 추가 (태그 트리거, build 잡 이후 실행)
+- `README.md` — "설치 (Chocolatey)" 섹션 추가
+
+---
+
 ## 2026-07-04 00:36:10 — 제품 소개 페이지·홈페이지 링크 등록
 
 ### 요청
