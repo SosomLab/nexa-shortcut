@@ -4,10 +4,10 @@ nShiftSpace의 Windows 패키지 관리자 배포 현황, 등록 절차, 상태 
 
 ## 한눈에 보기
 
-| 채널 | 패키지 식별자 | 설치 명령 | 상태 (2026-07-04 기준) |
+| 채널 | 패키지 식별자 | 설치 명령 | 상태 (2026-07-05 기준) |
 |---|---|---|---|
-| Chocolatey | `nshiftspace` | `choco install nshiftspace` | 0.1.0 제출 완료 — **모더레이션 심사 중** |
-| winget | `SosomLab.nShiftSpace` | `winget install SosomLab.nShiftSpace` | 0.1.0 PR 제출 완료 — **검증 파이프라인/심사 중** |
+| Chocolatey | `nshiftspace` | `choco install nshiftspace` | 0.1.0 제출 완료 — **모더레이션 심사 중** (피드 미노출) |
+| winget | `SosomLab.nShiftSpace` | `winget install SosomLab.nShiftSpace` | 0.1.0 PR **검증 완료(Validation-Completed)** — 모더레이터 병합 대기 |
 
 두 채널 모두 GitHub Release의 zip(`nShiftSpace-x64.zip` / `nShiftSpace-x86.zip`)을
 다운로드해 설치하는 원격형 패키지다. 심사 완료 전에는
@@ -41,6 +41,7 @@ nShiftSpace의 Windows 패키지 관리자 배포 현황, 등록 절차, 상태 
 | 2026-07-04 00:43 | 패키지 명세·CI 자동 게시 파이프라인 구성, pack 단계 검증 |
 | 2026-07-04 00:52 | `CHOCO_API_KEY` 시크릿 등록 (사용자) |
 | 2026-07-04 00:53 | v0.1.0 `choco push` 성공 — nshiftspace 0.1.0 모더레이션 큐 진입 |
+| 2026-07-05 01:38 | 상태 점검: `choco search nshiftspace` 미노출 — 여전히 모더레이션 심사 중 |
 
 ---
 
@@ -72,6 +73,7 @@ nShiftSpace의 Windows 패키지 관리자 배포 현황, 등록 절차, 상태 
 | 2026-07-04 00:58 | microsoft/winget-pkgs#397365 PR 제출 — 검증 파이프라인 실행 중 |
 | 2026-07-04 01:04 | `WINGET_TOKEN` 시크릿 등록 (사용자) — 이후 버전 자동 제출 준비 완료 |
 | 2026-07-04 01:22 | 상태 점검: CLA 체크 통과(Needs-CLA 라벨은 갱신 지연, 무해), `New-Package` 분류, Azure 검증 파이프라인 진행 중, 모더레이터 승인 대기 |
+| 2026-07-05 01:38 | 상태 점검: PR open·미병합, 라벨 `Azure-Pipeline-Passed`+`Validation-Completed` (검증 통과) — 모더레이터 병합 대기 |
 
 ---
 
