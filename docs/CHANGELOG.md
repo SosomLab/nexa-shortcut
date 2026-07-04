@@ -5,6 +5,42 @@
 
 ---
 
+## 2026-07-05 01:38:59 — Windows 개발환경(MSYS2) 구성·검증 및 문서 최신화
+
+### 요청
+- 프로젝트 진행 내용을 분석하고 빌드에 필요한 Windows 환경을 구성할 것.
+- (진행 중) 32비트·64비트를 모두 컴파일할 수 있는 방법을 찾을 것, 필요하면 잘못 깐 도구는 제거할 것.
+- GitHub Actions에서 빌드가 잘 되는지 확인할 것.
+- 진행 내용을 정리해 프로젝트 빌드 환경 설정 방법을 상세 문서로 남기고, 전체 문서를 최신화할 것.
+
+### 분석 내용
+- 이 PC 초기 상태: C 컴파일러(gcc/cl)·make 전무. choco·winget·python만 존재.
+- `choco install mingw`(mingw-builds 16.1.0)은 **64비트 전용**임을 실측 확인:
+  `gcc -dumpmachine` = `x86_64-w64-mingw32`, `gcc -m32` 링크 실패(멀티립 아님),
+  `i686-w64-mingw32-gcc` 부재 → **단일 mingw 패키지로는 32비트 빌드 불가**.
+- 패키지 배포 상태 재점검(2026-07-05): Chocolatey는 커뮤니티 피드 미노출(모더레이션 중),
+  winget PR #397365는 open·미병합이나 라벨이 `Validation-Completed`/`Azure-Pipeline-Passed`로 진전.
+- GitHub Actions 최신 실행(main HEAD e3d0ec8) success — build(x64+x86)·크기 회귀 검사 통과,
+  Package/Release·chocolatey/winget 잡은 `v*` 태그 전용이라 skipped(정상).
+
+### 설계 방향
+- 32/64비트를 한 도구로 모두 지원하기 위해 64비트 전용 `mingw`를 제거하고 **MSYS2** 채택
+  (pacman으로 x86_64·i686 두 툴체인 + make + Unix 셸 일괄 제공, README의 UCRT64/MINGW32 구분과 일치).
+- 빌드는 아키텍처별로 PATH를 격리(`/mingw64/bin` vs `/mingw32/bin`)해 `gcc` 모호성 제거,
+  Makefile의 `CC*/RES*` 변수를 접두어 없는 `gcc`/`windres`로 덮어써 나눠 빌드.
+- 환경 구성은 별도 문서로 분리(README는 명령 요약만 유지하는 기존 방침 준수) + README에서 링크.
+
+### 개발 내용 및 소스 위치
+- 실제 구성·검증: `choco uninstall mingw make` → `choco install msys2` →
+  `pacman -S mingw-w64-x86_64-gcc mingw-w64-i686-gcc make binutils` →
+  x64/x86 각각 빌드 성공 (`dist/nShiftSpace-x64.exe`, `-x86.exe` 각 **4,608바이트**, 8KB 예산 통과).
+- `docs/DEV-ENV-WINDOWS.md` (신규) — MSYS2 설치·양쪽 툴체인 구성·빌드·검증·문제 해결 상세 절차.
+- `README.md` — 방법 2(MSYS2)에 DEV-ENV-WINDOWS.md 링크 추가.
+- `docs/PACKAGING.md` — 상태 기준일 2026-07-05로 갱신, winget 진전(Validation-Completed) 반영,
+  Chocolatey/winget 진행 이력에 2026-07-05 점검 항목 추가.
+
+---
+
 ## 2026-07-04 01:14:23 — 패키지 관리자 등록 문서 신설, README 진행 상태 반영
 
 ### 요청

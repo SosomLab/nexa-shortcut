@@ -36,6 +36,9 @@ make x64 CC64=gcc RES64=windres    # dist/nShiftSpace-x64.exe 생성
 
 32비트 빌드는 **MSYS2 MINGW32** 셸에서 `make x86 CC32=gcc RES32=windres`.
 
+> MSYS2 설치부터 32/64비트 툴체인 구성까지 처음부터 세팅하는 상세 절차는
+> [docs/DEV-ENV-WINDOWS.md](docs/DEV-ENV-WINDOWS.md) 참고.
+
 #### 방법 3 — Windows에서 컴파일 (Visual Studio / MSVC)
 
 **x64 Native Tools Command Prompt for VS**에서 저장소 폴더로 이동 후:
