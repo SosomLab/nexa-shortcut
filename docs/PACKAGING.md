@@ -15,6 +15,46 @@ nShiftSpace의 Windows 패키지 관리자 배포 현황, 등록 절차, 상태 
 
 ---
 
+## 설치 안내 (사용자용)
+
+README에도 요약이 있으며, 여기서는 채널별 차이와 문제 해결까지 다룬다.
+
+### 명령 대조표
+
+| 작업 | winget | Chocolatey |
+|---|---|---|
+| 사전 준비 | Windows 11 / Windows 10 1809+ 기본 포함 (없으면 Store의 "앱 설치 관리자") | Chocolatey 설치 필요 — https://chocolatey.org/install |
+| 권한 | 일반 사용자 | **관리자 권한 PowerShell** |
+| 설치 | `winget install SosomLab.nShiftSpace` | `choco install nshiftspace -y` |
+| 실행 | `nshiftspace` (포터블 별칭) | `nShiftSpace-x64` (또는 `-x86`) |
+| 업그레이드 | `winget upgrade SosomLab.nShiftSpace` | `choco upgrade nshiftspace -y` |
+| 제거 | `winget uninstall SosomLab.nShiftSpace` | `choco uninstall nshiftspace -y` |
+| 설치 경로 | `%LOCALAPPDATA%\Microsoft\WinGet\Packages\` (별칭 링크는 `…\WinGet\Links\`) | `%ChocolateyInstall%\lib\nshiftspace\tools\` |
+| 설치되는 아키텍처 | 매니페스트의 x64/x86 중 OS에 맞는 것 | `Install-ChocolateyZipPackage`의 `url`/`url64bit` 중 OS에 맞는 것 하나 |
+
+### 채널별 동작 차이
+
+- **실행 중 프로세스 처리**: Chocolatey는 `chocolateybeforemodify.ps1`이 업그레이드/제거 전에
+  실행 중인 nShiftSpace를 종료한다. **winget에는 이런 처리가 없으므로** 트레이에서 먼저 종료해야
+  파일 잠김으로 실패하지 않는다.
+- **shim과 콘솔**: Chocolatey는 tools 폴더의 exe에 shim을 만든다. GUI(트레이) 프로그램이라
+  콘솔이 붙잡히지 않도록 설치 스크립트가 `nShiftSpace-*.exe.gui` 마커 파일을 생성한다.
+- **시작 프로그램 등록**: 두 채널 모두 자동 등록하지 않는다. `Win+R` → `shell:startup`에
+  위 설치 경로의 exe 바로가기를 넣는다. 업그레이드로 경로가 바뀔 수 있는 점에 유의
+  (경로 고정이 필요하면 zip 직접 다운로드 권장).
+
+### 문제 해결
+
+| 증상 | 원인·조치 |
+|---|---|
+| `winget install` 시 패키지를 찾지 못함 | 소스 캐시가 오래됨 — `winget source update` 후 재시도 |
+| `choco install`이 "package not found" | 승인 직후 피드 반영 지연 가능 — 잠시 후 재시도. `choco search nshiftspace`로 노출 확인 |
+| 업그레이드/제거가 파일 잠김으로 실패 | 트레이 아이콘 우클릭 → 종료 후 재시도 (winget 경로에서 특히) |
+| 실행해도 Shift+Space가 안 먹음 | 관리자 권한 창이 포커스를 가진 경우 일반 권한 프로세스의 단축키는 동작하지 않음 (알려진 제약) |
+| 중복 실행된 것 같음 | 뮤텍스로 차단되어 두 번째 인스턴스는 즉시 종료된다. 트레이 아이콘이 사라졌다면 explorer 재시작 후 자동 복구됨 |
+
+---
+
 ## Chocolatey
 
 ### 등록 상태 확인 방법
