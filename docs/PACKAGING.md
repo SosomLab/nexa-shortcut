@@ -4,14 +4,14 @@ nShiftSpace의 Windows 패키지 관리자 배포 현황, 등록 절차, 상태 
 
 ## 한눈에 보기
 
-| 채널 | 패키지 식별자 | 설치 명령 | 상태 (2026-07-05 기준) |
+| 채널 | 패키지 식별자 | 설치 명령 | 상태 (2026-07-30 기준) |
 |---|---|---|---|
-| Chocolatey | `nshiftspace` | `choco install nshiftspace` | 0.1.0 제출 완료 — **모더레이션 심사 중** (피드 미노출) |
-| winget | `SosomLab.nShiftSpace` | `winget install SosomLab.nShiftSpace` | 0.1.0 PR **검증 완료(Validation-Completed)** — 모더레이터 병합 대기 |
+| Chocolatey | `nshiftspace` | `choco install nshiftspace` | 0.1.0 **승인 완료** (2026-07-30 21:01, `IsApproved=true`) |
+| winget | `SosomLab.nShiftSpace` | `winget install SosomLab.nShiftSpace` | 0.1.0 **등록 완료** (PR #397365 병합, 2026-07-17 05:23) |
 
 두 채널 모두 GitHub Release의 zip(`nShiftSpace-x64.zip` / `nShiftSpace-x86.zip`)을
-다운로드해 설치하는 원격형 패키지다. 심사 완료 전에는
-[GitHub Releases](https://github.com/SosomLab/nexa-shortcut/releases)가 유일한 설치 경로.
+다운로드해 설치하는 원격형 패키지다.
+[GitHub Releases](https://github.com/SosomLab/nexa-shortcut/releases)에서 zip을 직접 받아 쓰는 것도 여전히 가능.
 
 ---
 
@@ -42,6 +42,7 @@ nShiftSpace의 Windows 패키지 관리자 배포 현황, 등록 절차, 상태 
 | 2026-07-04 00:52 | `CHOCO_API_KEY` 시크릿 등록 (사용자) |
 | 2026-07-04 00:53 | v0.1.0 `choco push` 성공 — nshiftspace 0.1.0 모더레이션 큐 진입 |
 | 2026-07-05 01:38 | 상태 점검: `choco search nshiftspace` 미노출 — 여전히 모더레이션 심사 중 |
+| 2026-07-30 21:01 | **모더레이션 승인 완료** — 커뮤니티 피드 API 확인 (`IsApproved=true`, `PackageStatus=Approved`, 누적 다운로드 10) |
 
 ---
 
@@ -62,7 +63,8 @@ nShiftSpace의 Windows 패키지 관리자 배포 현황, 등록 절차, 상태 
   매니페스트 3종 사본 (version / installer / defaultLocale, 스키마 1.6)
   - zip 안의 포터블 exe: `InstallerType: zip` + `NestedInstallerType: portable`, 별칭 `nshiftspace`
 - CI `winget` 잡 — `v*` 태그 시 `wingetcreate update`로 업데이트 PR 자동 제출
-  (시크릿 `WINGET_TOKEN`, 등록 완료). **최초 등록 PR 병합 이후 버전부터 동작.**
+  (시크릿 `WINGET_TOKEN`, 등록 완료). 최초 등록 PR이 병합되었으므로 **다음 버전부터 이 경로로 동작**
+  — 첫 자동 제출은 v0.1.1 배포 시 실제 동작을 확인해야 한다.
 - 제출용 포크: https://github.com/kiros33/winget-pkgs (브랜치 `sosomlab-nshiftspace-0.1.0`)
 
 ### 진행 이력
@@ -74,6 +76,7 @@ nShiftSpace의 Windows 패키지 관리자 배포 현황, 등록 절차, 상태 
 | 2026-07-04 01:04 | `WINGET_TOKEN` 시크릿 등록 (사용자) — 이후 버전 자동 제출 준비 완료 |
 | 2026-07-04 01:22 | 상태 점검: CLA 체크 통과(Needs-CLA 라벨은 갱신 지연, 무해), `New-Package` 분류, Azure 검증 파이프라인 진행 중, 모더레이터 승인 대기 |
 | 2026-07-05 01:38 | 상태 점검: PR open·미병합, 라벨 `Azure-Pipeline-Passed`+`Validation-Completed` (검증 통과) — 모더레이터 병합 대기 |
+| 2026-07-17 05:23 | **PR #397365 병합 — 등록 완료.** 라벨 `Moderator-Approved`, `Publish-Pipeline-Succeeded` 추가. winget-pkgs master에 매니페스트 반영 확인 |
 
 ---
 

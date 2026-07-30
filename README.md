@@ -51,10 +51,9 @@ MSVC에서도 CRT를 링크하지 않으므로(/NODEFAULTLIB + /ENTRY:start) 초
 
 ### 설치 (winget / Chocolatey)
 
-> ⏳ **두 패키지 관리자 모두 최초 등록 심사가 진행 중입니다** (2026-07-04 제출).
-> 심사 완료 전에는 아래 명령이 동작하지 않으며, [GitHub Releases](https://github.com/SosomLab/nexa-shortcut/releases)에서
-> zip을 직접 내려받아 사용할 수 있습니다. 등록 상태·확인 방법은
-> [docs/PACKAGING.md](docs/PACKAGING.md) 참고.
+> ✅ **두 채널 모두 등록이 완료되었습니다** (winget 2026-07-17 병합, Chocolatey 2026-07-30 승인).
+> [GitHub Releases](https://github.com/SosomLab/nexa-shortcut/releases)에서 zip을 직접 내려받아
+> 쓰는 것도 가능합니다. 채널별 상세는 [docs/PACKAGING.md](docs/PACKAGING.md) 참고.
 
 ```powershell
 winget install SosomLab.nShiftSpace
@@ -84,6 +83,7 @@ git tag v0.1.0 && git push origin v0.1.0
 - **목표 2 — nexa-mapper**: `mappings.ini`로 사용자가 직접 정의하는 단순 키 재매핑 엔진
 - **목표 3 — exe 내보내기**: 현재 매핑만 내장한 독립 exe 생성 (스텁 복사 + 설정 덧붙이기 방식)
 
+목표별 할 일 목록과 진행 상태는 [docs/ROADMAP.md](docs/ROADMAP.md),
 상세 설계는 [docs/DESIGN.md](docs/DESIGN.md), 변경 이력은 [docs/CHANGELOG.md](docs/CHANGELOG.md) 참고.
 
 ## 라이선스
