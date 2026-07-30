@@ -32,7 +32,10 @@ nShiftSpace의 Windows 패키지 관리자 배포 현황, 등록 절차, 상태 
 - [packaging/chocolatey/tools/chocolateyinstall.ps1](../packaging/chocolatey/tools/chocolateyinstall.ps1) — 릴리스 zip 다운로드·설치, GUI shim 마커
 - [packaging/chocolatey/tools/chocolateybeforemodify.ps1](../packaging/chocolatey/tools/chocolateybeforemodify.ps1) — 업그레이드/제거 전 프로세스 종료
 - CI `chocolatey` 잡 ([.github/workflows/build.yml](../.github/workflows/build.yml)) — `v*` 태그 시
-  체크섬 주입 → `choco pack` → `choco push` (시크릿 `CHOCO_API_KEY`, 등록 완료)
+  체크섬 주입 → `choco pack` → `choco push` (시크릿 `CHOCO_API_KEY`, 등록 완료).
+  **v0.1.0에서 이미 전 스텝 성공 — 자동 게시 경로 검증 완료.** 다음 태그도 추가 작업 없이 게시된다.
+  단 게시(push)가 자동일 뿐 **승인은 별개**로, 새 버전도 모더레이션 큐를 다시 거친다
+  (0.1.0은 제출→승인에 약 27일 소요).
 
 ### 진행 이력
 
@@ -43,6 +46,7 @@ nShiftSpace의 Windows 패키지 관리자 배포 현황, 등록 절차, 상태 
 | 2026-07-04 00:53 | v0.1.0 `choco push` 성공 — nshiftspace 0.1.0 모더레이션 큐 진입 |
 | 2026-07-05 01:38 | 상태 점검: `choco search nshiftspace` 미노출 — 여전히 모더레이션 심사 중 |
 | 2026-07-30 21:01 | **모더레이션 승인 완료** — 커뮤니티 피드 API 확인 (`IsApproved=true`, `PackageStatus=Approved`, 누적 다운로드 10) |
+| 2026-07-30 22:40 | 재점검: 패키지 페이지에 "approved by moderator flcdrg on 30 Jul 2026" 표시, 검증기 결과 `PackageTestResultStatus=Passing`·`PackageValidationResultStatus=Passing`, 커뮤니티 검색 피드 노출 확인. CI 자동 게시 잡은 v0.1.0 런(28671030609)에서 `choco push`까지 성공했음을 확인 |
 
 ---
 

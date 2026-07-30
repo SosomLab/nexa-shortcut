@@ -5,6 +5,39 @@
 
 ---
 
+## 2026-07-30 22:46:17 — Chocolatey 상태 재점검 및 자동 게시 경로 검증 기록 정정
+
+### 요청
+- Chocolatey 진행 상태를 점검할 것.
+- 다음 `v*` 태그 푸시 시 Chocolatey 배포가 자동으로 되도록 설정된 상태인지 확인할 것.
+- 내용 정리 후 진행사항을 최신화하고 커밋·병합·푸시할 것.
+
+### 분석 내용
+- Chocolatey 상태(2026-07-30 22:40 점검): 패키지 페이지에 "approved by moderator flcdrg on 30 Jul 2026" 표시,
+  피드 API `IsApproved=true`/`PackageStatus=Approved`, 자동 검사 `PackageTestResultStatus=Passing`·
+  `PackageValidationResultStatus=Passing`, 커뮤니티 검색 피드 노출 확인. 누적 다운로드 11.
+- 자동 배포 설정 점검: `chocolatey` 잡은 `if: startsWith(github.ref, 'refs/tags/v')` + `needs: build`,
+  시크릿 `CHOCO_API_KEY` 등록됨(2026-07-03), 템플릿 플레이스홀더(`__VERSION__`/`__CHECKSUM32__`/
+  `__CHECKSUM64__`)가 저장소 파일에 그대로 보존됨(치환은 러너에서만) → 반복 배포에 안전.
+- **직전 기록 정정**: ROADMAP/PACKAGING에 "`choco push` 자동 경로가 아직 한 번도 실행된 적 없다"고
+  적었으나 사실과 다름. v0.1.0 태그 런(28671030609)에서 chocolatey 잡의 전 스텝(`choco pack` → `choco push`)이
+  성공했음을 확인. 수동이었던 것은 winget 최초 등록 PR뿐이다.
+- 다만 게시(push)가 자동일 뿐 **승인은 별개**로, 새 버전도 모더레이션 큐를 다시 거친다
+  (0.1.0 기준 제출→승인 약 27일).
+
+### 설계 방향
+- 문서에 "자동인 것(게시)"과 "자동이 아닌 것(승인)"을 분리해 명시 — 다음 릴리스 때 승인 지연을
+  장애로 오인하지 않도록 소요 실적(27일)을 함께 남긴다.
+- 미검증 항목은 winget `wingetcreate` 자동 제출 하나로 좁힌다.
+
+### 개발 내용 및 소스 위치
+- `docs/PACKAGING.md` — Chocolatey CI 잡 설명에 "v0.1.0에서 자동 게시 경로 검증 완료 + 승인은 별개"
+  추가, 진행 이력에 2026-07-30 22:40 재점검 항목 추가
+- `docs/ROADMAP.md` — Chocolatey 자동 게시 검증을 완료 항목으로 전환, 남은 미검증 항목을
+  winget 자동 제출 1건으로 축소
+
+---
+
 ## 2026-07-30 21:35:12 — 패키지 등록 완료 반영 (winget 병합, Chocolatey 승인)
 
 ### 요청

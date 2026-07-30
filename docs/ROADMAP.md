@@ -38,8 +38,9 @@ DESIGN.md의 "공통 초경량 원칙"이 곧 완료 기준의 일부다. 새 �
 - [x] winget `SosomLab.nShiftSpace` 0.1.0 PR 병합 —
   [microsoft/winget-pkgs#397365](https://github.com/microsoft/winget-pkgs/pull/397365) (2026-07-17 05:23)
 - [x] README·PACKAGING.md의 "심사 중" 안내 제거, 상태 표 갱신
-- [ ] **다음 버전(v0.1.1) 태그 시 CI 자동 갱신 경로 실동작 검증** — `choco push` 재게시와
-  `wingetcreate` 업데이트 PR 자동 제출은 아직 한 번도 실행된 적이 없다 (v0.1.0은 모두 수동 최초 등록)
+- [x] Chocolatey 자동 게시 경로 검증 — v0.1.0 태그 런에서 CI `chocolatey` 잡이 `choco push`까지 성공
+- [ ] **다음 버전(v0.1.1) 태그 시 winget 자동 제출 검증** — `wingetcreate` 업데이트 PR 자동 제출은
+  아직 한 번도 실행된 적이 없다 (0.1.0 최초 등록은 수동 PR이었고, CI 잡은 병합 이후 버전부터 동작)
 
 > ⚠️ 운영 규칙: **이미 게시한 태그는 재발행 금지** (릴리스 zip의 SHA256이 매니페스트에 고정됨).
 > 수정이 필요하면 새 버전으로 배포한다.
