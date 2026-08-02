@@ -5,6 +5,110 @@
 
 ---
 
+## 2026-08-02 — 배포 상태 재확인 · 자동 실행 안내 신설 · Wiki 원고 작성
+
+### 요청
+- winget, choco의 배포 상태를 확인하고 변경에 따라 문서를 최신화할 것.
+- Wiki 배포가 가능한지 확인하고 Wiki 작성 및 배포를 진행할 것.
+- winget 설치 시 바로가기를 만들고 자동 실행되도록 설정하는 방법이 쉽지 않으니
+  관련 안내를 순서대로 자세히 정리해 문서에 반영할 것.
+- choco 배치 시 `shell:startup` 폴더(사용자 시작프로그램)에 단축키가 만들어지도록 할 수 있는지 확인.
+
+### 분석 내용
+
+**1) 배포 상태 재확인 — 두 채널 모두 변동 없음**
+
+- Chocolatey: 커뮤니티 피드 API 조회 결과 `IsApproved=true`, `PackageStatus=Approved`,
+  `IsLatestVersion=true`, `PackageTestResultStatus=Passing`, `PackageValidationResultStatus=Passing`.
+  게시 버전은 0.1.0 단일, 누적 다운로드 11로 7/30 점검 시점과 동일.
+- winget: PR #397365 `merged=true`(2026-07-16T20:23:39Z UTC), 라벨 5종 유지.
+  winget-pkgs master의 `manifests/s/SosomLab/nShiftSpace/`에 버전 디렉터리는 `0.1.0` 하나뿐이고
+  매니페스트 3종 존재. 게시본에서 `PortableCommandAlias: nshiftspace`,
+  `NestedInstallerType: portable` 재확인.
+- v0.1.0 이후 새 태그·릴리스가 없으므로 **winget 자동 제출(wingetcreate) 검증은 여전히 미실행 상태**.
+
+**2) winget 자동 실행 설정이 어려운 진짜 원인 — 경로 안정성**
+
+기존 README는 시작 프로그램 경로로 `…\WinGet\Packages\SosomLab.nShiftSpace_*\nShiftSpace-x64.exe`를
+안내했는데, 이 **Packages 경로는 업그레이드 시 폴더가 재생성되며 바로가기가 끊긴다.**
+포터블 패키지는 `…\WinGet\Links\nshiftspace.exe`에 **별칭**이 생성되고 이 경로는 버전에
+무관하게 유지되므로, 시작 프로그램은 반드시 이쪽을 가리켜야 한다.
+탐색기로 설치 폴더를 뒤지면 자연스럽게 Packages 쪽 실제 exe를 집게 되는 것이
+"쉽지 않다"고 느껴지는 핵심 원인이다.
+
+부수 논점 — winget의 포터블 별칭은 심볼릭 링크로 만들어지므로 **개발자 모드가 꺼져 있으면
+생성에 실패**할 수 있다. 이 경우 대비 경로(Packages 실제 exe 탐색)와 그 한계를 함께 안내해야 한다.
+
+또한 README에 이미 기록된 제약 — **관리자 권한 창 포커스 시 단축키 미동작**(UIPI) — 은
+시작 프로그램 폴더·Run 키로는 해결할 수 없고, **작업 스케줄러의 최고 권한 실행만이 해법**이다.
+자동 실행 안내와 이 제약은 같은 자리에서 다뤄야 사용자가 연결지어 이해할 수 있다.
+
+**3) Chocolatey의 `shell:startup` 바로가기 자동 생성 — 가능하나 즉시 적용은 부적절**
+
+`Install-ChocolateyShortcut` 헬퍼로 `chocolateyinstall.ps1`에서 사용자 시작 프로그램 폴더에
+`.lnk` 생성이 가능하다(winget에는 대응 수단 없음 — Chocolatey 고유 장점).
+choco의 `tools` 경로에는 버전이 들어가지 않아 업그레이드에도 바로가기가 유지되는 궁합도 좋다.
+다만 즉시 적용하지 않을 이유가 넷 있다.
+- `choco install`은 관리자 권한 실행이라 **SYSTEM/타 사용자 컨텍스트**에서는 엉뚱한 프로필에 생성됨
+- 요청하지 않은 자동 실행 등록은 침습적 — `--params "/Startup"` **opt-in**이 Chocolatey 관례
+- 제거 시 바로가기 삭제를 위해 `chocolateyuninstall.ps1` 신설 필요 (현재 없음)
+- 패키지 스크립트 변경 = 새 버전 배포 + 모더레이션 재심사 (0.1.0 실적 약 27일)
+
+**4) Wiki 배포 가능 여부**
+
+- 저장소 설정상 Wiki는 **활성화되어 있다** (`has_wiki=true`, public).
+- 그러나 `https://github.com/SosomLab/nexa-shortcut.wiki.git`은 인증 여부와 무관하게
+  `Repository not found` — **첫 페이지가 생성된 적이 없어 wiki 저장소 자체가 미생성**이다.
+- GitHub REST API에는 Wiki 페이지 생성 엔드포인트가 없다. 즉 **웹 UI에서 최초 1회 페이지를
+  저장하기 전까지는 어떤 자동화로도 푸시할 수 없다.** 이후부터는 git push로 완전 자동화 가능.
+
+### 설계 방향
+
+- **문서 역할 분리**: 저장소 `docs/`는 개발·배포 이력 중심(메인테이너용), **Wiki는 사용자용 안내**.
+  Wiki 원고는 `docs/wiki/`에 두어 **버전 관리하고**, 스크립트로 wiki 저장소에 발행한다
+  (Wiki에서 직접 편집하면 덮어써진다는 경고를 `_Footer.md`에 명시).
+- **자동 실행 안내는 "경로 확정 → 등록 → 확인 → 해제" 4단계**로 구성한다. 등록은 목적에 따라
+  A(바로가기)·B(Run 키)·C(작업 스케줄러) 중 하나만 고르게 하고, C에는 관리자 권한 창 대응이라는
+  **선택 이유**를 명시한다. 1단계를 `Test-Path` 검사로 시작해 사용자가 자기 PC의 실제 상태를
+  스스로 확정하게 만든다 (환경별 분기를 글로 나열하는 대신).
+- **Chocolatey 자동 바로가기는 문서화하되 적용하지 않는다.** 가능하다는 사실·예시 코드·
+  미적용 사유를 PACKAGING.md에 남기고 ROADMAP에 v0.1.1 후보 과제로 올려 판단을 보류한다.
+  (패키지 변경은 재심사 27일을 유발하므로 단독으로 결정할 일이 아님)
+- 검증되지 않은 부분은 **검증되지 않았다고 명시**한다 — 자동 실행 절차는 macOS에서 작성해
+  Windows 실측을 거치지 않았으므로 ROADMAP에 실측 검증 과제를 남긴다.
+
+### 개발 내용 및 소스 위치
+
+- `docs/PACKAGING.md`
+  - 한눈에 보기 표 기준일 2026-08-02로 갱신, "게시 버전은 0.1.0 단일" 명시
+  - **"설치 후 자동 실행 설정" 절 신설** — 경로 안정성 비교표, 1단계 경로 확정(winget 별칭 /
+    개발자 모드 미설정 시 대응 / Chocolatey), 2단계 방법 A·B·C, 3단계 확인, 해제, 업그레이드 주의
+  - Chocolatey 절에 **"시작 프로그램 바로가기 자동 생성 — 가능하나 미적용"** 소절 신설
+    (예시 코드 + 미적용 사유 5항목 표)
+  - 양 채널 진행 이력에 2026-08-02 재확인 행 추가
+- `docs/ROADMAP.md` — 기준일 갱신, 배포 채널 절에 재확인 결과·자동 실행 문서화 완료 반영,
+  실측 검증 과제 추가, **"후보 과제 — Chocolatey 시작 프로그램 바로가기 자동 생성"** 신설,
+  **"2-1. 사용자 문서 — GitHub Wiki"** 절 신설 (첫 페이지 수동 생성 필요 사실 포함)
+- `docs/wiki/` **신설** — Wiki 원고 8개 페이지 + 사이드바·푸터
+  - `Home.md` 30초 설치·문서 색인 / `Installation.md` 3채널 설치·비교표
+  - `Autostart.md` 자동 실행 4단계 (winget 경로 함정, 방법 A·B·C, 해제, 업그레이드 주의)
+  - `Usage.md` 동작 방식·제약 3종 / `Troubleshooting.md` 설치·실행·단축키·자동 실행 증상별 대응
+  - `Build.md` 빌드 3방법·검증 / `Releasing.md` 태그 배포 자동화·운영 규칙
+  - `Roadmap.md` 목표 2·3 요약 / `_Sidebar.md`, `_Footer.md`
+- `tools/publish-wiki.sh` **신설** — `docs/wiki/*.md`를 wiki 저장소에 발행.
+  wiki 미초기화 시 첫 페이지 생성 URL을 안내하고 종료한다 (실행해 동작 확인 완료)
+- `README.md` — 상단에 Wiki 링크 추가, **"시작 프로그램 등록" 절 전면 개정**
+  (Packages 경로 → `Links` 별칭 경로로 정정, PowerShell 등록 예시, 오른쪽 버튼 드래그 안내,
+  관리자 권한 실행 팁, PACKAGING.md 상세 절 링크)
+
+### 남은 작업 (사용자 수동 1회)
+
+Wiki 발행은 **저장소 소유자가 웹 UI에서 첫 페이지를 만들어야** 시작할 수 있다.
+https://github.com/SosomLab/nexa-shortcut/wiki/_new 에서 아무 내용으로 저장한 뒤
+`./tools/publish-wiki.sh` 를 실행하면 8개 페이지가 한 번에 발행된다.
+
+---
+
 ## 2026-07-30 22:48:36 — winget·Chocolatey 설치 안내 문서화
 
 ### 요청

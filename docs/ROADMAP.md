@@ -4,7 +4,7 @@ nexa-shortcut 프로젝트의 **목표**와 그 목표를 이루기 위한 **할
 설계 근거는 [DESIGN.md](DESIGN.md), 완료된 작업의 상세 이력은 [CHANGELOG.md](CHANGELOG.md),
 패키지 배포 현황은 [PACKAGING.md](PACKAGING.md)에 있다. 이 문서는 **앞으로 할 일**에 집중한다.
 
-- 기준일: 2026-07-30
+- 기준일: 2026-08-02
 - 표기: `[ ]` 미착수 · `[~]` 진행 중 · `[x]` 완료
 
 ---
@@ -33,17 +33,50 @@ DESIGN.md의 "공통 초경량 원칙"이 곧 완료 기준의 일부다. 새 �
 ## 2. 배포 채널 — 등록 완료, 남은 검증 1건
 
 두 채널 모두 최초 등록 심사를 통과해 설치 명령이 동작한다. 상세는 [PACKAGING.md](PACKAGING.md) 참고.
+**2026-08-02 재확인 결과 두 채널 모두 변동 없음** (게시 버전은 0.1.0 단일).
 
 - [x] Chocolatey `nshiftspace` 0.1.0 모더레이션 승인 (2026-07-30 21:01)
 - [x] winget `SosomLab.nShiftSpace` 0.1.0 PR 병합 —
   [microsoft/winget-pkgs#397365](https://github.com/microsoft/winget-pkgs/pull/397365) (2026-07-17 05:23)
 - [x] README·PACKAGING.md의 "심사 중" 안내 제거, 상태 표 갱신
 - [x] Chocolatey 자동 게시 경로 검증 — v0.1.0 태그 런에서 CI `chocolatey` 잡이 `choco push`까지 성공
+- [x] 설치 후 자동 실행(시작 프로그램) 설정 절차 문서화 — winget `Links` 별칭 경로 사용,
+  작업 스케줄러 최고 권한 방식 포함 ([PACKAGING.md](PACKAGING.md) "설치 후 자동 실행 설정")
 - [ ] **다음 버전(v0.1.1) 태그 시 winget 자동 제출 검증** — `wingetcreate` 업데이트 PR 자동 제출은
   아직 한 번도 실행된 적이 없다 (0.1.0 최초 등록은 수동 PR이었고, CI 잡은 병합 이후 버전부터 동작)
+- [ ] 자동 실행 절차를 실제 Windows PC에서 실측 검증 (특히 winget 별칭 생성에 개발자 모드가
+  필요한지 여부, 방법 C 예약 작업의 승격 실행 동작)
 
 > ⚠️ 운영 규칙: **이미 게시한 태그는 재발행 금지** (릴리스 zip의 SHA256이 매니페스트에 고정됨).
 > 수정이 필요하면 새 버전으로 배포한다.
+
+### 후보 과제 — Chocolatey 시작 프로그램 바로가기 자동 생성 (v0.1.1 검토)
+
+`Install-ChocolateyShortcut`으로 설치 시 `shell:startup`에 바로가기를 만들 수 있음을 확인했다
+(winget에는 불가능한 Chocolatey 고유 기능). 적용 시 필요한 일:
+
+- [ ] `chocolateyinstall.ps1`에 `--params "/Startup"` **opt-in** 분기 추가
+- [ ] `chocolateyuninstall.ps1` 신설 — 제거 시 바로가기 삭제
+- [ ] SYSTEM/타 사용자 컨텍스트 설치 시 프로필이 어긋나는 문제 대응 방침 결정
+- [ ] 새 버전 배포 + 모더레이션 재심사 감수 (0.1.0 실적 약 27일)
+
+판단 근거와 예시 코드는 [PACKAGING.md](PACKAGING.md) "시작 프로그램 바로가기 자동 생성" 절.
+
+---
+
+## 2-1. 사용자 문서 — GitHub Wiki
+
+저장소 `docs/`는 개발·배포 이력 중심이라 일반 사용자가 읽기엔 무겁다.
+[GitHub Wiki](https://github.com/SosomLab/nexa-shortcut/wiki)를 **사용자용 안내 창구**로 둔다.
+
+- [x] Wiki 배포 가능 여부 확인 — 저장소 설정상 Wiki는 **활성화(`has_wiki=true`)** 되어 있으나
+  **첫 페이지가 생성된 적이 없어** `*.wiki.git` 저장소가 아직 존재하지 않는다
+  (GitHub은 첫 페이지 생성 API를 제공하지 않아 **웹 UI에서 최초 1회 생성이 필요**)
+- [x] Wiki 페이지 원고 작성 — [docs/wiki/](wiki/)에 8개 페이지 준비
+- [ ] **첫 페이지 웹 UI 생성** (저장소 소유자 수동 작업 1회) —
+  https://github.com/SosomLab/nexa-shortcut/wiki/_new 에서 아무 내용으로 저장
+- [ ] `docs/wiki/` 전체를 `*.wiki.git`에 푸시 (`tools/publish-wiki.sh`)
+- [ ] README에 Wiki 링크 추가
 
 ---
 

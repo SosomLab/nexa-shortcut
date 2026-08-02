@@ -5,6 +5,7 @@
 
 - **SosomLab 홈페이지**: https://sosomlab.com
 - **제품 소개 페이지**: https://sosomlab.com/apps/nexa-shortcut/
+- **사용자 안내(Wiki)**: https://github.com/SosomLab/nexa-shortcut/wiki — 설치·자동 실행·문제 해결
 - **다운로드**: [GitHub Releases](https://github.com/SosomLab/nexa-shortcut/releases)
 
 ## nShiftSpace (목표 1 — 완료)
@@ -107,19 +108,39 @@ GitHub Release에 자동 첨부한다:
 git tag v0.1.0 && git push origin v0.1.0
 ```
 
-### 시작 프로그램 등록
+### 시작 프로그램 등록 (자동 실행)
 
-`Win+R` → `shell:startup` → 폴더에 exe 바로가기를 넣으면 로그인 시 자동 실행.
-설치 경로는 채널마다 다르다.
+상주 프로그램이므로 로그인 시 자동 실행되도록 한 번 설정해 두는 것이 좋다.
+**두 채널 모두 자동 등록하지 않는다.**
 
-| 설치 방법 | exe 경로 |
-|---|---|
-| winget | `%LOCALAPPDATA%\Microsoft\WinGet\Packages\SosomLab.nShiftSpace_*\nShiftSpace-x64.exe` |
-| Chocolatey | `%ChocolateyInstall%\lib\nshiftspace\tools\nShiftSpace-x64.exe` |
-| zip 직접 다운로드 | 압축을 푼 위치 |
+먼저 가리킬 exe 경로를 확정한다. 채널마다 다르고, **winget은 반드시 `Links` 별칭 경로를 써야**
+`winget upgrade` 후에도 바로가기가 끊기지 않는다.
 
-> 업그레이드로 경로가 바뀌면 바로가기가 끊길 수 있다. 경로가 고정된 곳에 exe를 두고 쓰려면
-> zip 직접 다운로드 방식이 안전하다.
+| 설치 방법 | 시작 프로그램이 가리킬 경로 | 업그레이드 후 유지 |
+|---|---|---|
+| winget | `%LOCALAPPDATA%\Microsoft\WinGet\Links\nshiftspace.exe` | ✅ |
+| Chocolatey | `%ChocolateyInstall%\lib\nshiftspace\tools\nShiftSpace-x64.exe` | ✅ |
+| zip 직접 다운로드 | 압축을 푼 위치 | ✅ |
+
+winget 기준, 일반 PowerShell에서:
+
+```powershell
+$exe = "$env:LOCALAPPDATA\Microsoft\WinGet\Links\nshiftspace.exe"
+Test-Path $exe        # False 면 아래 문서의 "별칭이 없을 때" 참고
+
+$ws = New-Object -ComObject WScript.Shell
+$sc = $ws.CreateShortcut((Join-Path ([Environment]::GetFolderPath('Startup')) 'nShiftSpace.lnk'))
+$sc.TargetPath = $exe; $sc.WorkingDirectory = Split-Path $exe; $sc.Save()
+```
+
+GUI로 하려면 `Win+R` → `shell:startup` → 위 exe를 **오른쪽 버튼 드래그** 후
+"여기에 바로 가기 만들기".
+
+> 💡 **관리자 권한 창에서도 Shift+Space가 동작하게 하려면** 시작 프로그램 폴더가 아니라
+> 작업 스케줄러에 "가장 높은 권한으로 실행"으로 등록해야 한다.
+
+경로 확정 → 등록(바로가기 / 레지스트리 Run / 작업 스케줄러) → 확인 → 해제까지 단계별 절차는
+[docs/PACKAGING.md "설치 후 자동 실행 설정"](docs/PACKAGING.md#설치-후-자동-실행-설정) 참고.
 
 ## 로드맵
 
