@@ -69,14 +69,22 @@ DESIGN.md의 "공통 초경량 원칙"이 곧 완료 기준의 일부다. 새 �
 저장소 `docs/`는 개발·배포 이력 중심이라 일반 사용자가 읽기엔 무겁다.
 [GitHub Wiki](https://github.com/SosomLab/nexa-shortcut/wiki)를 **사용자용 안내 창구**로 둔다.
 
-- [x] Wiki 배포 가능 여부 확인 — 저장소 설정상 Wiki는 **활성화(`has_wiki=true`)** 되어 있으나
-  **첫 페이지가 생성된 적이 없어** `*.wiki.git` 저장소가 아직 존재하지 않는다
-  (GitHub은 첫 페이지 생성 API를 제공하지 않아 **웹 UI에서 최초 1회 생성이 필요**)
-- [x] Wiki 페이지 원고 작성 — [docs/wiki/](wiki/)에 8개 페이지 준비
-- [ ] **첫 페이지 웹 UI 생성** (저장소 소유자 수동 작업 1회) —
-  https://github.com/SosomLab/nexa-shortcut/wiki/_new 에서 아무 내용으로 저장
-- [ ] `docs/wiki/` 전체를 `*.wiki.git`에 푸시 (`tools/publish-wiki.sh`)
-- [ ] README에 Wiki 링크 추가
+**✅ 발행 완료 (2026-08-02)** — https://github.com/SosomLab/nexa-shortcut/wiki
+
+- [x] Wiki 배포 가능 여부 확인 — Wiki는 활성화(`has_wiki=true`)되어 있었으나 **첫 페이지가
+  생성된 적이 없어** `*.wiki.git` 저장소가 존재하지 않았다. GitHub은 첫 페이지 생성 API를
+  제공하지 않으므로 **웹 UI에서 최초 1회 생성이 필요**했다 (사용자가 Home 페이지 수동 생성)
+- [x] Wiki 페이지 원고 작성 — [docs/wiki/](wiki/)에 8개 페이지 + 사이드바·푸터
+- [x] `tools/publish-wiki.sh`로 발행 — 8개 페이지 모두 HTTP 200 확인,
+  페이지 간 링크·앵커(`#방법-c--…` 등) 실제 렌더링 결과와 대조 검증
+- [x] README에 Wiki 링크 추가
+
+### 운영 방침
+
+- Wiki의 **정본은 저장소의 [docs/wiki/](wiki/)** 다. 수정은 여기서 하고
+  `./tools/publish-wiki.sh`로 발행한다.
+- **Wiki에서 직접 편집하면 다음 발행 때 덮어써진다** (`_Footer.md`에 경고 표시).
+- [ ] 문서 변경 시 Wiki 재발행을 잊지 않기 — 특히 설치 명령·경로가 바뀌는 릴리스 때
 
 ---
 

@@ -101,11 +101,18 @@ choco의 `tools` 경로에는 버전이 들어가지 않아 업그레이드에�
   (Packages 경로 → `Links` 별칭 경로로 정정, PowerShell 등록 예시, 오른쪽 버튼 드래그 안내,
   관리자 권한 실행 팁, PACKAGING.md 상세 절 링크)
 
-### 남은 작업 (사용자 수동 1회)
+### 후속 — Wiki 발행 완료
 
-Wiki 발행은 **저장소 소유자가 웹 UI에서 첫 페이지를 만들어야** 시작할 수 있다.
-https://github.com/SosomLab/nexa-shortcut/wiki/_new 에서 아무 내용으로 저장한 뒤
-`./tools/publish-wiki.sh` 를 실행하면 8개 페이지가 한 번에 발행된다.
+사용자가 웹 UI에서 Home 페이지를 수동 생성(`17741d2 Initial Home page`)해
+wiki 저장소가 초기화되었고, `./tools/publish-wiki.sh` 실행으로 8개 페이지를 발행했다.
+
+- 발행 결과: https://github.com/SosomLab/nexa-shortcut/wiki — 8개 페이지 모두 HTTP 200 확인
+- 앵커 링크 검증: 렌더링된 페이지의 실제 `user-content-*` 앵커 ID를 추출해 문서에 적은
+  링크와 대조 확인. 한글 제목 + `—`/`★` 같은 기호가 섞인 앵커
+  (`#방법-c--작업-스케줄러--관리자-창에서도-단축키가-먹게-하려면`)까지 정상 동작.
+  `Installation#winget`/`#chocolatey`/`#zip-직접-다운로드`,
+  `PACKAGING.md#설치-후-자동-실행-설정`도 모두 유효.
+- 운영 방침 확정: **정본은 `docs/wiki/`**, Wiki 직접 편집분은 재발행 시 덮어써진다.
 
 ---
 
