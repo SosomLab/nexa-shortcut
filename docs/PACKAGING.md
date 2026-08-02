@@ -19,6 +19,14 @@ nShiftSpace의 Windows 패키지 관리자 배포 현황, 등록 절차, 상태 
 
 ## 설치 안내 (사용자용)
 
+> 📖 **사용자에게 안내할 때는 [Wiki](https://github.com/SosomLab/nexa-shortcut/wiki)를 가리킨다.**
+> 같은 내용을 읽기 쉽게 페이지로 나눠 두었다
+> ([설치하기](https://github.com/SosomLab/nexa-shortcut/wiki/Installation) ·
+> [자동 실행 설정](https://github.com/SosomLab/nexa-shortcut/wiki/Autostart) ·
+> [문제 해결](https://github.com/SosomLab/nexa-shortcut/wiki/Troubleshooting)).
+> **Wiki 원고의 정본은 [docs/wiki/](wiki/)** 이며, 이 절의 내용을 고치면
+> 해당 원고도 함께 고치고 `./tools/publish-wiki.sh`로 재발행해야 한다.
+
 README에도 요약이 있으며, 여기서는 채널별 차이와 문제 해결까지 다룬다.
 
 ### 명령 대조표

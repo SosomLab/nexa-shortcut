@@ -17,6 +17,7 @@ nexa-shortcut 프로젝트의 **목표**와 그 목표를 이루기 위한 **할
 | 2 | **nexa-mapper** — `mappings.ini`로 사용자가 정의하는 단순 키 재매핑 엔진 | `nMapper-x64/x86.exe` + `mappings.ini` | ⬜ 미착수 |
 | 3 | **exe 내보내기** — 현재 매핑만 내장한 독립 exe 생성 (스텁 복사 + payload 덧붙이기) | 엔진 내 "실행파일 만들기" 기능 | ⬜ 미착수 (목표 2 선행) |
 | — | **배포 채널 확보** — winget / Chocolatey 정식 등록 | 두 채널 설치 명령 동작 | ✅ 완료 (2026-07-30) |
+| — | **사용자 문서 창구** — 설치·자동 실행·문제 해결 안내 | [GitHub Wiki](https://github.com/SosomLab/nexa-shortcut/wiki) 8개 페이지 | ✅ 완료 (2026-08-02) |
 
 ### 모든 목표에 공통으로 적용되는 불변 원칙
 
@@ -30,7 +31,7 @@ DESIGN.md의 "공통 초경량 원칙"이 곧 완료 기준의 일부다. 새 �
 
 ---
 
-## 2. 배포 채널 — 등록 완료, 남은 검증 1건
+## 2. 배포 채널 — 등록 완료, 남은 과제 2건
 
 두 채널 모두 최초 등록 심사를 통과해 설치 명령이 동작한다. 상세는 [PACKAGING.md](PACKAGING.md) 참고.
 **2026-08-02 재확인 결과 두 채널 모두 변동 없음** (게시 버전은 0.1.0 단일).
@@ -64,12 +65,15 @@ DESIGN.md의 "공통 초경량 원칙"이 곧 완료 기준의 일부다. 새 �
 
 ---
 
-## 2-1. 사용자 문서 — GitHub Wiki
+## 3. 사용자 문서 — GitHub Wiki ✅ 발행 완료
 
 저장소 `docs/`는 개발·배포 이력 중심이라 일반 사용자가 읽기엔 무겁다.
 [GitHub Wiki](https://github.com/SosomLab/nexa-shortcut/wiki)를 **사용자용 안내 창구**로 둔다.
 
-**✅ 발행 완료 (2026-08-02)** — https://github.com/SosomLab/nexa-shortcut/wiki
+| 구분 | 대상 | 위치 |
+|---|---|---|
+| Wiki | **사용자** — 설치·자동 실행·사용법·문제 해결 | [wiki](https://github.com/SosomLab/nexa-shortcut/wiki) (정본: [docs/wiki/](wiki/)) |
+| `docs/` | **메인테이너** — 설계 근거, 배포 파이프라인, 심사 이력, 변경 기록 | DESIGN·PACKAGING·ROADMAP·CHANGELOG·DEV-ENV-WINDOWS |
 
 - [x] Wiki 배포 가능 여부 확인 — Wiki는 활성화(`has_wiki=true`)되어 있었으나 **첫 페이지가
   생성된 적이 없어** `*.wiki.git` 저장소가 존재하지 않았다. GitHub은 첫 페이지 생성 API를
@@ -84,11 +88,11 @@ DESIGN.md의 "공통 초경량 원칙"이 곧 완료 기준의 일부다. 새 �
 - Wiki의 **정본은 저장소의 [docs/wiki/](wiki/)** 다. 수정은 여기서 하고
   `./tools/publish-wiki.sh`로 발행한다.
 - **Wiki에서 직접 편집하면 다음 발행 때 덮어써진다** (`_Footer.md`에 경고 표시).
-- [ ] 문서 변경 시 Wiki 재발행을 잊지 않기 — 특히 설치 명령·경로가 바뀌는 릴리스 때
+- 재발행은 스크립트가 기존 `.md`를 지우고 다시 복사하는 방식이라 **삭제된 페이지도 반영**된다.
 
 ---
 
-## 3. 목표 2 — nexa-mapper (다음 개발 대상)
+## 4. 목표 2 — nexa-mapper (다음 개발 대상)
 
 설계는 [DESIGN.md "목표 2 아키텍처"](DESIGN.md)에 이미 확정되어 있다. 남은 것은 구현.
 아래 순서대로 진행하면 각 단계마다 동작하는 결과물이 나온다.
@@ -131,7 +135,7 @@ DESIGN.md의 "공통 초경량 원칙"이 곧 완료 기준의 일부다. 새 �
 
 ---
 
-## 4. 목표 3 — exe 내보내기 (목표 2 완료 후)
+## 5. 목표 3 — exe 내보내기 (목표 2 완료 후)
 
 방식은 확정: `[스텁 exe] + ["NEXA1" 마커] + [설정 텍스트] + [길이 4바이트]`.
 
@@ -145,16 +149,18 @@ DESIGN.md의 "공통 초경량 원칙"이 곧 완료 기준의 일부다. 새 �
 
 ---
 
-## 5. 상시 운영 과제 (기한 없음)
+## 6. 상시 운영 과제 (기한 없음)
 
 - [ ] Windows 11 / 관리자 권한 창 포커스 시 동작 한계 재확인 및 README 명시 유지
 - [ ] 신규 릴리스마다 크기 회귀 검사 통과 확인 (CI 자동)
-- [ ] 제품 소개 페이지 https://sosomlab.com/apps/nexa-shortcut/ 와 README 내용 동기화
+- [ ] **문서 3면 동기화** — 설치 명령·경로·버전이 바뀌면 세 곳을 함께 갱신
+  1. `README.md` 2. `docs/wiki/` → `./tools/publish-wiki.sh` **재발행 필수**
+  3. 제품 소개 페이지 https://sosomlab.com/apps/nexa-shortcut/
 - [ ] 사용자 이슈·요청 대응 (GitHub Issues)
 
 ---
 
-## 6. 완료된 일 (요약)
+## 7. 완료된 일 (요약)
 
 상세 이력은 [CHANGELOG.md](CHANGELOG.md).
 
@@ -165,4 +171,7 @@ DESIGN.md의 "공통 초경량 원칙"이 곧 완료 기준의 일부다. 새 �
 - [x] GitHub Actions: 빌드 + 8KB 크기 회귀 검사 + `v*` 태그 시 Release 자동 첨부
 - [x] v0.1.0 릴리스 및 Chocolatey / winget 패키지 명세·자동 게시 파이프라인 구성
 - [x] winget(2026-07-17) · Chocolatey(2026-07-30) 최초 등록 심사 통과 — 두 채널 설치 명령 동작
-- [x] 문서화 — README, DESIGN, CHANGELOG, PACKAGING, DEV-ENV-WINDOWS
+- [x] 설치 후 자동 실행 설정 절차 정립 (2026-08-02) — winget `Links` 별칭 경로 사용,
+  작업 스케줄러 최고 권한 방식으로 관리자 창 제약 우회
+- [x] GitHub Wiki 발행 (2026-08-02) — 사용자용 8개 페이지, `tools/publish-wiki.sh`로 재발행 가능
+- [x] 문서화 — README, DESIGN, CHANGELOG, PACKAGING, ROADMAP, DEV-ENV-WINDOWS, wiki/
