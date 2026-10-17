@@ -124,7 +124,7 @@ LED를 끄면 Raw Input 등록을 **해제**(`RIDEV_REMOVE`, 이때 `hwndTarget`
   `GetModuleFileName`이 별칭 경로를 돌려주는지는 실측 과제). 제거 전에 끄지 않으면 `Run` 값이 남는다 (Windows는 무시하지만
   작업 관리자 시작 프로그램 탭에 흔적이 남음).
 
-## 공통 — 메모리: 1MB는 어디서 오고, 왜 0.3MB로 보이게 하는가 (2026-10-17 실측)
+## 공통 — 메모리: 1MB는 어디서 오고, 어떻게 0.3MB(1차)·0.1MB(2차)로 줄였는가 (2026-10-17 실측)
 
 작업 관리자의 "메모리" 열은 **사설 작업 집합**(private working set)이다. nShiftSpace가 1.0~1.7MB로 보이는 반면
 같은 작성자의 nexa-coffee·NexaMemKeeper는 0.3MB로 보이는 이유를 페이지 단위로 분류해 확인했다

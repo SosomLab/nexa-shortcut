@@ -28,7 +28,7 @@ Everything the standard `nshiftspace` package does, plus:
   per-keystroke cost drops to zero like the standard build
 
 Common features: single ~6KB executable, no C runtime, pure Win32 API, zero CPU while
-idle, about 0.3MB in Task Manager, "Start at login" tray toggle, single-instance guard.
+idle, about 0.1MB in Task Manager, "Start at login" tray toggle, single-instance guard.
 
 Install either `nshiftspace` or `nshiftspace-led`, not both - they share the same
 hotkey and only one instance runs at a time.

@@ -21,7 +21,7 @@ keyboard layout behavior.
 
 - Single ~5KB executable, no C runtime, pure Win32 API
 - Zero CPU while idle (uses `RegisterHotKey`, no keyboard hook)
-- About 0.3MB in Task Manager (working set trimmed after startup)
+- About 0.1MB in Task Manager (IME disabled for this process, working set trimmed after activity)
 - Tray menu: "Start at login" toggle (HKCU Run value, written only when you turn it on) and Exit
 - Single-instance guard, tray icon auto-restore after explorer.exe restart
 - Free and open source (MIT)

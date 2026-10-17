@@ -5,6 +5,30 @@
 
 ---
 
+## 2026-10-17 — 내용 정리 및 진행사항 최신화 (v0.3.0 이후)
+
+### 요청
+- 내용 정리 후 진행사항 최신화를 수행하고 commit 및 main 병합 후 push할 것.
+
+### 분석 내용
+- v0.3.0 작업은 `main`에서 직접 진행해 병합할 브랜치가 없다 (`git branch --no-merged main` 비어 있음). 작업 트리는 origin/main과 동기.
+- 같은 날 두 번 릴리스하며 남은 불일치: ROADMAP 1절 1-b 행 "미배포", 2절 제목의 건수(2건 → 실제 4건)와 "2026-08-02 변동 없음"
+  문구, 3절 제목이 v0.2.0만 가리킴, PACKAGING의 "구현·미배포"/"다음 릴리스부터", wiki 로드맵의 메모리 수치(0.3MB → 0.1MB),
+  두 nuspec의 "0.3MB"(다음 Chocolatey 버전에 반영될 설명), DESIGN 메모리 절 제목.
+
+### 설계 방향
+- 수치는 2차 개선 실측(약 0.1MB)으로 통일하고, 릴리스 시점 표기는 "v0.2.0부터/v0.3.0" 같은 버전 기준으로 바꿔 날짜가 지나도 틀리지 않게 한다.
+
+### 개발 내용 및 소스 위치
+- `docs/ROADMAP.md` 1·2·3절 문구, `docs/PACKAGING.md` 2곳, `docs/wiki/Roadmap.md`, `docs/DESIGN.md` 절 제목,
+  `packaging/chocolatey/nshiftspace.nuspec`·`packaging/chocolatey-led/nshiftspace-led.nuspec` 설명. Wiki 재발행.
+- 함께 커밋: 작업 트리에 준비돼 있던 **CI `guard` 잡** — 태그 배포 시 패키지별로 같은 버전이 이미 등록(Chocolatey 피드 /
+  winget-pkgs 병합·열린 PR)돼 있으면 그 패키지 게시를 건너뛰고, 직전 버전이 검수 대기 중이면 보류한다. 수동 실행 `force=true`로
+  무시 가능. `chocolatey`·`chocolatey-led`·`winget` 잡이 `guard` 출력에 따라 push/submit 여부를 결정. PACKAGING.md에 조건 표 추가.
+  (pyyaml 문법 검사 통과. 실제 동작은 다음 태그에서 확인)
+
+---
+
 ## 2026-10-17 — v0.3.0 릴리스 · LED판 패키지 최초 게시 · winget CI 방식 교체
 
 ### 요청
