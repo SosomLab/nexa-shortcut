@@ -4,12 +4,12 @@ nShiftSpace의 Windows 패키지 관리자 배포 현황, 등록 절차, 상태 
 
 ## 한눈에 보기
 
-| 채널 | 패키지 식별자 | 설치 명령 | 상태 (2026-10-17 23:30) |
+| 채널 | 패키지 식별자 | 설치 명령 | 상태 (2026-10-18 00:10) |
 |---|---|---|---|
-| Chocolatey | `nshiftspace` | `choco install nshiftspace` | 0.1.0 승인·게시 중 / 0.2.0·**0.3.0 제출 완료, 모더레이션 대기** |
+| Chocolatey | `nshiftspace` | `choco install nshiftspace` | 0.1.0 승인·게시 중 / 0.2.0 자동 검증·테스트 통과(`Ready`, 모더레이터 대기) / 0.3.0 검증·테스트 통과(`Pending`) |
 | winget | `SosomLab.nShiftSpace` | `winget install SosomLab.nShiftSpace` | 0.1.0 등록·게시 중 / 0.2.0 PR [microsoft/winget-pkgs#454746](https://github.com/microsoft/winget-pkgs/pull/454746) 검증 통과·승인 대기 / **0.3.0 PR [microsoft/winget-pkgs#454771](https://github.com/microsoft/winget-pkgs/pull/454771)** |
-| Chocolatey (LED판) | `nshiftspace-led` | `choco install nshiftspace-led` | **0.3.0 최초 제출 완료, 모더레이션 대기** (2026-10-17 23:16 push) |
-| winget (LED판) | `SosomLab.nShiftSpace.LED` | `winget install SosomLab.nShiftSpace.LED` | **0.3.0 최초 등록 PR [microsoft/winget-pkgs#454772](https://github.com/microsoft/winget-pkgs/pull/454772)** 검증 대기 |
+| Chocolatey (LED판) | `nshiftspace-led` | `choco install nshiftspace-led` | 0.3.0 최초 제출, 검증 통과·테스트 대기 (`Pending`) |
+| winget (LED판) | `SosomLab.nShiftSpace.LED` | `winget install SosomLab.nShiftSpace.LED` | 0.3.0 최초 등록 PR [microsoft/winget-pkgs#454772](https://github.com/microsoft/winget-pkgs/pull/454772) — 경로 오류 수정 후 재검증 중 |
 
 설치되는 버전은 **양쪽 모두 아직 0.1.0**이다. v0.2.0(2026-10-17 태그)은 GitHub Release에 zip 4종이 올라갔고,
 Chocolatey 모더레이션과 winget PR 병합이 끝나면 각 채널에서 0.2.0이 설치된다.
@@ -363,7 +363,8 @@ uninstall 스크립트와 함께 넣는 것이 타당하다. [ROADMAP.md](ROADMA
 
 - [packaging/winget/manifests/s/SosomLab/nShiftSpace/](../packaging/winget/manifests/s/SosomLab/nShiftSpace/) —
   `TEMPLATE.*.yaml`(CI 렌더링 원본) + 버전별(0.1.0, 0.2.0, 0.3.0) 매니페스트 3종 사본 (스키마 1.6).
-  LED판은 [nShiftSpace.LED/](../packaging/winget/manifests/s/SosomLab/nShiftSpace.LED/) (템플릿 + 0.3.0)
+  LED판은 [nShiftSpace/LED/](../packaging/winget/manifests/s/SosomLab/nShiftSpace/LED/) (템플릿 + 0.3.0) —
+  **식별자의 점은 폴더 구분**이라 `SosomLab.nShiftSpace.LED`의 경로는 `manifests/s/SosomLab/nShiftSpace/LED/<버전>`이다.
   - zip 안의 포터블 exe: `InstallerType: zip` + `NestedInstallerType: portable`, 별칭 `nshiftspace`
 - CI `winget` 잡 — `v*` 태그 시 `wingetcreate update`로 업데이트 PR 자동 제출
   (시크릿 `WINGET_TOKEN`, 등록 완료). **v0.2.0·v0.3.0에서 `wingetcreate update` 두 번 모두 실패** — x64 zip URL을
@@ -391,6 +392,8 @@ uninstall 스크립트와 함께 넣는 것이 타당하다. [ROADMAP.md](ROADMA
 | 2026-10-17 23:16 | v0.3.0 태그 CI `winget` 잡 — `|x64` 지정에도 **동일 오류로 재실패**. CI를 템플릿 렌더링 + `wingetcreate submit` 방식으로 교체 |
 | 2026-10-17 23:25 | 0.2.0 PR #454746 라벨 `Azure-Pipeline-Passed`·`Validation-Completed`·`New-Manifest` — 검증 통과, 모더레이터 승인 대기 |
 | 2026-10-17 23:28 | **0.3.0 수동 PR 2건 제출** — 일반판 [microsoft/winget-pkgs#454771](https://github.com/microsoft/winget-pkgs/pull/454771) (브랜치 `SosomLab.nShiftSpace-0.3.0`), **LED판 신규 패키지** [microsoft/winget-pkgs#454772](https://github.com/microsoft/winget-pkgs/pull/454772) (`SosomLab.nShiftSpace.LED`, 별칭 `nshiftspace-led`, 브랜치 `SosomLab.nShiftSpace.LED-0.3.0`). 둘 다 로컬 `winget validate` 통과 |
+| 2026-10-17 23:20 | LED PR #454772 `Manifest-Validation-Error` — 봇 진단: 경로가 `nShiftSpace.LED\\0.3.0`인데 기대 경로는 `nShiftSpace\\LED\\0.3.0` (식별자의 점 = 폴더). 로컬 `winget validate`는 폴더 규칙을 보지 않아 잡지 못했다 |
+| 2026-10-18 00:05 | 포크 브랜치에서 3개 파일을 `manifests/s/SosomLab/nShiftSpace/LED/0.3.0/`으로 옮김(삭제+추가) → PR 재검증. 저장소 템플릿 폴더도 `nShiftSpace/LED/`로 이동, CI 렌더·guard 경로를 "점 → /" 규칙으로 수정, 렌더 결과는 `rendered/<id>/<버전>/`에 모아 아티팩트로 |
 
 ---
 

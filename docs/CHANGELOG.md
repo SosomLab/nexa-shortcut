@@ -5,6 +5,34 @@
 
 ---
 
+## 2026-10-18 — 진행사항 최신화: winget LED PR 경로 오류 수정 · 심사 상태 갱신
+
+### 요청
+- 내용 정리 후 진행사항 최신화를 수행하고 commit 및 main 병합 후 push할 것 (재요청).
+
+### 분석 내용
+- 작업 트리 clean, origin/main과 동기, 병합할 브랜치 없음.
+- 심사 상태 변화: Chocolatey `nshiftspace` 0.2.0이 자동 검증·테스트 통과(`PackageSubmittedStatus=Ready`), 0.3.0 검증·테스트 통과,
+  `nshiftspace-led` 0.3.0 검증 통과·테스트 대기. winget #454746 검증 통과 유지, #454771 검증 대기.
+- **winget LED PR #454772에 `Manifest-Validation-Error`·`Needs-Author-Feedback`.** 봇 진단: 매니페스트 경로가
+  `manifests\s\SosomLab\nShiftSpace.LED\0.3.0`인데 기대 경로는 `manifests\s\SosomLab\nShiftSpace\LED\0.3.0` —
+  식별자의 점(`.`)마다 폴더를 나눈다는 규칙을 놓쳤다. 로컬 `winget validate`는 파일 내용만 보므로 잡지 못했다.
+  같은 가정이 저장소 템플릿 폴더명, CI 렌더 경로, guard 잡의 winget-pkgs 조회 URL에도 들어 있었다.
+
+### 설계 방향
+- 열린 PR을 닫지 않고 **같은 브랜치에서 파일을 옮겨** 재검증시킨다 (삭제 3 + 추가 3, contents API).
+- 저장소 쪽은 폴더를 `nShiftSpace/LED/`로 옮기고, CI는 식별자 → 경로 변환을 한 곳의 규칙("`SosomLab.` 제거 후 점을 `/`로")로 통일.
+  렌더 결과는 저장소 트리 안이 아니라 `rendered/<id>/<버전>/`에 모아 아티팩트 경로의 `v`/버전 불일치 문제도 함께 없앤다.
+
+### 개발 내용 및 소스 위치
+- 포크 `kiros33/winget-pkgs` 브랜치 `SosomLab.nShiftSpace.LED-0.3.0` — 파일 3개를 `manifests/s/SosomLab/nShiftSpace/LED/0.3.0/`으로 이동.
+- `packaging/winget/manifests/s/SosomLab/nShiftSpace/LED/` (구 `nShiftSpace.LED/`) — 템플릿 3종 + 0.3.0 사본.
+- `.github/workflows/build.yml` — guard `sub="${sub//./\/}"`, 렌더 `$dir`에 `-replace '\.','/'`, 출력 `rendered/$id/$version`,
+  아티팩트 `rendered/`, submit 경로 `rendered/$id/$version`. pyyaml 문법 검사 통과.
+- `docs/PACKAGING.md` 상태 표·구성 요소·이력, `docs/ROADMAP.md` 2절 상태.
+
+---
+
 ## 2026-10-17 — 내용 정리 및 진행사항 최신화 (v0.3.0 이후)
 
 ### 요청

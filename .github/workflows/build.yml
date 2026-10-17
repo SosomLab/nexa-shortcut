@@ -136,7 +136,7 @@ jobs:
           set -uo pipefail
           v="${VERSION#v}"
           check() {
-            local id="$1" sub="${1#SosomLab.}"
+            local id="$1" sub="${1#SosomLab.}"; sub="${sub//./\/}"   # SosomLab.nShiftSpace.LED → nShiftSpace/LED
             if [ "$FORCE" = "true" ]; then echo "winget: $id — force=true, 판정 생략" >&2; echo true; return; fi
             local code
             code=$(curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $GH_TOKEN" \
@@ -282,12 +282,13 @@ jobs:
             @{ id = 'SosomLab.nShiftSpace.LED'; x64 = 'nShiftSpace-led-x64.zip'; x86 = 'nShiftSpace-led-x86.zip' }
           )
           foreach ($p in $pkgs) {
-            $dir = "packaging/winget/manifests/s/SosomLab/$($p.id -replace '^SosomLab\.','')"
+            # 식별자의 점은 폴더 구분: SosomLab.nShiftSpace.LED → manifests/s/SosomLab/nShiftSpace/LED
+            $dir = "packaging/winget/manifests/s/SosomLab/$(($p.id -replace '^SosomLab\.','') -replace '\.','/')"
             Invoke-WebRequest "$base/$($p.x64)" -OutFile x64.zip
             Invoke-WebRequest "$base/$($p.x86)" -OutFile x86.zip
             $sha64 = (Get-FileHash x64.zip -Algorithm SHA256).Hash.ToUpper()
             $sha32 = (Get-FileHash x86.zip -Algorithm SHA256).Hash.ToUpper()
-            $out = "$dir/$version"
+            $out = "rendered/$($p.id)/$version"
             New-Item -ItemType Directory -Force $out | Out-Null
             foreach ($t in Get-ChildItem "$dir/TEMPLATE*.yaml") {
               $name = $t.Name -replace '^TEMPLATE', $p.id
@@ -305,7 +306,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: winget-manifests
-          path: packaging/winget/manifests/s/SosomLab/*/${{ github.ref_name }}/
+          path: rendered/
 
       - name: Submit PRs (wingetcreate submit · 미등록 버전만)
         if: env.WINGET_TOKEN != '' && (needs.guard.outputs.winget == 'true' || needs.guard.outputs.winget_led == 'true')
@@ -318,7 +319,7 @@ jobs:
           Invoke-WebRequest https://aka.ms/wingetcreate/latest -OutFile wingetcreate.exe
           $failed = 0
           foreach ($id in $ids) {
-            $dir = "packaging/winget/manifests/s/SosomLab/$($id -replace '^SosomLab\.','')/$version"
+            $dir = "rendered/$id/$version"
             Write-Host "== submit $id $version"
             ./wingetcreate.exe submit --token $env:WINGET_TOKEN --prtitle "New version: $id version $version" $dir
             if ($LASTEXITCODE -ne 0) { Write-Warning "submit failed: $id"; $failed++ }
