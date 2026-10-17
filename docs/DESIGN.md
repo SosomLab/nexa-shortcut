@@ -28,10 +28,14 @@
 ```
 start() ─ 뮤텍스(중복실행 방지)
         ─ 숨은 윈도우 생성 + RegisterHotKey(Shift+Space)
-        ─ 트레이 아이콘 (Shell_NotifyIcon)
+        ─ [LED판] Raw Input 등록 (RIDEV_INPUTSINK)
+        ─ 트레이 아이콘 (Shell_NotifyIcon) → 작업 집합 비우기
         └ 메시지 루프
              WM_HOTKEY   → keybd_event(VK_HANGUL)  # 한/영 키 합성
-             WM_TRAYICON → 종료 메뉴
+             WM_TRAYICON → 메뉴: 로그인 시 자동 실행(체크) / [LED판] 키보드 LED 표시(체크) / 종료
+                           → 메뉴를 닫은 뒤 작업 집합 비우기
+             WM_COMMAND  → Run 값 등록·삭제 / [LED판] Raw Input 등록·해제 / 종료
+             [LED판] WM_INPUT → 키 눌림/뗌 → 트레이 아이콘 초록/파랑
              TaskbarCreated → 트레이 아이콘 복구 (explorer 재시작 대응)
 ```
 
