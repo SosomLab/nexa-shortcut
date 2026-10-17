@@ -114,7 +114,7 @@ chocolatey.org 게시와 winget-pkgs 업데이트 PR 제출을 자동으로 수�
 (exe별 zip) GitHub Release에 자동 첨부한다. winget·Chocolatey 패키지는 일반판 zip만 사용한다:
 
 ```bash
-git tag v0.1.0 && git push origin v0.1.0
+git tag v0.2.0 && git push origin v0.2.0
 ```
 
 ### 시작 프로그램 등록 (자동 실행)
