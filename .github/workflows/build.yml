@@ -106,6 +106,8 @@ jobs:
   # 태그 배포 시 winget-pkgs 매니페스트 업데이트 PR 자동 제출.
   # 최초 등록(0.1.0)은 수동 PR로 완료 — 이 잡은 그 이후 버전부터 동작.
   # WINGET_TOKEN: public_repo 권한의 GitHub PAT (없으면 잡 스킵)
+  # v0.2.0 교훈: URL에 "|x64"/"|x86" 아키텍처 지정이 없으면 wingetcreate가 x64 zip을 x86 설치 항목에
+  # 짝지어 "Nested installer not found: nShiftSpace-x86.exe"로 실패한다 (0.2.0은 수동 PR로 제출).
   winget:
     needs: build
     if: startsWith(github.ref, 'refs/tags/v')
@@ -121,5 +123,5 @@ jobs:
           $base = 'https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}'
           Invoke-WebRequest https://aka.ms/wingetcreate/latest -OutFile wingetcreate.exe
           ./wingetcreate.exe update SosomLab.nShiftSpace --version $version `
-            --urls "$base/nShiftSpace-x64.zip" "$base/nShiftSpace-x86.zip" `
+            --urls "$base/nShiftSpace-x64.zip|x64" "$base/nShiftSpace-x86.zip|x86" `
             --submit --token $env:WINGET_TOKEN

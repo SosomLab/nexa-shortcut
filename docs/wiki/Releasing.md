@@ -3,7 +3,7 @@
 ## 한 줄 요약
 
 ```bash
-git tag v0.1.1 && git push origin v0.1.1
+git tag v0.3.0 && git push origin v0.3.0
 ```
 
 이 한 번으로 **GitHub Release → Chocolatey 게시 → winget 업데이트 PR**까지 자동 진행됩니다.
@@ -11,7 +11,7 @@ git tag v0.1.1 && git push origin v0.1.1
 ## 자동화 흐름
 
 ```
-git push origin v0.1.1
+git push origin v0.3.0
    │
    ├─ build    빌드 + 8KB 크기 회귀 검사 → Release에 zip 4종 첨부 (일반·LED × x64·x86)
    ├─ chocolatey   체크섬 주입 → choco pack → choco push  (시크릿 CHOCO_API_KEY)
@@ -25,12 +25,13 @@ git push origin v0.1.1
 | 단계 | 자동 여부 |
 |---|---|
 | GitHub Release 생성·자산 첨부 | ✅ 자동 |
-| Chocolatey **게시**(`choco push`) | ✅ 자동 (v0.1.0에서 검증됨) |
+| Chocolatey **게시**(`choco push`) | ✅ 자동 (v0.1.0·v0.2.0에서 검증됨) |
 | Chocolatey **승인**(모더레이션) | ❌ 별개 — 새 버전마다 큐를 다시 거침 (0.1.0 실적 약 27일) |
-| winget PR **제출** | ✅ 자동 — 단, **아직 한 번도 실행된 적 없음** (0.1.0은 수동 PR이었음) |
+| winget PR **제출** | ⚠️ 자동 — v0.2.0 첫 실행은 **실패**(아키텍처 짝짓기 오류, 수동 PR로 대체). URL에 `\|x64`/`\|x86` 지정을 추가해 수정했으며 v0.3.0에서 재검증 |
 | winget PR **병합** | ❌ 별개 — 검증 파이프라인 통과 후 모더레이터 승인 |
 
-> ⚠️ v0.1.1 배포 때 winget 자동 제출이 실제로 동작하는지 **처음 확인**하게 됩니다.
+> ⚠️ winget 자동 제출이 실패하면 `packaging/winget/manifests/…/<버전>/`에 사본 3종을 만들어
+> `winget validate --manifest <폴더>`로 검증한 뒤 포크(kiros33/winget-pkgs)에서 수동 PR을 올립니다 (0.2.0이 그 예).
 
 ## ⛔ 운영 규칙 — 게시된 태그는 재발행 금지
 
@@ -38,7 +39,7 @@ winget 매니페스트와 Chocolatey 설치 스크립트에 릴리스 zip의 **S
 태그를 지웠다 다시 만들면 zip이 새로 빌드되어 체크섬이 달라지고, **이미 배포된 패키지의
 설치가 깨집니다.**
 
-수정이 필요하면 반드시 **새 버전**(v0.1.1, v0.1.2 …)으로 배포하세요.
+수정이 필요하면 반드시 **새 버전**(v0.2.1, v0.3.0 …)으로 배포하세요.
 
 ## 상태 확인
 

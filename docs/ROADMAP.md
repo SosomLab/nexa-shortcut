@@ -47,8 +47,10 @@ DESIGN.md의 "공통 초경량 원칙"이 곧 완료 기준의 일부다. 새 �
 - [x] Chocolatey 자동 게시 경로 검증 — v0.1.0 태그 런에서 CI `chocolatey` 잡이 `choco push`까지 성공
 - [x] 설치 후 자동 실행(시작 프로그램) 설정 절차 문서화 — winget `Links` 별칭 경로 사용,
   작업 스케줄러 최고 권한 방식 포함 ([PACKAGING.md](PACKAGING.md) "설치 후 자동 실행 설정")
-- [ ] **다음 버전(v0.1.1) 태그 시 winget 자동 제출 검증** — `wingetcreate` 업데이트 PR 자동 제출은
-  아직 한 번도 실행된 적이 없다 (0.1.0 최초 등록은 수동 PR이었고, CI 잡은 병합 이후 버전부터 동작)
+- [x] winget 자동 제출 첫 실행 (v0.2.0, 2026-10-17) — **실패**: `wingetcreate`가 x64 zip을 x86 항목에 짝지음.
+  워크플로 URL에 `|x64`/`|x86` 지정을 추가해 수정, 0.2.0은 수동 PR [#454746](https://github.com/microsoft/winget-pkgs/pull/454746)
+- [ ] **v0.3.0 태그 시 수정된 winget 자동 제출 재검증**
+- [ ] Chocolatey 0.2.0 모더레이션 승인 확인 (제출 2026-10-17 22:24, 0.1.0 실적 약 27일) · winget PR #454746 병합 확인
 - [ ] 자동 실행 절차를 실제 Windows PC에서 실측 검증 (특히 winget 별칭 생성에 개발자 모드가
   필요한지 여부, 방법 C 예약 작업의 승격 실행 동작)
 
@@ -71,9 +73,10 @@ DESIGN.md의 "공통 초경량 원칙"이 곧 완료 기준의 일부다. 새 �
 
 ---
 
-## 3. 다음 릴리스 v0.2.0 — LED판 · 자동 실행 메뉴 · 메모리 (구현 완료, 배포 전 과제)
+## 3. v0.2.0 — LED판 · 자동 실행 메뉴 · 메모리 (2026-10-17 릴리스, 패키지 심사 중)
 
-2026-10-17 `feat/led-indicator` 브랜치에서 구현해 main에 병합했다. 상세는 [CHANGELOG.md](CHANGELOG.md) 10-17 항목 3건,
+2026-10-17 `feat/led-indicator` 브랜치에서 구현해 main에 병합하고 같은 날 `v0.2.0` 태그로 릴리스했다
+([GitHub Release](https://github.com/SosomLab/nexa-shortcut/releases/tag/v0.2.0), zip 4종). 상세는 [CHANGELOG.md](CHANGELOG.md) 10-17 항목 3건,
 설계 근거는 [DESIGN.md](DESIGN.md) "목표 1 변형" · "공통 기능" · "공통 — 메모리" 절.
 
 | 산출물 | 크기 (로컬 winlibs GCC 16.2 실측) | 사설 작업 집합 (기동 2초 후) |
@@ -83,16 +86,16 @@ DESIGN.md의 "공통 초경량 원칙"이 곧 완료 기준의 일부다. 새 �
 
 - [x] 구현·빌드 4종·`-Wall -Wextra` 무경고·WM_COMMAND 주입 테스트(자동 실행 값 생성/삭제, LED 토글 상주 유지)
 - [x] 문서 반영 — README, DESIGN, PACKAGING, DEV-ENV-WINDOWS, wiki 8개 페이지 원고
-- [ ] CI(Ubuntu gcc-mingw-w64) 빌드 크기 재확인 — 로컬 툴체인과 바이트 차이가 있을 수 있음. 8KB 검사 통과 확인
-- [ ] **Wiki 재발행** `./tools/publish-wiki.sh` + 제품 소개 페이지 갱신 (문서 3면 동기화)
-- [ ] **LED판 포함 첫 배포(v0.2.0 후보)** — 릴리스 자산이 zip 2종 → 4종으로 늘어난다.
-  winget·Chocolatey는 일반판 zip만 참조하므로 매니페스트·설치 스크립트 변경은 없다
+- [x] CI(Ubuntu gcc-mingw-w64) 빌드 크기 재확인 — 로컬 실측과 바이트 단위로 동일 (5,120 / 5,632 / 6,144 / 6,656), 8KB 검사 통과
+- [x] **v0.2.0 릴리스** — zip 4종 첨부, Chocolatey 0.2.0 push 성공(모더레이션 대기), winget 0.2.0 수동 PR 제출
+- [x] Wiki 재발행 (`./tools/publish-wiki.sh`)
+- [ ] 제품 소개 페이지 https://sosomlab.com/apps/nexa-shortcut/ 갱신 — 0.2.0 기능(LED판·자동 실행 메뉴·메모리)과 크기
 - [ ] LED판 화면 실측 — 키를 누른 동안 아이콘이 실제로 초록으로 바뀌는지, 메뉴 토글로 꺼지는지,
   관리자 권한 창에 포커스가 있을 때도 Raw Input이 수신되는지(UIPI) 확인 후 Wiki 사용법에 반영
 - [ ] 자동 실행 메뉴 실측 — winget `Links` 별칭(`nshiftspace`)으로 실행한 상태에서 켰을 때 `Run` 값에
   별칭 경로가 기록되는지(별칭이 심볼릭 링크인지 복사본인지에 따라 다름), 재로그인 후 실제로 뜨는지
 - [ ] `chocolateyuninstall.ps1`에서 `Run` 값 정리 여부 결정 (메뉴로 켠 자동 실행이 제거 후 남는 문제)
-- [ ] `v0.2.0` 태그 — zip 4종 첨부, winget 자동 제출(`wingetcreate`) 첫 검증(2절 과제)과 Chocolatey 재심사
+- [ ] 두 채널 0.2.0 반영 확인 후 README·Wiki·PACKAGING 상태 표 갱신 (2절 과제)
 
 ---
 

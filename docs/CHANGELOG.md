@@ -5,6 +5,37 @@
 
 ---
 
+## 2026-10-17 — v0.2.0 릴리스 및 패키지 게시
+
+### 요청
+- 새 버전 릴리스와 패키지 게시를 진행할 것.
+
+### 분석 내용
+- main 푸시 CI(런 39036302171) 통과 — 4개 exe 크기가 로컬 실측과 바이트 단위로 동일(5,120 / 5,632 / 6,144 / 6,656).
+- Chocolatey nuspec 설명이 0.1.0 시절(4.5KB, "shell:startup에 바로가기") 그대로라 태그 전에 갱신했다
+  (새 버전은 어차피 모더레이션을 다시 거친다).
+- `v0.2.0` 태그 런(39036391096): `build`·`chocolatey` 성공, **`winget` 실패**. 로그: `wingetcreate update`가
+  x64 zip을 내려받아 `Nested installer not found in zip archive: nShiftSpace-x86.exe` — URL 2개를 기존 매니페스트의
+  설치 항목에 짝지을 때 아키텍처를 URL에서 읽지 못해 x64 zip을 x86 항목에 맞춘 것. 첫 자동 제출이었으므로 0.1.0 때는 드러나지 않았다.
+- Chocolatey 피드 API: `nshiftspace 0.2.0` `PackageStatus=Submitted`·`PackageSubmittedStatus=Pending` — 큐 진입 확인.
+
+### 설계 방향
+- winget 0.2.0은 저장소의 매니페스트 사본(0.1.0)을 복제·갱신해 **수동 PR**로 제출 (사용자가 다른 Nexa 패키지에서도 쓰는 경로).
+  로컬 `winget validate` 통과 후 포크 브랜치에 contents API로 3개 파일을 올리고 PR 생성.
+- CI 재발 방지: `--urls "…x64.zip|x64" "…x86.zip|x86"` (wingetcreate의 URL 뒤 `|아키텍처` 지정). v0.3.0에서 재검증.
+- Wiki는 `tools/publish-wiki.sh`로 재발행 (문서 3면 동기화 중 저장소·Wiki 두 면. 제품 소개 페이지는 별도 과제).
+
+### 개발 내용 및 소스 위치
+- 커밋 `6b468e2` — `packaging/chocolatey/nshiftspace.nuspec` 설명 갱신, README 태그 예시 v0.2.0.
+- 태그 `v0.2.0` → [Release](https://github.com/SosomLab/nexa-shortcut/releases/tag/v0.2.0) zip 4종
+  (x64 2,149 B · x86 2,239 B · led-x64 2,530 B · led-x86 2,645 B), `nshiftspace.0.2.0.nupkg` push 성공.
+- `packaging/winget/manifests/s/SosomLab/nShiftSpace/0.2.0/` — 3종 신규 (SHA256: x64 `8A99E9D0…9623`, x86 `3D249144…64B6`,
+  ReleaseDate 2026-10-17, 설명에 자동 실행 메뉴·LED판 안내). PR [microsoft/winget-pkgs#454746](https://github.com/microsoft/winget-pkgs/pull/454746).
+- `.github/workflows/build.yml` — winget 잡 URL 아키텍처 지정 + 주석.
+- 문서: PACKAGING(상태 표·구성 요소·진행 이력 양쪽), ROADMAP(2절 winget 검증 결과·3절 릴리스 완료), wiki Home(현재 버전 0.2.0)/Roadmap/Releasing.
+
+---
+
 ## 2026-10-17 — 내용 정리 및 진행사항 최신화 (feat/led-indicator → main 병합)
 
 ### 요청
