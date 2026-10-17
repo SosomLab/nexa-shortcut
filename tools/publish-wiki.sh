@@ -12,7 +12,9 @@ set -euo pipefail
 
 REPO="SosomLab/nexa-shortcut"
 SRC="$(cd "$(dirname "${BASH_SOURCE[0]}")/../docs/wiki" && pwd)"
-WIKI_URL="https://github.com/${REPO}.wiki.git"
+# 기본은 HTTPS. SSH 호스트 별칭 등 다른 자격 증명을 써야 하면 환경변수로 덮어쓴다:
+#   WIKI_URL=git@kiros33.github.com:SosomLab/nexa-shortcut.wiki.git ./tools/publish-wiki.sh
+WIKI_URL="${WIKI_URL:-https://github.com/${REPO}.wiki.git}"
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
 

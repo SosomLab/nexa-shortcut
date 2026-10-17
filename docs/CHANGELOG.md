@@ -33,6 +33,8 @@
   ReleaseDate 2026-10-17, 설명에 자동 실행 메뉴·LED판 안내). PR [microsoft/winget-pkgs#454746](https://github.com/microsoft/winget-pkgs/pull/454746).
 - `.github/workflows/build.yml` — winget 잡 URL 아키텍처 지정 + 주석.
 - 문서: PACKAGING(상태 표·구성 요소·진행 이력 양쪽), ROADMAP(2절 winget 검증 결과·3절 릴리스 완료), wiki Home(현재 버전 0.2.0)/Roadmap/Releasing.
+- Wiki 재발행 — `tools/publish-wiki.sh`의 HTTPS 푸시가 이 PC의 Git 자격 증명(다른 GitHub 계정)으로 403. 스크립트에
+  `WIKI_URL` 환경변수 덮어쓰기를 추가하고 저장소 origin과 같은 SSH 별칭(`git@kiros33.github.com:…wiki.git`)으로 발행 완료 (7개 페이지 갱신).
 
 ---
 
