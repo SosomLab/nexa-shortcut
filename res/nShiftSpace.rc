@@ -1,1 +1,4 @@
 1 ICON "nShiftSpace.ico"
+#ifdef NSS_LED
+2 ICON "nShiftSpace-on.ico"
+#endif

@@ -1,9 +1,15 @@
 #!/usr/bin/env python3
 """nShiftSpace 초경량 아이콘 생성기.
 
-16x16, 1bpp(2색: 파랑 바탕 + 흰 '한' 픽셀아트) 단일 이미지 ICO를 생성한다.
+16x16, 1bpp(2색: 색 바탕 + 흰 '가·A' 픽셀아트) 단일 이미지 ICO를 생성한다.
 결과물은 약 198바이트 — 다중 해상도/트루컬러 ICO(수십 KB) 대신 크기 최소화.
-사용법: python3 tools/make_icon.py res/nShiftSpace.ico
+
+변형(variant): 픽셀 맵은 같고 바탕색만 다르다.
+  off (기본) 파랑 — 평상시 / LED 꺼짐
+  on         초록 — LED 빌드에서 키가 눌린 동안
+
+사용법: python3 tools/make_icon.py res/nShiftSpace.ico          # off
+        python3 tools/make_icon.py res/nShiftSpace-on.ico on    # on
 """
 import struct
 import sys
@@ -30,13 +36,17 @@ PIXELS = [
     "................",
 ]
 
-BG = (0xEB, 0x63, 0x25)  # BGR — 파랑 #2563EB
+# 바탕색 (BGR 순서). 전경은 항상 흰색.
+VARIANTS = {
+    "off": (0xEB, 0x63, 0x25),  # 파랑 #2563EB
+    "on":  (0x5E, 0xC5, 0x22),  # 초록 #22C55E — LED 켜짐
+}
 FG = (0xFF, 0xFF, 0xFF)  # 흰색
 
 W = H = 16
 
 
-def build_ico() -> bytes:
+def build_ico(bg: tuple = VARIANTS["off"]) -> bytes:
     # XOR 비트맵: 1bpp, 행은 32비트 경계 패딩, 아래→위 순서
     xor = bytearray()
     for row in reversed(PIXELS):
@@ -49,7 +59,7 @@ def build_ico() -> bytes:
     # AND 마스크: 전부 0 = 완전 불투명 (투명 픽셀 없음 → 합성 비용도 없음)
     and_mask = bytes(4 * H)
 
-    palette = bytes(BG) + b"\x00" + bytes(FG) + b"\x00"  # RGBQUAD x 2
+    palette = bytes(bg) + b"\x00" + bytes(FG) + b"\x00"  # RGBQUAD x 2
 
     # BITMAPINFOHEADER (높이는 XOR+AND 합산이라 2배)
     bih = struct.pack("<IiiHHIIiiII", 40, W, H * 2, 1, 1, 0,
@@ -64,7 +74,8 @@ def build_ico() -> bytes:
 
 if __name__ == "__main__":
     out = sys.argv[1] if len(sys.argv) > 1 else "res/nShiftSpace.ico"
-    data = build_ico()
+    variant = sys.argv[2] if len(sys.argv) > 2 else "off"
+    data = build_ico(VARIANTS[variant])
     with open(out, "wb") as f:
         f.write(data)
     print(f"{out}: {len(data)} bytes")

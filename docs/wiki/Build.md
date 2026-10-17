@@ -3,7 +3,9 @@
 소스는 [`src/nShiftSpace.c`](https://github.com/SosomLab/nexa-shortcut/blob/main/src/nShiftSpace.c)
 한 파일입니다. 아래 3가지 방법 중 환경에 맞는 것을 고르세요.
 
-결과물: `dist/nShiftSpace-x64.exe`, `dist/nShiftSpace-x86.exe` — 각 **4,608바이트**
+결과물: `dist/nShiftSpace-x64.exe` **5,120바이트**, `dist/nShiftSpace-x86.exe` **5,632바이트**.
+[키보드 LED 표시판](Usage#키보드-led-표시판-선택)은 같은 소스를 `NSS_LED` 플래그로 빌드한
+`dist/nShiftSpace-led-x64.exe` **6,144바이트**, `dist/nShiftSpace-led-x86.exe` **6,656바이트**
 
 | 방법 | 환경 | x64 | x86 |
 |---|---|---|---|
@@ -23,7 +25,8 @@ brew install mingw-w64        # macOS
 
 git clone https://github.com/SosomLab/nexa-shortcut.git
 cd nexa-shortcut
-make
+make            # 일반판 + LED판, x64/x86 → exe 4개
+make x64 x86    # 일반판만 (make led → LED판만)
 ```
 
 ---
@@ -33,13 +36,13 @@ make
 **MSYS2 UCRT64** 셸에서:
 
 ```bash
-make x64 CC64=gcc RES64=windres
+make x64 led-x64 CC64=gcc RES64=windres
 ```
 
 32비트는 **MSYS2 MINGW32** 셸에서:
 
 ```bash
-make x86 CC32=gcc RES32=windres
+make x86 led-x86 CC32=gcc RES32=windres
 ```
 
 > 인자 없는 `make`를 쓰지 않는 이유: Makefile의 기본값은 `x86_64-w64-mingw32-gcc` 같은
@@ -63,7 +66,7 @@ build.bat
 ```
 
 MSVC에서도 CRT를 링크하지 않으므로(`/NODEFAULTLIB` + `/ENTRY:start`) 초경량 결과물이 나옵니다.
-단, **x64만** 생성됩니다.
+일반판과 LED판(`nShiftSpace-led-x64.exe`)이 함께 나오며, **x64만** 생성됩니다.
 
 ---
 
@@ -83,8 +86,10 @@ Get-ChildItem dist\*.exe | ForEach-Object {
 기대 결과:
 
 ```
-nShiftSpace-x64.exe      4608 bytes  x64
-nShiftSpace-x86.exe      4608 bytes  x86
+nShiftSpace-led-x64.exe  6144 bytes  x64
+nShiftSpace-led-x86.exe  6656 bytes  x86
+nShiftSpace-x64.exe      5120 bytes  x64
+nShiftSpace-x86.exe      5632 bytes  x86
 ```
 
 GitHub Actions CI도 동일하게 검증하며, **8KB를 초과하면 빌드를 실패**시킵니다.
@@ -96,10 +101,12 @@ GitHub Actions CI도 동일하게 검증하며, **8KB를 초과하면 빌드를 
 | 기법 | 효과 |
 |---|---|
 | `-nostdlib`, 진입점 `start` | CRT 미링크 — 수십 KB 절약 |
-| kernel32 / user32 / shell32 만 링크 | import 테이블 최소화 |
+| kernel32 / user32 / shell32 만 링크 (+ advapi32는 자동 실행 `Run` 값용 3개 함수만) | import 테이블 최소화 |
 | 큰 구조체를 전역(`.bss`)에 배치 | 컴파일러의 `memset` 호출 생성 회피 |
 | 16×16 1bpp 단일 이미지 ICO (198바이트) | 다중 해상도 트루컬러 ICO는 수십 KB |
 | `RegisterHotKey` 사용 (훅 아님) | 코드 단순 + CPU 비용 0 |
+| 초기화 후 작업 집합 비우기 | 작업 관리자 메모리 약 1MB → 0.3MB (DLL 데이터 페이지를 대기 목록으로) |
+| LED판은 별도 빌드 (`NSS_LED`) | 일반판에 LED 코드·아이콘·import가 섞이지 않는다 |
 
 설계 배경은
 [docs/DESIGN.md](https://github.com/SosomLab/nexa-shortcut/blob/main/docs/DESIGN.md) 참고.

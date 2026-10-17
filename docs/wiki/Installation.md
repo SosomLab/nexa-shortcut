@@ -9,7 +9,8 @@ nShiftSpace는 **설치 프로그램이 없는 포터블 exe** 하나가 전부�
 | [Chocolatey](#chocolatey) | **관리자 권한** | 이미 choco를 쓰는 경우 |
 | [zip 직접 다운로드](#zip-직접-다운로드) | 일반 사용자 | 경로를 내가 정하고 싶을 때 |
 
-설치 후에는 **[자동 실행 설정](Autostart)** 을 이어서 하세요.
+설치 후 한 번 실행하고 트레이 아이콘 우클릭 → **로그인 시 자동 실행** 을 체크하면 로그인 때마다 뜹니다.
+세부와 대안은 **[자동 실행 설정](Autostart)** 참고.
 
 ---
 
@@ -68,7 +69,9 @@ OS 아키텍처에 맞는 exe **하나만** `%ChocolateyInstall%\lib\nshiftspace
 ## zip 직접 다운로드
 
 1. [Releases 페이지](https://github.com/SosomLab/nexa-shortcut/releases)에서
-   `nShiftSpace-x64.zip` (64비트) 또는 `nShiftSpace-x86.zip` (32비트) 다운로드
+   `nShiftSpace-x64.zip` (64비트) 또는 `nShiftSpace-x86.zip` (32비트) 다운로드.
+   키를 누르는 동안 트레이 아이콘이 켜지는 [키보드 LED 표시판](Usage#키보드-led-표시판-선택)을
+   원하면 `nShiftSpace-led-x64.zip` / `nShiftSpace-led-x86.zip`
 2. 원하는 폴더에 압축 해제 (예: `C:\Tools\nShiftSpace\`)
 3. exe를 더블클릭하면 트레이에 아이콘이 뜹니다
 

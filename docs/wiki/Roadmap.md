@@ -5,7 +5,9 @@ nexa-shortcut은 **초경량 단축키 유틸리티 모음**을 목표로 합니
 
 | # | 목표 | 산출물 | 상태 |
 |---|---|---|---|
-| 1 | **nShiftSpace** — Shift+Space 한/영 전환 | `nShiftSpace-x64/x86.exe` (4.5KB) | ✅ 완료 (v0.1.0) |
+| 1 | **nShiftSpace** — Shift+Space 한/영 전환 | `nShiftSpace-x64/x86.exe` (5KB) | ✅ 완료 (v0.1.0) |
+| 1-a | **키보드 LED 표시판** — 키를 누르는 동안 트레이 아이콘 켜짐 (메뉴로 켜고 끔) | `nShiftSpace-led-x64/x86.exe` (6KB) | ✅ 구현 (다음 릴리스에 포함) |
+| 1-b | **로그인 시 자동 실행** 트레이 메뉴 | 메뉴 항목 (양쪽 빌드) | ✅ 구현 (다음 릴리스에 포함) |
 | 2 | **nexa-mapper** — 사용자 정의 키 재매핑 엔진 | `nMapper.exe` + `mappings.ini` | ⬜ 예정 |
 | 3 | **exe 내보내기** — 설정 내장 독립 exe 생성 | 엔진 내 "실행파일 만들기" | ⬜ 예정 |
 | — | 배포 채널 (winget · Chocolatey) | 두 채널 설치 명령 동작 | ✅ 완료 |
