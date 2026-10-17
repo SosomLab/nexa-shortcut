@@ -5,6 +5,165 @@
 
 ---
 
+## 2026-10-17 — 내용 정리 및 진행사항 최신화 (feat/led-indicator → main 병합)
+
+### 요청
+- 내용 정리 후 진행사항 최신화를 수행하고 commit 및 main 병합 후 push할 것.
+
+### 분석 내용
+- 같은 날 세 차례(LED판 → 자동 실행 → 메모리) 문서를 덧붙이며 생긴 정합성 문제:
+  - ROADMAP 2절 "배포 채널 — 남은 과제 2건" 아래에 LED 실측·자동 실행 실측·v0.2.0 배포 등 **배포 채널과 무관한
+    과제 5건**이 섞여 들어갔고 제목의 건수도 맞지 않았다.
+  - ROADMAP 불변 원칙의 "기본 빌드는 바이트 단위로 동일하게 유지"가 DESIGN의 완화된 표현("변형 코드·리소스를
+    포함하지 않는다")과 어긋났다 — 자동 실행 메뉴가 양쪽에 공통으로 들어가 일반판도 커졌기 때문.
+  - ROADMAP 1절 목표 1 행의 크기(5.0/5.5KB)가 상태(v0.1.0 배포)와 맞지 않았다 (v0.1.0은 4.5KB).
+  - DESIGN 목표 1 아키텍처 도식이 "WM_TRAYICON → 종료 메뉴"로 남아 새 메뉴·WM_INPUT·작업 집합 비우기를 반영하지 못했다.
+  - 메모리 개선이 1절 목표 표에 없었고, Wiki 로드맵에 "다음 릴리스에 포함"이라는 시점 안내가 없었다.
+
+### 설계 방향
+- ROADMAP에 **"3. 다음 릴리스 v0.2.0"** 절을 신설해 구현 완료 항목의 실측 수치와 배포 전 과제를 한곳에 모으고,
+  이후 절을 4~8로 재배열 (목표 2 하위 단계 번호 `2-1`~`2-5`는 그대로).
+- 원칙 문구는 DESIGN을 정본으로 ROADMAP을 맞춘다. 레지스트리 예외(사용자가 켠 `Run` 값)도 원칙에 명시.
+
+### 개발 내용 및 소스 위치
+- `docs/ROADMAP.md` — 3절 신설·재번호, 1절에 1-c(메모리) 행과 목표 1 크기 이력, 원칙 2줄 정정, 8절 목표 1 항목에 v0.1.0 표기
+- `docs/DESIGN.md` — 목표 1 아키텍처 도식에 메뉴 항목·WM_COMMAND·[LED판] WM_INPUT·작업 집합 비우기 반영
+- `docs/wiki/Roadmap.md` — v0.2.0 포함 예정 안내 추가
+- 저장소 `.md` 상대 링크 전수 검사 — 모두 실재 파일
+
+---
+
+## 2026-10-17 — 메모리 분석 및 작업 집합 비우기
+
+### 요청
+- nexa-memkeeper, nexa-coffee 등은 사용 메모리가 훨씬 적어 보이는데 이 프로그램이 1.7MB를 차지하는 이유를
+  분석하고 줄일 수 있는지 확인할 것 (작업 관리자 캡처: nShiftSpace-x64 1,720K, nexa-coffee 292K, NexaMemKeeper 268K).
+
+### 분석 내용
+- 작업 관리자 "메모리" = 사설 작업 집합. 세 프로세스의 로드 모듈·커밋·작업 집합을 비교한 결과:
+  nexa-coffee는 DLL 52개(우리 47개와 거의 같은 집합)를 로드하고 **커밋은 2,436K로 우리(1,464K)보다 크다.**
+  작업 집합만 작다 (WS 3.4MB vs 13.8MB).
+- 두 형제 앱의 import 테이블 확인: nexa-coffee → `SetProcessWorkingSetSize`, NexaMemKeeper → `K32EmptyWorkingSet`.
+  즉 **초기화 후 작업 집합을 비워 표시 수치를 낮추는 것**이며 실제 할당이 적은 것이 아니다.
+- 우리 1.7MB의 정체 (`QueryWorkingSetEx`로 사설 페이지를 모듈별 분류): 힙·스택 등 순수 사설 716K +
+  45개 DLL의 쓰기 가능 데이터 페이지(복사-후-쓰기) 약 1MB (ntdll/shell32 56K, windows.storage 52K, … IME 계열
+  msctf/imkrtip/imjkapi/imetip/TextInputFramework 등 포함). 우리 코드 자체는 .bss 1.6KB.
+- 결론: 커밋을 진짜로 줄일 여지는 없다 (트레이·단축키·메뉴가 모두 user32/shell32에 있음). 표시 수치와 상주
+  페이지는 형제 앱과 같은 방법으로 줄일 수 있다.
+
+### 설계 방향
+- `trim_working_set()` — `SetProcessWorkingSetSize((HANDLE)-1, -1, -1)`. `GetCurrentProcess()` 대신 의사 핸들 상수를
+  써서 import 1개 절약 (LED x64 판의 `.idata`가 512B 경계를 넘어 +512B 되는 것을 막음).
+- 호출 시점: 초기화 직후(트레이 아이콘 추가 후) + 트레이 메뉴를 닫은 직후. 주기적 호출은 하지 않는다 (타이머 = CPU).
+- 문서에 솔직하게 명시: 표시 수치·상주 페이지 감소이지 할당 감소가 아니며, 다음 단축키 처리 때 몇 페이지가
+  소프트 폴트로 돌아온다.
+
+### 개발 내용 및 소스 위치
+- `src/nShiftSpace.c` — `trim_working_set()`, `start()` 말미와 `WM_TRAYICON` 메뉴 종료 후 호출, 파일 머리 주석.
+- 실측 (기동 2초 후, 사설 WS): x64 1,020K → **284K**, x86 988K → **160K**, LED x64 → 296K, LED x86 → 160K.
+  커밋은 1.4MB대로 불변. exe 크기 변동 없음 (x64 5,120 / x86 5,632 / LED 6,144 / 6,656).
+- 문서: README(메모리 항목), DESIGN("메모리" 절·원칙 추가), ROADMAP(완료), wiki Usage/Build/Home.
+
+---
+
+## 2026-10-17 — 로그인 시 자동 실행 메뉴 (Start on login)
+
+### 요청
+- "Start on login" 기능을 추가할 것 (LED 작업과 같은 브랜치 `feat/led-indicator`에서 이어서).
+
+### 분석 내용
+- 기존에는 Wiki의 수동 절차(바로가기 / Run 키 / 작업 스케줄러) 3종을 사용자가 직접 수행해야 했고, winget의
+  `Links` 별칭 경로 함정 때문에 설명이 길었다. 프로그램 안에서 한 번 체크하는 쪽이 훨씬 쉽다.
+- 구현 후보: (1) 시작 프로그램 폴더 `.lnk` — COM `IShellLink`·ole32 필요, 가장 무거움. (2) 시작 폴더에 exe 복사 —
+  업그레이드 후 옛 사본이 뜸. (3) 작업 스케줄러 — 외부 프로세스/COM. (4) **HKCU `Run` 값** — 표준이며 가장 가볍다.
+- `Run` 값은 레지스트리 API(advapi32)가 필요해 "kernel32/user32/shell32만" 원칙에 예외가 생긴다. advapi32는
+  모든 프로세스에 이미 로드되는 DLL이라 메모리 부담은 없고, import는 Vista+ 단축 API 3개
+  (`RegGetValueW`/`RegSetKeyValueW`/`RegDeleteKeyValueW`)로 제한해 키 열기·닫기 코드를 없앴다
+  (5개 API 버전 대비 .text 112B·.idata 132B 절약 실측).
+- 크기 실측: x64 일반판 4,608 → **5,120B**, x86 일반판 4,608 → **5,632B** (x86은 `.text`·`.idata` 둘 다 512B 경계를 넘음),
+  LED판 x64 **6,144B** / x86 **6,656B**. 모두 8KB 예산 안.
+- "레지스트리에 아무것도 쓰지 않는다" 원칙은 **기본 상태**에 한해 유지된다. 사용자가 메뉴로 켤 때만 값 하나를 쓰고,
+  끄면 지운다. 제거 전에 끄지 않으면 값이 남는 한계는 문서에 명시.
+
+### 설계 방향
+- 트레이 메뉴 "로그인 시 자동 실행(&S)" 체크 항목. **체크 표시는 메뉴를 열 때마다 `Run` 값 존재 여부로 결정**
+  (상태 변수 없음 → 사용자가 레지스트리에서 직접 지워도 어긋나지 않음).
+- 값은 `GetModuleFileNameW` 경로를 큰따옴표로 감싼 REG_SZ. 반환 길이를 그대로 써서 `lstrcat`/`lstrlen` import 회피.
+- 양쪽 빌드(일반·LED) 공통. 메뉴 순서: 자동 실행 / (LED 표시) / 구분선 / 종료.
+- winget 사용자는 `nshiftspace` 별칭으로 실행한 상태에서 켜야 `Links` 경로가 기록된다 — Wiki에 채널별 안내 표 추가.
+  관리자 권한 창 대응은 여전히 작업 스케줄러(방법 C) 안내 유지.
+
+### 개발 내용 및 소스 위치
+- `src/nShiftSpace.c` — `IDM_AUTOSTART`, `g_run_cmd[MAX_PATH+3]`(.bss), `RUN_KEY`/`RUN_VAL`, `autostart_enabled()`,
+  `set_autostart()`, 트레이 메뉴 항목·구분선, `WM_COMMAND` 분기.
+- `Makefile` `LIBS += -ladvapi32`, `build.bat` 두 링크 모두 `advapi32.lib` 추가.
+- 문서: README(기능·자동 실행 절), DESIGN(공통 기능 절·원칙 예외·크기 갱신), ROADMAP(1-b 행·실측 과제·Chocolatey 바로가기
+  과제 하향), PACKAGING, DEV-ENV-WINDOWS, wiki Autostart(최상단 "가장 쉬운 방법" 절·해제·선택표)/Usage(트레이 메뉴 표·무설정
+  문구 수정)/Home/Installation/Build/Roadmap. **Wiki 재발행 필요** (`tools/publish-wiki.sh`, 미실행).
+- 검증 — 화면 조작 없이 `WM_COMMAND`(IDM_AUTOSTART=12, IDM_LED=11)를 창에 PostMessage로 주입:
+  4개 exe 모두 `Run\nShiftSpace` 값이 `"<exe 경로>"`로 생성되고 다시 삭제됨, LED 토글 후에도 상주 유지, 테스트 후 값 없음 확인.
+  실제 재로그인 후 기동과 winget 별칭 경로 기록 여부는 미실측 (ROADMAP 과제).
+
+---
+
+## 2026-10-17 — 키보드 LED 표시판 (별도 빌드, 메뉴로 켜고 끔)
+
+### 요청
+- 브랜치를 추가하고 작업할 것 (`feat/led-indicator`).
+- 트레이 아이콘 영역에 **어떤 키든 눌리면 LED를 켜고 떼면 끄는** 단순한 기능을 넣을 것.
+- 최종 exe 크기·메모리 최소화 규칙을 점검하고, 필요하면 LED 버전과 일반 버전을 따로 빌드할 것.
+- (추가) LED를 끄면 성능 영향이 더 줄어드는지 — 그렇다면 **켜고 끄는 기능**을 넣을 것.
+
+### 분석 내용
+- "어떤 키든"을 감지하려면 `RegisterHotKey`로는 불가능하고 키 입력 전체를 받아야 한다. 후보 3가지:
+  - `WH_KEYBOARD_LL` 훅: 모든 키 입력이 우리 콜백을 **동기적으로** 거쳐 시스템 전체 입력 지연이 생기고,
+    콜백 안에서 `Shell_NotifyIcon`(explorer 동기 호출)을 부르면 훅 타임아웃으로 훅이 조용히 제거될 위험.
+    Wiki가 내세우던 "훅이 아니다"라는 장점도 잃는다.
+  - 타이머 폴링: 유휴 CPU 0 원칙 위반.
+  - **Raw Input(`RIDEV_INPUTSINK`)**: 키 make/break가 `WM_INPUT` 메시지로 비동기 전달. 다른 프로세스 입력 경로에
+    개입하지 않고 훅도 아니다. 채택.
+- 크기 규칙 점검 — 기능 추가분을 실측한 결과 **+1,024바이트** (4,608 → 5,632). 실제 증가분은 1KB 미만이지만
+  PE 파일 정렬(512B) 경계를 `.text`와 `.rsrc`가 각각 넘었다. 8KB 예산 안이나, 한 exe에 런타임 토글로 넣으면
+  LED를 안 쓰는 사용자도 이 증가분과 켜짐 아이콘을 떠안는다.
+- 메모리 — 네 빌드 모두 기동 직후 사설 메모리 ≈1.4MB로 차이 없음 (로드되는 DLL이 지배).
+- LED를 끄면: Raw Input 등록을 `RIDEV_REMOVE`로 해제할 수 있어 `WM_INPUT`이 전혀 오지 않는다.
+  즉 **꺼진 LED판의 키 입력당 비용은 일반판과 동일하게 0**이다. 켜고 끄는 기능을 넣을 가치가 있다.
+- 로컬 PC에 C 툴체인이 없어 포터블 winlibs GCC 16.2(mingw-w64, CI와 같은 GCC+binutils 계열)를 스크래치
+  폴더에 받아 빌드·측정했다. 기존 소스로 빌드한 기준 exe와 새 일반판 exe는 PE 타임스탬프·체크섬 4바이트만
+  다르고 나머지는 동일 — **일반판 바이트 동일 유지 확인**.
+
+### 설계 방향
+- 같은 소스(`src/nShiftSpace.c`)에서 **컴파일 플래그 `NSS_LED`로 분리**한 별도 빌드. 일반판에는 LED 코드·import·
+  아이콘이 전혀 들어가지 않는다. 이 방침을 DESIGN "공통 초경량 원칙"에 추가.
+- LED판 안의 런타임 토글: 트레이 메뉴 **"키보드 LED 표시"** 체크 항목. 끄면 Raw Input 등록 해제 + 아이콘 꺼짐.
+  상태는 저장하지 않는다 (레지스트리·설정 파일 미사용 원칙) — 시작 시 항상 켜짐. 상시 꺼둘 사용자는 일반판.
+- 셸 호출 최소화: 상태가 실제로 바뀔 때만 `NIM_MODIFY` (키 반복 입력은 호출 없음). 여러 키 동시 입력은 세지 않는다
+  (어느 키든 떼면 꺼짐 — 요구 그대로이며 상태 꼬임이 없다).
+- 켜짐 아이콘은 픽셀 맵 동일·바탕색만 초록(#22C55E)인 198바이트 ICO를 `tools/make_icon.py`의 변형(`on`)으로 생성.
+  `.rc`의 `#ifdef NSS_LED`로 LED판에만 포함.
+- 릴리스 자산은 exe별 zip이므로 2종 → 4종이 된다. winget·Chocolatey는 일반판 zip만 참조해 패키징 변경 없음.
+
+### 개발 내용 및 소스 위치
+- `src/nShiftSpace.c` — `#ifdef NSS_LED` 블록: `g_icon_off/on`, `g_lit`, `g_led_enabled`, `g_rid`, `g_raw`(.bss),
+  `set_led()`(상태 변화 시만 `NIM_MODIFY`), `set_led_enabled()`(`RIDEV_INPUTSINK`/`RIDEV_REMOVE` 전환),
+  `WM_INPUT` 처리(`GetRawInputData` → `RI_KEY_BREAK`), 트레이 메뉴 `IDM_LED` 체크 항목 + 구분선,
+  `TaskbarCreated` 재추가 시 꺼짐으로 초기화. 비-LED 경로의 코드는 텍스트 그대로 유지.
+- `res/nShiftSpace.rc` — `#ifdef NSS_LED` 아래 `2 ICON "nShiftSpace-on.ico"`.
+- `res/nShiftSpace-on.ico` (신규, 198바이트), `tools/make_icon.py` — `VARIANTS` {off: 파랑, on: 초록}, 두 번째 인자로
+  변형 선택. 기본 아이콘 출력은 바이트 동일 (재생성 후 git diff 없음 확인).
+- `Makefile` — `led`, `led-x64`, `led-x86` 타깃, `LEDDEF := -DNSS_LED`를 gcc·windres 양쪽에 전달,
+  `build/rsrc-led-*.o`, `dist/nShiftSpace-led-*.exe`. `all`은 4개 모두.
+- `build.bat` — MSVC: `rc /d NSS_LED` + `cl /DNSS_LED`로 `dist\nShiftSpace-led-x64.exe` 추가 생성.
+- `.github/workflows/build.yml` — 변경 없음: `make`가 4개를 만들고, 8KB 검사·아티팩트·zip이 `dist/*.exe` 전체에 적용됨.
+- 문서: README, DESIGN(변형 아키텍처·비용 실측·토글의 성능 의미), ROADMAP(1-a 행, 배포·실측 과제), DEV-ENV-WINDOWS,
+  wiki Build/Usage/Installation/Home/Releasing/Roadmap. **Wiki는 `tools/publish-wiki.sh`로 재발행 필요** (미실행).
+- 검증 — 4개 exe 빌드(-Wall -Wextra 경고 없음), 크기 4,608/5,632, 기동·상주·오류 대화상자 없음·메모리 측정.
+  **키를 누를 때 아이콘이 실제로 바뀌는 화면 확인과 메뉴 토글은 미실측** (세션에서 화면 자동 조작을 하지 않기로 함)
+  → ROADMAP 과제로 등록. 수동 확인: `dist\nShiftSpace-led-x64.exe` 실행 후 아무 키나 누르고 있으면 트레이 아이콘이
+  초록, 떼면 파랑. 우클릭 메뉴에서 "키보드 LED 표시" 체크 해제 시 반응 없음.
+
+---
+
 ## 2026-08-02 — 문서 구조 정리 및 진행사항 최신화
 
 ### 요청

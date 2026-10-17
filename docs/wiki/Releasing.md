@@ -13,7 +13,7 @@ git tag v0.1.1 && git push origin v0.1.1
 ```
 git push origin v0.1.1
    │
-   ├─ build    빌드 + 8KB 크기 회귀 검사 → Release에 zip 2종 첨부
+   ├─ build    빌드 + 8KB 크기 회귀 검사 → Release에 zip 4종 첨부 (일반·LED × x64·x86)
    ├─ chocolatey   체크섬 주입 → choco pack → choco push  (시크릿 CHOCO_API_KEY)
    └─ winget       wingetcreate update → winget-pkgs PR 자동 제출 (시크릿 WINGET_TOKEN)
 ```

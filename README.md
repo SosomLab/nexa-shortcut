@@ -12,11 +12,19 @@
 
 **Nexa ShiftSpace** — Shift+Space로 한/영 전환만 하는 단일 기능 상주 프로그램.
 
-- 파일 크기: **4.5KB** (참고: 원조 jwShiftSpaceKey.exe는 12KB)
+- 파일 크기: **5.0KB** (x64 5,120바이트 · x86 5,632바이트. 참고: 원조 jwShiftSpaceKey.exe는 12KB)
 - 동작: Shift+Space 입력 시 한/영 키(VK_HANGUL)를 대신 눌러줌
 - 자체 아이콘 내장: '가·A' 픽셀 아트, 198바이트 1bpp ICO (`tools/make_icon.py`로 생성)
-- 트레이 아이콘 우클릭 → 종료
+- 트레이 아이콘 우클릭 → **로그인 시 자동 실행**(체크) / 종료.
+  자동 실행은 HKCU `Run` 값에 실행 중인 exe 경로를 쓰는 표준 방식이며, 켤 때만 쓰고 끄면 지운다
+- 메모리: 작업 관리자 기준 **약 300KB**(x64) / 160KB(x86). 초기화 직후·메뉴를 닫은 뒤 작업 집합을 비운다.
+  커밋 메모리는 약 1.4MB로, user32/shell32를 쓰는 다른 초소형 트레이 앱과 같은 수준 (상세: [docs/DESIGN.md](docs/DESIGN.md))
 - 중복 실행 방지, 탐색기 재시작 시 트레이 아이콘 자동 복구
+- **키보드 LED 표시판** (`nShiftSpace-led-x64/x86.exe`, **6.0KB** — x64 6,144 · x86 6,656바이트): 아무 키나 누르는 동안 트레이 아이콘이
+  초록으로 켜지고 떼면 파랑으로 꺼진다. Raw Input(`RIDEV_INPUTSINK`)으로 키 눌림/뗌만 수신하므로
+  훅이 아니며 다른 프로그램의 키 입력을 지연시키지 않는다. 트레이 메뉴 "키보드 LED 표시"로 끄면
+  Raw Input 등록을 해제해 일반판과 똑같이 키 입력당 비용 0이 된다 (시작 시 기본 켜짐, 저장 안 함).
+  일반판에는 이 코드가 전혀 들어가지 않는다(컴파일 플래그 `NSS_LED`). 두 판은 동시에 실행되지 않는다.
 
 ### 빌드
 
@@ -24,7 +32,8 @@
 
 ```bash
 brew install mingw-w64   # 또는 apt install gcc-mingw-w64
-make                     # dist/nShiftSpace-x64.exe, dist/nShiftSpace-x86.exe 생성
+make                     # 일반판 + LED판, x64/x86 → dist/ 에 exe 4개 생성
+make x64 x86             # 일반판만 / make led → LED판만
 ```
 
 #### 방법 2 — Windows에서 컴파일 (MSYS2 / MinGW-w64)
@@ -32,10 +41,10 @@ make                     # dist/nShiftSpace-x64.exe, dist/nShiftSpace-x86.exe �
 **MSYS2 UCRT64** 셸에서:
 
 ```bash
-make x64 CC64=gcc RES64=windres    # dist/nShiftSpace-x64.exe 생성
+make x64 led-x64 CC64=gcc RES64=windres    # dist/nShiftSpace-x64.exe, nShiftSpace-led-x64.exe 생성
 ```
 
-32비트 빌드는 **MSYS2 MINGW32** 셸에서 `make x86 CC32=gcc RES32=windres`.
+32비트 빌드는 **MSYS2 MINGW32** 셸에서 `make x86 led-x86 CC32=gcc RES32=windres`.
 
 > MSYS2 설치부터 32/64비트 툴체인 구성까지 처음부터 세팅하는 상세 절차는
 > [docs/DEV-ENV-WINDOWS.md](docs/DEV-ENV-WINDOWS.md) 참고.
@@ -45,7 +54,7 @@ make x64 CC64=gcc RES64=windres    # dist/nShiftSpace-x64.exe 생성
 **x64 Native Tools Command Prompt for VS**에서 저장소 폴더로 이동 후:
 
 ```bat
-build.bat               # dist\nShiftSpace-x64.exe 생성
+build.bat               # dist\nShiftSpace-x64.exe, dist\nShiftSpace-led-x64.exe 생성
 ```
 
 MSVC에서도 CRT를 링크하지 않으므로(/NODEFAULTLIB + /ENTRY:start) 초경량 결과물이 나온다.
@@ -101,8 +110,8 @@ chocolatey.org 게시와 winget-pkgs 업데이트 PR 제출을 자동으로 수�
 
 ### 배포 (자동 릴리스)
 
-`v*` 형식의 태그를 푸시하면 GitHub Actions가 빌드 후 x64/x86 실행 파일 2개를
-GitHub Release에 자동 첨부한다:
+`v*` 형식의 태그를 푸시하면 GitHub Actions가 빌드 후 일반판·LED판 × x64/x86 실행 파일 4개를
+(exe별 zip) GitHub Release에 자동 첨부한다. winget·Chocolatey 패키지는 일반판 zip만 사용한다:
 
 ```bash
 git tag v0.1.0 && git push origin v0.1.0
@@ -112,6 +121,11 @@ git tag v0.1.0 && git push origin v0.1.0
 
 상주 프로그램이므로 로그인 시 자동 실행되도록 한 번 설정해 두는 것이 좋다.
 **두 채널 모두 자동 등록하지 않는다.**
+
+**가장 쉬운 방법**: 프로그램을 한 번 실행한 뒤 트레이 아이콘 우클릭 → **로그인 시 자동 실행** 체크.
+실행 중인 exe의 경로를 HKCU `Run` 값에 등록하며, 체크를 해제하면 지운다 (방법 B와 같은 값).
+winget 사용자는 `nshiftspace` 별칭으로 실행한 상태에서 켜야 업그레이드 후에도 유지되는 `Links` 경로가
+기록된다. 관리자 권한 창에서도 단축키가 필요하면 아래 작업 스케줄러 방식을 쓴다. 아래는 수동 등록 절차.
 
 먼저 가리킬 exe 경로를 확정한다. 채널마다 다르고, **winget은 반드시 `Links` 별칭 경로를 써야**
 `winget upgrade` 후에도 바로가기가 끊기지 않는다.

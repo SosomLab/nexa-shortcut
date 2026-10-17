@@ -16,7 +16,8 @@ Windows에서 nShiftSpace를 **32비트·64비트 모두** 빌드할 수 있는 
 | `mingw-w64-i686-gcc` | **32비트** 컴파일러/windres (`/mingw32`) | pacman |
 | `make` | Makefile 실행 | pacman |
 
-결과물: `dist/nShiftSpace-x64.exe`, `dist/nShiftSpace-x86.exe` — 각 **4,608바이트**.
+결과물: `dist/nShiftSpace-x64.exe` **5,120바이트**, `dist/nShiftSpace-x86.exe` **5,632바이트**.
+키보드 LED 표시판(`led-x64`/`led-x86` 타깃)은 `dist/nShiftSpace-led-x64.exe` **6,144바이트**, `-x86` **6,656바이트**.
 
 ---
 
@@ -88,16 +89,16 @@ PowerShell에서 MSYS2 bash를 통해 (`<사용자>`는 실제 경로로 교체)
 $bash = "C:\tools\msys64\usr\bin\bash.exe"
 
 # 64비트
-& $bash -lc "cd /c/Users/<사용자>/Projects/nexa-shortcut && PATH=/mingw64/bin:/usr/bin make x64 CC64=gcc RES64=windres"
+& $bash -lc "cd /c/Users/<사용자>/Projects/nexa-shortcut && PATH=/mingw64/bin:/usr/bin make x64 led-x64 CC64=gcc RES64=windres"
 
 # 32비트
-& $bash -lc "cd /c/Users/<사용자>/Projects/nexa-shortcut && PATH=/mingw32/bin:/usr/bin make x86 CC32=gcc RES32=windres"
+& $bash -lc "cd /c/Users/<사용자>/Projects/nexa-shortcut && PATH=/mingw32/bin:/usr/bin make x86 led-x86 CC32=gcc RES32=windres"
 ```
 
 또는 MSYS2 셸을 직접 열어서 (README 방식):
 
-- **MINGW64 셸** → `make x64 CC64=gcc RES64=windres`
-- **MINGW32 셸** → `make x86 CC32=gcc RES32=windres`
+- **MINGW64 셸** → `make x64 led-x64 CC64=gcc RES64=windres`
+- **MINGW32 셸** → `make x86 led-x86 CC32=gcc RES32=windres`
 
 > **`make`(인자 없는 기본 타깃)를 쓰지 않는 이유:** Makefile의 기본값은
 > `x86_64-w64-mingw32-gcc` 같은 **접두어 이름**을 기대하는데(리눅스 크로스 컴파일 기준),
@@ -122,8 +123,10 @@ Get-ChildItem dist\*.exe | ForEach-Object {
 기대 결과:
 
 ```
-nShiftSpace-x64.exe      4608 bytes  x64
-nShiftSpace-x86.exe      4608 bytes  x86
+nShiftSpace-led-x64.exe  6144 bytes  x64
+nShiftSpace-led-x86.exe  6656 bytes  x86
+nShiftSpace-x64.exe      5120 bytes  x64
+nShiftSpace-x86.exe      5632 bytes  x86
 ```
 
 CI(GitHub Actions)도 동일 결과를 검증한다 — `ubuntu-latest`에서 `gcc-mingw-w64`로 x64/x86을
