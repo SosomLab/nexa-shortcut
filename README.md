@@ -17,14 +17,15 @@
 - 자체 아이콘 내장: '가·A' 픽셀 아트, 198바이트 1bpp ICO (`tools/make_icon.py`로 생성)
 - 트레이 아이콘 우클릭 → **로그인 시 자동 실행**(체크) / 종료.
   자동 실행은 HKCU `Run` 값에 실행 중인 exe 경로를 쓰는 표준 방식이며, 켤 때만 쓰고 끄면 지운다
-- 메모리: 작업 관리자 기준 **약 300KB**(x64) / 160KB(x86). 초기화 직후·메뉴를 닫은 뒤 작업 집합을 비운다.
-  커밋 메모리는 약 1.4MB로, user32/shell32를 쓰는 다른 초소형 트레이 앱과 같은 수준 (상세: [docs/DESIGN.md](docs/DESIGN.md))
+- 메모리: 작업 관리자 기준 **약 70KB**(x64) / 120KB(x86). 이 스레드의 IME를 끄고(`ImmDisableIME`) 마지막 활동 2초 뒤
+  작업 집합을 비운다. 커밋 메모리는 약 1.4MB로, user32/shell32를 쓰는 다른 초소형 트레이 앱과 같은 수준 (상세: [docs/DESIGN.md](docs/DESIGN.md))
 - 중복 실행 방지, 탐색기 재시작 시 트레이 아이콘 자동 복구
 - **키보드 LED 표시판** (`nShiftSpace-led-x64/x86.exe`, **6.0KB** — x64 6,144 · x86 6,656바이트): 아무 키나 누르는 동안 트레이 아이콘이
   초록으로 켜지고 떼면 파랑으로 꺼진다. Raw Input(`RIDEV_INPUTSINK`)으로 키 눌림/뗌만 수신하므로
   훅이 아니며 다른 프로그램의 키 입력을 지연시키지 않는다. 트레이 메뉴 "키보드 LED 표시"로 끄면
   Raw Input 등록을 해제해 일반판과 똑같이 키 입력당 비용 0이 된다 (시작 시 기본 켜짐, 저장 안 함).
   일반판에는 이 코드가 전혀 들어가지 않는다(컴파일 플래그 `NSS_LED`). 두 판은 동시에 실행되지 않는다.
+  패키지도 별도: Chocolatey `nshiftspace-led` / winget `SosomLab.nShiftSpace.LED` (v0.3.0부터, 기존 `nshiftspace` / `SosomLab.nShiftSpace`는 일반판 그대로).
 
 ### 빌드
 
@@ -64,6 +65,10 @@ MSVC에서도 CRT를 링크하지 않으므로(/NODEFAULTLIB + /ENTRY:start) 초
 > ✅ **두 채널 모두 등록이 완료되었습니다** (winget 2026-07-17 병합, Chocolatey 2026-07-30 승인).
 > [GitHub Releases](https://github.com/SosomLab/nexa-shortcut/releases)에서 zip을 직접 내려받아
 > 쓰는 것도 가능합니다.
+
+> 키보드 LED 표시판은 **별도 패키지**로 게시한다 — Chocolatey `nshiftspace-led`, winget `SosomLab.nShiftSpace.LED`
+> (v0.3.0에서 최초 제출, 각 채널 심사 완료 후 설치 가능). 아래 명령에서 패키지 이름만 바꾸면 된다.
+> 일반판과 LED판은 같은 단축키를 쓰므로 둘 중 하나만 설치한다.
 
 #### winget (일반 PowerShell)
 

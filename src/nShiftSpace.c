@@ -3,14 +3,19 @@
  *
  * 초경량 원칙: CRT를 링크하지 않는다 (-nostdlib, 진입점 start).
  *  - 큰 구조체는 전역(.bss)에 두어 memset 호출 생성을 피한다.
- *  - 초기화 직후와 트레이 메뉴를 닫은 뒤 작업 집합을 비운다(SetProcessWorkingSetSize -1/-1).
- *    user32/shell32 초기화가 건드린 DLL 데이터 페이지(복사-후-쓰기 사설 페이지)가 상주 상태로
- *    남아 작업 관리자 "메모리"(사설 작업 집합)가 1.5MB 안팎으로 보이기 때문. 비우면 대기 목록으로
- *    내려가 수치가 수백 KB로 떨어지며, 다음 단축키 처리 때 필요한 몇 페이지만 소프트 폴트로
- *    돌아온다 (커밋 메모리 자체는 변하지 않는다 — 표시 수치와 상주 페이지만 줄어든다).
+ *  - 메모리 표시(작업 관리자 "메모리" = 사설 작업 집합) 최소화 — 두 가지:
+ *    1) ImmDisableIME(-1): 트레이 메뉴를 열 때 SetForegroundWindow 로 우리 창이 활성화되면
+ *       한국어 IME/TSF 스택(msctf, imkrtip, imjkapi, TextInputFramework, CoreMessaging 등 DLL 20여 개와
+ *       그 스레드)이 프로세스에 붙어 이후 포그라운드가 바뀔 때마다 페이지를 끌어들인다. 우리는
+ *       텍스트 입력을 받지 않으므로 이 스레드의 IME 를 아예 끈다. (키 합성·단축키·메뉴와 무관)
+ *    2) 마지막 메시지 후 2초 동안 조용하면 일회성 타이머로 SetProcessWorkingSetSize(-1/-1).
+ *       user32/shell32 가 건드린 DLL 데이터 페이지(복사-후-쓰기 사설 페이지)를 대기 목록으로 내려
+ *       수치가 수백 KB 로 떨어진다. 커밋 메모리 자체는 변하지 않는다 — 표시 수치와 상주 페이지만
+ *       줄어들며, 다음 단축키 처리 때 필요한 몇 페이지만 소프트 폴트로 돌아온다. 주기 타이머가
+ *       아니라 활동 뒤 한 번만 깨어난다 (유휴 CPU 0 유지).
  *  - 라이브러리는 kernel32 / user32 / shell32 만 사용한다.
- *    (예외: advapi32 — "로그인 시 자동 실행" 메뉴가 HKCU\...\Run 값을 읽고 쓰는 데만 사용.
- *     모든 프로세스에 이미 로드되는 DLL이라 메모리 추가 부담은 없다.)
+ *    (예외 1: advapi32 — "로그인 시 자동 실행" 메뉴가 HKCU\...\Run 값을 읽고 쓰는 데만 사용.
+ *     예외 2: imm32 — ImmDisableIME 하나. 둘 다 user32 가 이미 로드하는 DLL이라 추가 부담 없음.)
  *
  * 트레이 메뉴:
  *  - 로그인 시 자동 실행 (체크) — HKCU\Software\Microsoft\Windows\CurrentVersion\Run 에
@@ -36,6 +41,8 @@
 #endif
 
 #define HOTKEY_ID   1
+#define IDT_TRIM    1     /* 활동 후 작업 집합 비우기 일회성 타이머 */
+#define TRIM_DELAY_MS 2000
 #define WM_TRAYICON (WM_USER + 1)
 #define IDM_EXIT      10
 #define IDM_LED       11 /* NSS_LED 빌드 전용: 키보드 LED 표시 켜기/끄기 */
@@ -128,7 +135,9 @@ static void add_tray_icon(HWND hwnd)
     Shell_NotifyIconW(NIM_ADD, &g_nid);
 }
 
-/* 작업 집합 비우기 — 상주 페이지를 대기 목록으로 내려 Task Manager 수치를 낮춘다 */
+/* 작업 집합 비우기 — 상주 페이지를 대기 목록으로 내려 Task Manager 수치를 낮춘다.
+ * 호출 시점은 WM_TIMER(IDT_TRIM) 한 곳: 어떤 메시지든 받으면 타이머를 (재)설정하고
+ * 2초간 조용하면 한 번 비운다. */
 static void trim_working_set(void)
 {
     /* GetCurrentProcess() 의 의사 핸들 값은 -1 로 고정 — 호출 대신 상수를 써 import 하나를 아낀다 */
@@ -144,6 +153,16 @@ static void send_hangul_key(void)
 
 static LRESULT CALLBACK wnd_proc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 {
+    if (msg == WM_TIMER) {
+        if (wp == IDT_TRIM) {
+            KillTimer(hwnd, IDT_TRIM);
+            trim_working_set();
+        }
+        return 0;
+    }
+    /* 어떤 메시지든 활동으로 간주: 2초 뒤 한 번 비우도록 일회성 타이머 (재)설정 */
+    SetTimer(hwnd, IDT_TRIM, TRIM_DELAY_MS, NULL);
+
     /* 탐색기(explorer.exe) 재시작 시 트레이 아이콘 복구 */
     if (msg == g_taskbar_created) {
         add_tray_icon(hwnd);
@@ -186,25 +205,21 @@ static LRESULT CALLBACK wnd_proc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
             TrackPopupMenu(menu, TPM_RIGHTBUTTON | TPM_BOTTOMALIGN,
                            pt.x, pt.y, 0, hwnd, NULL);
             DestroyMenu(menu);
-            trim_working_set();  /* 메뉴 표시가 끌어들인 페이지 정리 */
         }
         return 0;
 
     case WM_COMMAND:
-        if (LOWORD(wp) == IDM_EXIT)
-            DestroyWindow(hwnd);
+        if (LOWORD(wp) == IDM_EXIT) {
+            /* 단축키·Raw Input·창은 프로세스 종료와 함께 OS 가 정리한다. 아이콘만 직접 지운다 */
+            Shell_NotifyIconW(NIM_DELETE, &g_nid);
+            ExitProcess(0);
+        }
         else if (LOWORD(wp) == IDM_AUTOSTART)
             set_autostart(!autostart_enabled());
 #ifdef NSS_LED
         else if (LOWORD(wp) == IDM_LED)
             set_led_enabled(hwnd, !g_led_enabled);
 #endif
-        return 0;
-
-    case WM_DESTROY:
-        Shell_NotifyIconW(NIM_DELETE, &g_nid);
-        UnregisterHotKey(hwnd, HOTKEY_ID);
-        PostQuitMessage(0);
         return 0;
     }
     return DefWindowProcW(hwnd, msg, wp, lp);
@@ -221,6 +236,9 @@ void start(void)
     CreateMutexW(NULL, TRUE, L"nShiftSpace-single-instance");
     if (GetLastError() == ERROR_ALREADY_EXISTS)
         ExitProcess(1);
+
+    /* 이 스레드의 IME/TSF 비활성화 — 창을 만들기 전에 호출해야 한다 */
+    ImmDisableIME((DWORD)-1);
 
     g_taskbar_created = RegisterWindowMessageW(L"TaskbarCreated");
 
@@ -252,11 +270,9 @@ void start(void)
 #endif
 
     add_tray_icon(hwnd);
-    trim_working_set();
 
-    while (GetMessageW(&msg, NULL, 0, 0)) {
-        TranslateMessage(&msg);
+    /* TranslateMessage 는 WM_CHAR 생성용 — 문자 입력을 받지 않으므로 생략 (import 하나 절약) */
+    while (GetMessageW(&msg, NULL, 0, 0))
         DispatchMessageW(&msg);
-    }
     ExitProcess(0);
 }

@@ -14,9 +14,9 @@ nexa-shortcut 프로젝트의 **목표**와 그 목표를 이루기 위한 **할
 | # | 목표 | 산출물 | 상태 |
 |---|---|---|---|
 | 1 | **nShiftSpace** — Shift+Space 한/영 전환 단일 기능 초경량 상주 프로그램 | `nShiftSpace-x64/x86.exe` (v0.1.0 4.5KB → 현재 5.0/5.5KB) | ✅ 완료 (v0.1.0 배포) |
-| 1-a | **키보드 LED 표시판** — 아무 키나 누르는 동안 트레이 아이콘 켜짐 (Raw Input, 메뉴로 켜고 끔) | `nShiftSpace-led-x64/x86.exe` (6.0/6.5KB) | ✅ 구현 (2026-10-17, 미배포) |
+| 1-a | **키보드 LED 표시판** — 아무 키나 누르는 동안 트레이 아이콘 켜짐 (Raw Input, 메뉴로 켜고 끔) | `nShiftSpace-led-x64/x86.exe` (6.0/6.5KB) · 패키지 `nshiftspace-led` / `SosomLab.nShiftSpace.LED` | ✅ v0.2.0 릴리스, 패키지는 v0.3.0에서 최초 제출 |
 | 1-b | **로그인 시 자동 실행** — 트레이 메뉴 체크로 HKCU `Run` 값 등록/삭제 (양쪽 빌드 공통) | 트레이 메뉴 항목 | ✅ 구현 (2026-10-17, 미배포) |
-| 1-c | **메모리 표시 개선** — 초기화 후 작업 집합 비우기 (작업 관리자 ≈1MB → 0.3MB) | 양쪽 빌드 공통 | ✅ 구현 (2026-10-17, 미배포) |
+| 1-c | **메모리 표시 개선** — IME 비활성화 + 활동 2초 뒤 작업 집합 비우기 (작업 관리자 ≈1MB → 0.07~0.12MB) | 양쪽 빌드 공통 | ✅ v0.2.0(1차) · v0.3.0(2차) |
 | 2 | **nexa-mapper** — `mappings.ini`로 사용자가 정의하는 단순 키 재매핑 엔진 | `nMapper-x64/x86.exe` + `mappings.ini` | ⬜ 미착수 |
 | 3 | **exe 내보내기** — 현재 매핑만 내장한 독립 exe 생성 (스텁 복사 + payload 덧붙이기) | 엔진 내 "실행파일 만들기" 기능 | ⬜ 미착수 (목표 2 선행) |
 | — | **배포 채널 확보** — winget / Chocolatey 정식 등록 | 두 채널 설치 명령 동작 | ✅ 완료 (2026-07-30) |
@@ -27,7 +27,7 @@ nexa-shortcut 프로젝트의 **목표**와 그 목표를 이루기 위한 **할
 DESIGN.md의 "공통 초경량 원칙"이 곧 완료 기준의 일부다. 새 기능을 넣을 때마다 아래를 만족해야 한다.
 
 - C + Win32 API만 사용, GUI 프레임워크·CRT 미링크 (`-nostdlib`, 진입점 `start`)
-- 링크 라이브러리는 kernel32 / user32 / shell32 로 제한 (+ advapi32: 자동 실행 `Run` 값 전용)
+- 링크 라이브러리는 kernel32 / user32 / shell32 로 제한 (+ advapi32: 자동 실행 `Run` 값 전용, imm32: `ImmDisableIME` 전용)
 - **exe 1개당 8KB 이내** (CI가 초과 시 빌드 실패 — [.github/workflows/build.yml](../.github/workflows/build.yml) 크기 회귀 검사)
 - 설정 GUI를 만들지 않는다 (설정은 텍스트 파일 편집). 레지스트리는 사용자가 메뉴에서 켠 자동 실행 `Run` 값 외에 쓰지 않는다
 - 부가 기능은 컴파일 플래그로 분리한 별도 빌드로 제공한다 (기본 빌드에는 변형 코드·리소스·import가 들어가지 않는다)
@@ -96,6 +96,16 @@ DESIGN.md의 "공통 초경량 원칙"이 곧 완료 기준의 일부다. 새 �
   별칭 경로가 기록되는지(별칭이 심볼릭 링크인지 복사본인지에 따라 다름), 재로그인 후 실제로 뜨는지
 - [ ] `chocolateyuninstall.ps1`에서 `Run` 값 정리 여부 결정 (메뉴로 켠 자동 실행이 제거 후 남는 문제)
 - [ ] 두 채널 0.2.0 반영 확인 후 README·Wiki·PACKAGING 상태 표 갱신 (2절 과제)
+
+### v0.3.0 — 메모리 2차 개선 · LED판 별도 패키지
+
+- [x] 사용자 실측(일반 800KB / LED 1,000KB)의 원인 규명 — 트레이 메뉴 활성화 시 IME/TSF 스택 부착 → `ImmDisableIME(-1)` +
+  활동 2초 뒤 일회성 타이머 트리밍. 기동 후 68K / 76K / 120K / 116K (DESIGN "2차 개선")
+- [x] LED판 별도 패키지 구성 — `packaging/chocolatey-led/` (id `nshiftspace-led`), winget 템플릿
+  `packaging/winget/manifests/s/SosomLab/nShiftSpace.LED/`, CI `chocolatey-led` 잡 + winget LED update 스텝(최초 등록 전 실패 허용)
+- [ ] v0.3.0 태그 → Chocolatey `nshiftspace`·`nshiftspace-led` push, winget `SosomLab.nShiftSpace` 자동 제출 재검증,
+  `SosomLab.nShiftSpace.LED` 최초 등록 PR(수동, 템플릿에 SHA256 주입)
+- [ ] 릴리스 후 사용자 PC 작업 관리자에서 메뉴 사용 뒤 메모리 재확인 (IME 부착 제거 효과 실측)
 
 ---
 
@@ -206,6 +216,9 @@ DESIGN.md의 "공통 초경량 원칙"이 곧 완료 기준의 일부다. 새 �
   WM_COMMAND 주입 테스트로 4개 exe 모두 값 생성·삭제 확인
 - [x] 메모리 분석·작업 집합 비우기 (2026-10-17) — 작업 관리자 표시 ≈1MB → 0.16~0.3MB. 1MB의 정체는
   user32/shell32/IME DLL의 복사-후-쓰기 데이터 페이지였고, 형제 앱(nexa-coffee 등)도 같은 트리밍으로 작게 보이는 것임을 확인
+- [x] 메모리 2차 개선 (2026-10-17, v0.3.0) — 메뉴 활성화 시 IME/TSF 부착이 재증가 원인. `ImmDisableIME` + 활동 2초 뒤 타이머
+  트리밍으로 68~120K. import 4개 제거로 크기 동일 유지
+- [x] LED판 별도 패키지 명세·CI (2026-10-17, v0.3.0) — `nshiftspace-led`, `SosomLab.nShiftSpace.LED`
 - [x] 자체 아이콘 내장 (198바이트 1bpp ICO, `tools/make_icon.py`)
 - [x] 중복 실행 방지, explorer 재시작 시 트레이 아이콘 복구
 - [x] 크로스 빌드(macOS mingw-w64) + Windows 빌드(MSYS2, MSVC) 경로 확보

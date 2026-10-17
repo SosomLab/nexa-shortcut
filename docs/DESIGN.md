@@ -11,10 +11,11 @@
 
 - C + Win32 API만 사용. GUI 프레임워크·CRT 미사용 (`-nostdlib`, 진입점 `start`).
 - 링크 라이브러리는 kernel32 / user32 / shell32 로 제한. 예외: advapi32 — "로그인 시 자동 실행"의
-  HKCU `Run` 값 읽기/쓰기 전용 3개 함수. 모든 프로세스에 이미 로드되는 DLL이라 메모리 추가 부담은 없다.
+  HKCU `Run` 값 읽기/쓰기 전용 3개 함수, imm32 — `ImmDisableIME` 하나. 둘 다 user32가 이미 로드하는 DLL이라
+  메모리 추가 부담은 없다.
 - 큰 구조체는 전역(.bss)에 두어 컴파일러의 `memset` 호출 생성을 회피.
-- 초기화 직후와 트레이 메뉴를 닫은 뒤 `SetProcessWorkingSetSize(-1, -1)`로 작업 집합을 비운다
-  (작업 관리자 "메모리" ≈1MB → 0.3MB. 아래 "메모리" 절).
+- 메모리 표시 최소화 두 가지: `ImmDisableIME(-1)`로 이 스레드의 IME/TSF 스택이 붙지 않게 하고, 마지막 메시지 2초 뒤
+  일회성 타이머로 `SetProcessWorkingSetSize(-1, -1)` (작업 관리자 "메모리" ≈1MB → 0.07~0.12MB. 아래 "메모리" 절).
 - 결과물 기준: 목표 1은 v0.1.0에서 4,608B 달성 (원본 jwShiftSpaceKey.exe 12KB 대비 1/3 수준).
   "로그인 시 자동 실행" 메뉴 추가 후 x64 5,120B / x86 5,632B (2026-10-17).
 - 아이콘도 초경량: 16×16 1bpp 단일 이미지 ICO(198바이트)를 스크립트(`tools/make_icon.py`)로
@@ -26,14 +27,15 @@
 ## 목표 1 아키텍처 (구현됨: `src/nShiftSpace.c`)
 
 ```
-start() ─ 뮤텍스(중복실행 방지)
+start() ─ 뮤텍스(중복실행 방지) ─ ImmDisableIME(-1)
         ─ 숨은 윈도우 생성 + RegisterHotKey(Shift+Space)
         ─ [LED판] Raw Input 등록 (RIDEV_INPUTSINK)
-        ─ 트레이 아이콘 (Shell_NotifyIcon) → 작업 집합 비우기
+        ─ 트레이 아이콘 (Shell_NotifyIcon)
         └ 메시지 루프
              WM_HOTKEY   → keybd_event(VK_HANGUL)  # 한/영 키 합성
              WM_TRAYICON → 메뉴: 로그인 시 자동 실행(체크) / [LED판] 키보드 LED 표시(체크) / 종료
-                           → 메뉴를 닫은 뒤 작업 집합 비우기
+             (모든 메시지) → 2초 일회성 타이머 (재)설정
+             WM_TIMER    → KillTimer + 작업 집합 비우기
              WM_COMMAND  → Run 값 등록·삭제 / [LED판] Raw Input 등록·해제 / 종료
              [LED판] WM_INPUT → 키 눌림/뗌 → 트레이 아이콘 초록/파랑
              TaskbarCreated → 트레이 아이콘 복구 (explorer 재시작 대응)
@@ -161,6 +163,33 @@ LED를 끄면 Raw Input 등록을 **해제**(`RIDEV_REMOVE`, 이때 `hwndTarget`
   실제 메모리 압박 상황에서는 OS가 어차피 같은 일을 한다. 비용은 kernel32 import 1개 + 코드 수십 바이트.
 - 진짜로 커밋을 줄이려면 user32/shell32를 쓰지 않아야 하는데, 트레이 아이콘·단축키·메뉴가 전부 그 둘에 있어 불가능하다.
   (키 입력 없는 서비스형 프로그램이 아닌 한 1.4MB 커밋은 Win32 트레이 앱의 바닥값이다.)
+
+### 2차 개선 (v0.3.0): 트리밍이 풀리는 이유와 IME 비활성화
+
+사용자 실측에서 일반판 800KB, LED판 1,000KB가 다시 보였다. 기동 직후(284K)와 다른 이유를 추적한 결과:
+
+- 기동 직후 프로세스에는 DLL 27개만 있다. 그런데 **트레이 메뉴를 열면 `SetForegroundWindow`로 우리 창이 활성화되고,
+  그 순간 한국어 IME/TSF 스택**(msctf, imkrtip, imjkapi, imetip, TextInputFramework, CoreMessaging, DUI70, OLEACC … 20여 개)이
+  프로세스에 붙는다 (앞서 본 47개 모듈이 이것). 이 DLL들의 데이터 페이지와 스레드는 메뉴를 닫은 뒤 한 번 비워도,
+  이후 포그라운드 창이 바뀔 때마다 TSF 쪽에서 다시 깨어나 페이지를 끌어들인다 — 메뉴 직후 한 번만 비우는 1차 방식의 한계.
+- 우리 프로세스는 텍스트 입력을 받을 일이 없다 (키 합성은 포그라운드 앱의 IME가 처리). 따라서
+  **`ImmDisableIME((DWORD)-1)`** 을 창 생성 전에 호출해 이 프로세스의 IME/TSF 부착을 막는다.
+  실측: 기동 후 모듈 25개(msctf 미로드), IME 계열 DLL 0개.
+- 트리밍 시점은 "활동 뒤 조용해지면"으로 바꿨다: `wnd_proc`가 어떤 메시지든 받으면 2초 일회성 타이머를 (재)설정하고,
+  `WM_TIMER`에서 `KillTimer` + 비우기. 주기 타이머가 아니라 활동 뒤 한 번만 깨어나므로 유휴 CPU 0은 유지된다.
+- import 수지: `SetTimer`/`KillTimer`/`ImmDisableIME` 3개가 늘고, 종료 경로를 `Shell_NotifyIcon(NIM_DELETE)` + `ExitProcess`로
+  단순화해 `DestroyWindow`/`PostQuitMessage`/`UnregisterHotKey`를, 문자 입력이 없으므로 `TranslateMessage`를 제거 (4개 감소).
+  exe 크기는 v0.2.0과 동일 (5,120 / 5,632 / 6,144 / 6,656 B).
+
+| 빌드 | 기동 0.8초 (타이머 전) | 기동 3.8초 (트리밍 후) | 메뉴 명령 4회 직후 | 그 3초 뒤 |
+|---|---|---|---|---|
+| nShiftSpace-x64 | 964K | **68K** | 212K | 68K |
+| nShiftSpace-led-x64 | 948K | **76K** | 200K | 76K |
+| nShiftSpace-x86 | 920K | **120K** | 264K | 116K |
+| nShiftSpace-led-x86 | 908K | **116K** | 260K | 120K |
+
+(사설 작업 집합, 커밋은 1.4MB대로 불변.) 트레이 메뉴를 실제로 열었을 때의 재증가는 화면 조작 없이 재현할 수 없어
+미실측이며, IME 부착이 사라진 만큼 1차보다 낮게 유지될 것으로 본다 — 릴리스 후 작업 관리자로 확인할 항목.
 
 ## 목표 2 아키텍처 (nexa-mapper)
 

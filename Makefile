@@ -20,8 +20,8 @@ CFLAGS := -Os -s -mwindows -nostdlib -DUNICODE -D_UNICODE \
           -fno-ident -fno-asynchronous-unwind-tables \
           -fno-stack-protector -fno-stack-check \
           -finput-charset=UTF-8
-# advapi32 는 "로그인 시 자동 실행"(HKCU Run 값) 전용
-LIBS   := -lkernel32 -luser32 -lshell32 -ladvapi32
+# advapi32: "로그인 시 자동 실행"(HKCU Run 값) 전용 / imm32: ImmDisableIME 전용
+LIBS   := -lkernel32 -luser32 -lshell32 -ladvapi32 -limm32
 
 # LED판: 컴파일러·windres 양쪽에 같은 매크로를 준다 (rc의 #ifdef로 켜짐 아이콘 포함)
 LEDDEF := -DNSS_LED

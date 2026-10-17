@@ -14,8 +14,10 @@ git tag v0.3.0 && git push origin v0.3.0
 git push origin v0.3.0
    │
    ├─ build    빌드 + 8KB 크기 회귀 검사 → Release에 zip 4종 첨부 (일반·LED × x64·x86)
-   ├─ chocolatey   체크섬 주입 → choco pack → choco push  (시크릿 CHOCO_API_KEY)
-   └─ winget       wingetcreate update → winget-pkgs PR 자동 제출 (시크릿 WINGET_TOKEN)
+   ├─ chocolatey      체크섬 주입 → choco pack → choco push  (시크릿 CHOCO_API_KEY)
+   ├─ chocolatey-led  LED판 nshiftspace-led 동일 절차
+   └─ winget          wingetcreate update → winget-pkgs PR 자동 제출 (시크릿 WINGET_TOKEN)
+                      일반판 SosomLab.nShiftSpace + LED판 SosomLab.nShiftSpace.LED (최초 등록 전엔 실패 허용)
 ```
 
 정의: [`.github/workflows/build.yml`](https://github.com/SosomLab/nexa-shortcut/blob/main/.github/workflows/build.yml)

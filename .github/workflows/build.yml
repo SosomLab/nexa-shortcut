@@ -103,6 +103,49 @@ jobs:
           name: chocolatey-package
           path: nshiftspace.*.nupkg
 
+  # LED판은 별도 패키지 nshiftspace-led 로 게시 (기존 nshiftspace 는 일반판 그대로).
+  chocolatey-led:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: windows-latest
+    env:
+      CHOCO_API_KEY: ${{ secrets.CHOCO_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Prepare package (버전·체크섬 주입)
+        shell: pwsh
+        run: |
+          $version = '${{ github.ref_name }}'.TrimStart('v')
+          $base = 'https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}'
+          Invoke-WebRequest "$base/nShiftSpace-led-x86.zip" -OutFile x86.zip
+          Invoke-WebRequest "$base/nShiftSpace-led-x64.zip" -OutFile x64.zip
+          $sum32 = (Get-FileHash x86.zip -Algorithm SHA256).Hash.ToLower()
+          $sum64 = (Get-FileHash x64.zip -Algorithm SHA256).Hash.ToLower()
+          $dir = 'packaging/chocolatey-led'
+          (Get-Content "$dir/nshiftspace-led.nuspec" -Raw) -replace '__VERSION__', $version |
+            Set-Content "$dir/nshiftspace-led.nuspec"
+          (Get-Content "$dir/tools/chocolateyinstall.ps1" -Raw) `
+            -replace '__VERSION__', $version `
+            -replace '__CHECKSUM32__', $sum32 `
+            -replace '__CHECKSUM64__', $sum64 |
+            Set-Content "$dir/tools/chocolateyinstall.ps1"
+
+      - name: choco pack
+        shell: pwsh
+        run: choco pack packaging/chocolatey-led/nshiftspace-led.nuspec --outputdirectory .
+
+      - name: choco push
+        if: env.CHOCO_API_KEY != ''
+        shell: pwsh
+        run: choco push (Get-Item nshiftspace-led.*.nupkg).FullName --source https://push.chocolatey.org/ --api-key $env:CHOCO_API_KEY
+
+      - name: Upload nupkg artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: chocolatey-led-package
+          path: nshiftspace-led.*.nupkg
+
   # 태그 배포 시 winget-pkgs 매니페스트 업데이트 PR 자동 제출.
   # 최초 등록(0.1.0)은 수동 PR로 완료 — 이 잡은 그 이후 버전부터 동작.
   # WINGET_TOKEN: public_repo 권한의 GitHub PAT (없으면 잡 스킵)
@@ -124,4 +167,16 @@ jobs:
           Invoke-WebRequest https://aka.ms/wingetcreate/latest -OutFile wingetcreate.exe
           ./wingetcreate.exe update SosomLab.nShiftSpace --version $version `
             --urls "$base/nShiftSpace-x64.zip|x64" "$base/nShiftSpace-x86.zip|x86" `
+            --submit --token $env:WINGET_TOKEN
+
+      # LED판 별도 패키지. 최초 등록(New package PR)이 병합되기 전에는 update 가 실패하므로 실패를 허용한다.
+      - name: Submit manifest update - LED (wingetcreate)
+        if: env.WINGET_TOKEN != ''
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          $version = '${{ github.ref_name }}'.TrimStart('v')
+          $base = 'https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}'
+          ./wingetcreate.exe update SosomLab.nShiftSpace.LED --version $version `
+            --urls "$base/nShiftSpace-led-x64.zip|x64" "$base/nShiftSpace-led-x86.zip|x86" `
             --submit --token $env:WINGET_TOKEN

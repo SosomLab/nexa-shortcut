@@ -8,12 +8,15 @@ nShiftSpace의 Windows 패키지 관리자 배포 현황, 등록 절차, 상태 
 |---|---|---|---|
 | Chocolatey | `nshiftspace` | `choco install nshiftspace` | 0.1.0 승인·게시 중 / **0.2.0 제출 완료, 모더레이션 대기** (`PackageStatus=Submitted`, 2026-10-17 22:24 push) |
 | winget | `SosomLab.nShiftSpace` | `winget install SosomLab.nShiftSpace` | 0.1.0 등록·게시 중 / **0.2.0 PR 제출, 검증 대기** ([microsoft/winget-pkgs#454746](https://github.com/microsoft/winget-pkgs/pull/454746)) |
+| Chocolatey (LED판) | `nshiftspace-led` | `choco install nshiftspace-led` | v0.3.0에서 최초 제출 (아래 진행 이력) |
+| winget (LED판) | `SosomLab.nShiftSpace.LED` | `winget install SosomLab.nShiftSpace.LED` | v0.3.0에서 최초 등록 PR (아래 진행 이력) |
 
 설치되는 버전은 **양쪽 모두 아직 0.1.0**이다. v0.2.0(2026-10-17 태그)은 GitHub Release에 zip 4종이 올라갔고,
 Chocolatey 모더레이션과 winget PR 병합이 끝나면 각 채널에서 0.2.0이 설치된다.
 
-두 채널 모두 GitHub Release의 zip(`nShiftSpace-x64.zip` / `nShiftSpace-x86.zip`)을
-다운로드해 설치하는 원격형 패키지다.
+두 채널 모두 GitHub Release의 zip(`nShiftSpace-x64.zip` / `nShiftSpace-x86.zip`, LED판은 `nShiftSpace-led-*.zip`)을
+다운로드해 설치하는 원격형 패키지다. LED판은 **별도 패키지 이름**으로 게시하고 기존 이름은 일반판을 유지한다
+(두 판이 같은 단축키·뮤텍스를 쓰므로 한 PC에 하나만 설치하도록 설명에 명시).
 [GitHub Releases](https://github.com/SosomLab/nexa-shortcut/releases)에서 zip을 직접 받아 쓰는 것도 여전히 가능.
 
 ---
@@ -46,7 +49,7 @@ README에도 요약이 있으며, 여기서는 채널별 차이와 문제 해결
 ### 채널별 동작 차이
 
 - **실행 중 프로세스 처리**: Chocolatey는 `chocolateybeforemodify.ps1`이 업그레이드/제거 전에
-  실행 중인 nShiftSpace를 종료한다. **winget에는 이런 처리가 없으므로** 트레이에서 먼저 종료해야
+  실행 중인 nShiftSpace를 종료한다 (LED 패키지는 `nShiftSpace-led*`만). **winget에는 이런 처리가 없으므로** 트레이에서 먼저 종료해야
   파일 잠김으로 실패하지 않는다.
 - **shim과 콘솔**: Chocolatey는 tools 폴더의 exe에 shim을 만든다. GUI(트레이) 프로그램이라
   콘솔이 붙잡히지 않도록 설치 스크립트가 `nShiftSpace-*.exe.gui` 마커 파일을 생성한다.

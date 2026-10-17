@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+  <metadata>
+    <id>nshiftspace-led</id>
+    <version>__VERSION__</version>
+    <title>nShiftSpace LED (Nexa ShiftSpace, keyboard-LED build)</title>
+    <authors>SosomLab</authors>
+    <owners>SosomLab</owners>
+    <projectUrl>https://sosomlab.com/apps/nexa-shortcut/</projectUrl>
+    <packageSourceUrl>https://github.com/SosomLab/nexa-shortcut/tree/main/packaging/chocolatey-led</packageSourceUrl>
+    <projectSourceUrl>https://github.com/SosomLab/nexa-shortcut</projectSourceUrl>
+    <bugTrackerUrl>https://github.com/SosomLab/nexa-shortcut/issues</bugTrackerUrl>
+    <licenseUrl>https://github.com/SosomLab/nexa-shortcut/blob/main/LICENSE</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <tags>korean ime hangul hotkey shift-space keyboard lightweight portable led</tags>
+    <summary>nShiftSpace keyboard-LED build: Shift+Space IME toggle whose tray icon lights up while any key is held (6KB)</summary>
+    <description><![CDATA[
+**nShiftSpace LED** is the keyboard-LED build of nShiftSpace (Nexa ShiftSpace), the
+ultra-lightweight Windows tray utility that toggles the Korean/English IME with
+**Shift+Space**.
+
+Everything the standard `nshiftspace` package does, plus:
+
+- The tray icon turns green while any key is held and back to blue when released -
+  a keyboard activity LED in the tray. Uses Raw Input (no keyboard hook, so it never
+  delays other programs' key input)
+- Tray menu toggle "Keyboard LED" - turning it off unregisters Raw Input, so the
+  per-keystroke cost drops to zero like the standard build
+
+Common features: single ~6KB executable, no C runtime, pure Win32 API, zero CPU while
+idle, about 0.3MB in Task Manager, "Start at login" tray toggle, single-instance guard.
+
+Install either `nshiftspace` or `nshiftspace-led`, not both - they share the same
+hotkey and only one instance runs at a time.
+]]></description>
+    <releaseNotes>https://github.com/SosomLab/nexa-shortcut/releases</releaseNotes>
+  </metadata>
+  <files>
+    <file src="tools\**" target="tools" />
+  </files>
+</package>

@@ -23,7 +23,7 @@ cl /nologo /utf-8 /O1 /GS- /DUNICODE /D_UNICODE ^
    src\nShiftSpace.c build\nShiftSpace.res ^
    /Fo:build\ /Fe:dist\nShiftSpace-x64.exe ^
    /link /SUBSYSTEM:WINDOWS /ENTRY:start /NODEFAULTLIB ^
-   kernel32.lib user32.lib shell32.lib advapi32.lib
+   kernel32.lib user32.lib shell32.lib advapi32.lib imm32.lib
 if errorlevel 1 exit /b 1
 
 rem ---- LED판 (NSS_LED: 켜짐 아이콘 리소스 + Raw Input 코드 포함) ----
@@ -34,7 +34,7 @@ cl /nologo /utf-8 /O1 /GS- /DUNICODE /D_UNICODE /DNSS_LED ^
    src\nShiftSpace.c build\nShiftSpace-led.res ^
    /Fo:build\ /Fe:dist\nShiftSpace-led-x64.exe ^
    /link /SUBSYSTEM:WINDOWS /ENTRY:start /NODEFAULTLIB ^
-   kernel32.lib user32.lib shell32.lib advapi32.lib
+   kernel32.lib user32.lib shell32.lib advapi32.lib imm32.lib
 if errorlevel 1 exit /b 1
 
 echo.

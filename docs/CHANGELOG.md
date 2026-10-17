@@ -5,6 +5,46 @@
 
 ---
 
+## 2026-10-17 — 메모리 2차 개선(IME 비활성화·유휴 타이머) · LED판 별도 패키지 · v0.3.0 준비
+
+### 요청
+- 먼저 사용 메모리 최적화: 사용자 PC에서 nShiftSpace 800KB, LED판 1,000KB로 보여 앞선 분석(284K)과 다름.
+- LED판을 Chocolatey·winget에 **별도 이름으로 신규 게시**하고, 기존 nShiftSpace는 기존 이름을 유지할 것.
+- 끝나면 개발 및 새 버전 릴리스.
+
+### 분석 내용
+- 재증가 원인: 기동 직후 프로세스의 DLL은 27개뿐인데 사용자 인스턴스는 47개였다. 차이는 IME/TSF 스택
+  (msctf, imkrtip, imjkapi, imetip, TextInputFramework, CoreMessaging, DUI70, OLEACC …). **트레이 메뉴를 열 때
+  `SetForegroundWindow`로 우리 창이 활성화되면서 붙는다.** 메뉴 직후 한 번 비워도 그 스레드들이 포그라운드 변화마다
+  페이지를 다시 끌어들여 800K~1MB가 된다. (A/B 실험: `ImmDisableIME(-1)` 변형은 기동 시 msctf조차 로드하지 않음.
+  4분 관찰은 실험 프로세스가 중간에 종료되어 미완.)
+- 우리 프로세스는 텍스트 입력을 받지 않으므로 IME를 꺼도 기능 손실이 없다. 키 합성은 포그라운드 앱의 IME가 처리.
+- 사용자 PC의 `Run\nShiftSpace` 값이 Chocolatey shim 경로로 이미 설정되어 있었고, 토글 테스트가 이를 덮어써서
+  원래 값으로 복원했다 (테스트 전 상태 저장·복원 규칙으로 기록).
+
+### 설계 방향
+- `ImmDisableIME((DWORD)-1)`을 창 생성 전에 호출 (imm32 import 1개, user32가 이미 로드하는 DLL).
+- 트리밍 시점을 "어떤 메시지든 받은 뒤 2초 조용하면" 일회성 타이머(`SetTimer`/`KillTimer`)로 변경. 주기 타이머가 아니므로
+  유휴 CPU 0 유지. 초기화 직후·메뉴 직후의 명시적 호출은 제거 (타이머가 대신).
+- import 수지 맞추기: 종료를 `NIM_DELETE` + `ExitProcess`로 단순화해 `DestroyWindow`/`PostQuitMessage`/`UnregisterHotKey` 제거,
+  문자 입력이 없으므로 `TranslateMessage` 제거 → LED x64의 `.idata`가 512B 경계를 넘지 않아 크기 동일.
+- LED판 패키지: Chocolatey id `nshiftspace-led`(`packaging/chocolatey-led/`, beforemodify는 `nShiftSpace-led*`만 종료),
+  winget `SosomLab.nShiftSpace.LED`(별칭 `nshiftspace-led`, 템플릿 3종 + 릴리스 후 SHA256 주입). CI에 `chocolatey-led` 잡과
+  winget LED update 스텝(`continue-on-error`, 최초 등록 PR 병합 전까지 실패 허용) 추가. 두 패키지 설명에 "하나만 설치" 명시.
+
+### 개발 내용 및 소스 위치
+- `src/nShiftSpace.c` — `ImmDisableIME`, `IDT_TRIM`/`TRIM_DELAY_MS`, `wnd_proc` 머리의 타이머 처리·재설정, 종료 경로 단순화,
+  `TranslateMessage` 제거. `Makefile`/`build.bat`에 imm32 링크.
+- 실측 (사설 WS): 기동 0.8초 ≈950K → 3.8초 68K(x64) / 76K(LED x64) / 120K(x86) / 116K(LED x86), 메뉴 명령 4회 뒤 200~264K →
+  3초 뒤 다시 68~120K. 모듈 25개, IME 계열 DLL 0개. 종료 메뉴로 exit code 0. 크기 5,120 / 5,632 / 6,144 / 6,656 B (불변).
+- `packaging/chocolatey-led/{nshiftspace-led.nuspec,tools/chocolateyinstall.ps1,tools/chocolateybeforemodify.ps1}` — 로컬 `choco pack` 성공.
+- `packaging/winget/manifests/s/SosomLab/nShiftSpace.LED/TEMPLATE.*.yaml` — 더미 값 치환 후 `winget validate` 통과.
+- `.github/workflows/build.yml` — `chocolatey-led` 잡, winget LED 스텝. pyyaml로 문법 확인.
+- 문서: README(메모리·LED 패키지), DESIGN(2차 개선 절·원칙·도식), ROADMAP(v0.3.0 절·완료), PACKAGING(LED 행·설명),
+  wiki Installation(패키지 이름 표)/Usage/Home/Build/Releasing/Roadmap.
+
+---
+
 ## 2026-10-17 — v0.2.0 릴리스 및 패키지 게시
 
 ### 요청

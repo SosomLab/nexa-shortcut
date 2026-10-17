@@ -1,0 +1,25 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.6.0.schema.json
+PackageIdentifier: SosomLab.nShiftSpace.LED
+PackageVersion: __VERSION__
+Platform:
+- Windows.Desktop
+MinimumOSVersion: 10.0.0.0
+InstallerType: zip
+NestedInstallerType: portable
+UpgradeBehavior: install
+ReleaseDate: __DATE__
+Installers:
+- Architecture: x64
+  InstallerUrl: https://github.com/SosomLab/nexa-shortcut/releases/download/v__VERSION__/nShiftSpace-led-x64.zip
+  InstallerSha256: __SHA64__
+  NestedInstallerFiles:
+  - RelativeFilePath: nShiftSpace-led-x64.exe
+    PortableCommandAlias: nshiftspace-led
+- Architecture: x86
+  InstallerUrl: https://github.com/SosomLab/nexa-shortcut/releases/download/v__VERSION__/nShiftSpace-led-x86.zip
+  InstallerSha256: __SHA32__
+  NestedInstallerFiles:
+  - RelativeFilePath: nShiftSpace-led-x86.exe
+    PortableCommandAlias: nshiftspace-led
+ManifestType: installer
+ManifestVersion: 1.6.0

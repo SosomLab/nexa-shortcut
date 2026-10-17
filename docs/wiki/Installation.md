@@ -14,6 +14,20 @@ nShiftSpace는 **설치 프로그램이 없는 포터블 exe** 하나가 전부�
 
 ---
 
+## 일반판과 LED판 — 패키지 이름이 다릅니다
+
+| | 일반판 | [키보드 LED 표시판](Usage#키보드-led-표시판-선택) |
+|---|---|---|
+| winget | `SosomLab.nShiftSpace` | `SosomLab.nShiftSpace.LED` |
+| Chocolatey | `nshiftspace` | `nshiftspace-led` |
+| zip | `nShiftSpace-x64.zip` / `-x86.zip` | `nShiftSpace-led-x64.zip` / `-x86.zip` |
+| 실행 별칭 | `nshiftspace` (winget) / `nShiftSpace-x64` (choco) | `nshiftspace-led` (winget) / `nShiftSpace-led-x64` (choco) |
+
+둘 중 **하나만** 설치하세요 (같은 단축키를 쓰므로 동시에 실행되지 않습니다). LED판 패키지는 v0.3.0에서 처음 제출되어
+각 채널의 심사가 끝나야 설치됩니다. 아래 명령은 일반판 기준이며, LED판은 패키지 이름만 바꾸면 됩니다.
+
+---
+
 ## winget
 
 Windows 11과 Windows 10 1809 이상에는 winget이 기본 포함되어 있습니다.
