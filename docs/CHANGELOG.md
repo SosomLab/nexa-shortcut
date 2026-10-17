@@ -5,6 +5,36 @@
 
 ---
 
+## 2026-10-17 — v0.3.0 릴리스 · LED판 패키지 최초 게시 · winget CI 방식 교체
+
+### 요청
+- (이어서) 개발 완료 후 새 버전 릴리스와 패키지 게시.
+
+### 분석 내용
+- main CI(런 39039…) 통과, 크기 4종 모두 v0.2.0과 동일. `v0.3.0` 태그 런 39039940540: `build`·`chocolatey`·`chocolatey-led` 성공,
+  `winget` 실패. 로그는 v0.2.0과 글자까지 같은 `Nested installer not found in zip archive: nShiftSpace-x86.exe` — URL 뒤
+  `|x64`/`|x86` 지정이 zip+중첩 포터블 조합에서는 효과가 없다. `wingetcreate update`의 짝짓기 로직 한계로 판단.
+- Chocolatey 피드: `nshiftspace` 0.3.0과 신규 `nshiftspace-led` 0.3.0 모두 `Submitted`. 0.2.0 winget PR #454746은 검증 통과
+  (`Validation-Completed`) 상태.
+
+### 설계 방향
+- winget 제출은 **완성된 매니페스트 폴더를 올리는 `wingetcreate submit`** 으로 바꾼다. 매니페스트는 저장소의
+  `TEMPLATE.*.yaml`(일반판·LED판)에 CI가 버전·SHA256·날짜를 주입해 만들고 아티팩트로도 남긴다. 사람이 수동 PR을 만들 때도
+  같은 템플릿을 쓰므로 CI와 수동 경로가 동일한 산출물을 낸다.
+- 이번 버전은 수동 PR: 일반판 0.3.0 "New version" PR과 LED판 "New package" PR. LED PR 본문에 같은 저장소의 별도 실행 파일이며
+  두 판을 함께 설치하지 않는다는 점을 설명.
+
+### 개발 내용 및 소스 위치
+- 태그 `v0.3.0` → [Release](https://github.com/SosomLab/nexa-shortcut/releases/tag/v0.3.0) zip 4종,
+  `nshiftspace.0.3.0.nupkg`·`nshiftspace-led.0.3.0.nupkg` push 성공.
+- `packaging/winget/manifests/s/SosomLab/nShiftSpace/{TEMPLATE.*.yaml, 0.3.0/}`, `nShiftSpace.LED/0.3.0/` —
+  SHA256: 일반 x64 `612C4DF9…2A1F` / x86 `43FF71F8…B402`, LED x64 `D5C68597…352C` / x86 `2454B772…BDCB`. 둘 다 `winget validate` 통과.
+  PR [#454771](https://github.com/microsoft/winget-pkgs/pull/454771)(일반판 0.3.0), [#454772](https://github.com/microsoft/winget-pkgs/pull/454772)(LED 신규).
+- `.github/workflows/build.yml` — `winget` 잡 교체: Render manifests → Upload artifact → `wingetcreate submit` ×2.
+- 문서: PACKAGING(상태 표·구성 요소·이력), ROADMAP(2절·3절), wiki Home/Releasing. Wiki 재발행.
+
+---
+
 ## 2026-10-17 — 메모리 2차 개선(IME 비활성화·유휴 타이머) · LED판 별도 패키지 · v0.3.0 준비
 
 ### 요청

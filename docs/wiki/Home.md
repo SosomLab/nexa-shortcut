@@ -19,7 +19,7 @@
 | 파일 크기 | **5KB** (x64 5,120바이트. 원조 jwShiftSpaceKey.exe는 12KB) · [키보드 LED 표시판](Usage#키보드-led-표시판-선택) 6KB |
 | 메모리 | 작업 관리자 기준 약 0.1MB |
 | 지원 | Windows 10 / 11, x64 · x86 |
-| 현재 버전 | **0.2.0** (2026-10-17, [Releases](https://github.com/SosomLab/nexa-shortcut/releases/tag/v0.2.0)) — winget·Chocolatey는 심사 완료 후 0.2.0으로 올라갑니다 |
+| 현재 버전 | **0.3.0** (2026-10-17, [Releases](https://github.com/SosomLab/nexa-shortcut/releases/tag/v0.3.0)) — winget·Chocolatey는 심사 완료 후 올라갑니다 |
 | 상주 방식 | 트레이 아이콘 ('가·A' 픽셀 아트, 198바이트 아이콘 내장) |
 
 ### 30초 설치
@@ -60,8 +60,8 @@ choco install nshiftspace -y
 |---|---|---|
 | winget | `SosomLab.nShiftSpace` | ✅ 등록 완료 (2026-07-17) |
 | Chocolatey | `nshiftspace` | ✅ 승인 완료 (2026-07-30) |
-| winget (LED판) | `SosomLab.nShiftSpace.LED` | ⏳ v0.3.0 최초 등록 PR (2026-10-17) |
-| Chocolatey (LED판) | `nshiftspace-led` | ⏳ v0.3.0 최초 제출 (2026-10-17) |
+| winget (LED판) | `SosomLab.nShiftSpace.LED` | ⏳ 최초 등록 PR 제출 (2026-10-17, [#454772](https://github.com/microsoft/winget-pkgs/pull/454772)) |
+| Chocolatey (LED판) | `nshiftspace-led` | ⏳ 0.3.0 제출, 심사 대기 (2026-10-17) |
 
 ---
 

@@ -1,0 +1,25 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.6.0.schema.json
+PackageIdentifier: SosomLab.nShiftSpace
+PackageVersion: __VERSION__
+Platform:
+- Windows.Desktop
+MinimumOSVersion: 10.0.0.0
+InstallerType: zip
+NestedInstallerType: portable
+UpgradeBehavior: install
+ReleaseDate: __DATE__
+Installers:
+- Architecture: x64
+  InstallerUrl: https://github.com/SosomLab/nexa-shortcut/releases/download/v__VERSION__/nShiftSpace-x64.zip
+  InstallerSha256: __SHA64__
+  NestedInstallerFiles:
+  - RelativeFilePath: nShiftSpace-x64.exe
+    PortableCommandAlias: nshiftspace
+- Architecture: x86
+  InstallerUrl: https://github.com/SosomLab/nexa-shortcut/releases/download/v__VERSION__/nShiftSpace-x86.zip
+  InstallerSha256: __SHA32__
+  NestedInstallerFiles:
+  - RelativeFilePath: nShiftSpace-x86.exe
+    PortableCommandAlias: nshiftspace
+ManifestType: installer
+ManifestVersion: 1.6.0

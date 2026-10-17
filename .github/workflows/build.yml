@@ -146,11 +146,12 @@ jobs:
           name: chocolatey-led-package
           path: nshiftspace-led.*.nupkg
 
-  # 태그 배포 시 winget-pkgs 매니페스트 업데이트 PR 자동 제출.
-  # 최초 등록(0.1.0)은 수동 PR로 완료 — 이 잡은 그 이후 버전부터 동작.
-  # WINGET_TOKEN: public_repo 권한의 GitHub PAT (없으면 잡 스킵)
-  # v0.2.0 교훈: URL에 "|x64"/"|x86" 아키텍처 지정이 없으면 wingetcreate가 x64 zip을 x86 설치 항목에
-  # 짝지어 "Nested installer not found: nShiftSpace-x86.exe"로 실패한다 (0.2.0은 수동 PR로 제출).
+  # 태그 배포 시 winget-pkgs 매니페스트 PR 자동 제출 (일반판 + LED판).
+  # 방식: 저장소의 TEMPLATE.*.yaml 에 버전·SHA256·날짜를 주입해 매니페스트를 만들고 `wingetcreate submit` 으로 PR 생성.
+  #   v0.2.0·v0.3.0 교훈: `wingetcreate update` 는 zip+중첩 포터블 패키지의 URL을 아키텍처별 설치 항목에 짝짓지 못해
+  #   "Nested installer not found in zip archive: nShiftSpace-x86.exe" 로 실패한다 (|x64 지정으로도 동일). submit 은 완성된
+  #   매니페스트 폴더를 그대로 올리므로 이 문제가 없다.
+  # WINGET_TOKEN: public_repo 권한의 GitHub PAT (없으면 잡 스킵). 생성된 매니페스트는 아티팩트로도 남긴다.
   winget:
     needs: build
     if: startsWith(github.ref, 'refs/tags/v')
@@ -158,25 +159,55 @@ jobs:
     env:
       WINGET_TOKEN: ${{ secrets.WINGET_TOKEN }}
     steps:
-      - name: Submit manifest update (wingetcreate)
-        if: env.WINGET_TOKEN != ''
-        shell: pwsh
-        run: |
-          $version = '${{ github.ref_name }}'.TrimStart('v')
-          $base = 'https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}'
-          Invoke-WebRequest https://aka.ms/wingetcreate/latest -OutFile wingetcreate.exe
-          ./wingetcreate.exe update SosomLab.nShiftSpace --version $version `
-            --urls "$base/nShiftSpace-x64.zip|x64" "$base/nShiftSpace-x86.zip|x86" `
-            --submit --token $env:WINGET_TOKEN
+      - uses: actions/checkout@v4
 
-      # LED판 별도 패키지. 최초 등록(New package PR)이 병합되기 전에는 update 가 실패하므로 실패를 허용한다.
-      - name: Submit manifest update - LED (wingetcreate)
-        if: env.WINGET_TOKEN != ''
-        continue-on-error: true
+      - name: Render manifests (버전·SHA256·날짜 주입)
         shell: pwsh
         run: |
           $version = '${{ github.ref_name }}'.TrimStart('v')
           $base = 'https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}'
-          ./wingetcreate.exe update SosomLab.nShiftSpace.LED --version $version `
-            --urls "$base/nShiftSpace-led-x64.zip|x64" "$base/nShiftSpace-led-x86.zip|x86" `
-            --submit --token $env:WINGET_TOKEN
+          $date = (Get-Date).ToUniversalTime().ToString('yyyy-MM-dd')
+          $pkgs = @(
+            @{ id = 'SosomLab.nShiftSpace';     x64 = 'nShiftSpace-x64.zip';     x86 = 'nShiftSpace-x86.zip' },
+            @{ id = 'SosomLab.nShiftSpace.LED'; x64 = 'nShiftSpace-led-x64.zip'; x86 = 'nShiftSpace-led-x86.zip' }
+          )
+          foreach ($p in $pkgs) {
+            $dir = "packaging/winget/manifests/s/SosomLab/$($p.id -replace '^SosomLab\.','')"
+            Invoke-WebRequest "$base/$($p.x64)" -OutFile x64.zip
+            Invoke-WebRequest "$base/$($p.x86)" -OutFile x86.zip
+            $sha64 = (Get-FileHash x64.zip -Algorithm SHA256).Hash.ToUpper()
+            $sha32 = (Get-FileHash x86.zip -Algorithm SHA256).Hash.ToUpper()
+            $out = "$dir/$version"
+            New-Item -ItemType Directory -Force $out | Out-Null
+            foreach ($t in Get-ChildItem "$dir/TEMPLATE*.yaml") {
+              $name = $t.Name -replace '^TEMPLATE', $p.id
+              (Get-Content $t.FullName -Raw) `
+                -replace '__VERSION__', $version `
+                -replace '__DATE__', $date `
+                -replace '__SHA64__', $sha64 `
+                -replace '__SHA32__', $sha32 |
+                Set-Content "$out/$name" -NoNewline
+            }
+            Get-ChildItem $out | ForEach-Object { Write-Host "rendered $($_.FullName)" }
+          }
+
+      - name: Upload rendered manifests
+        uses: actions/upload-artifact@v4
+        with:
+          name: winget-manifests
+          path: packaging/winget/manifests/s/SosomLab/*/${{ github.ref_name }}/
+
+      - name: Submit PRs (wingetcreate submit)
+        if: env.WINGET_TOKEN != ''
+        shell: pwsh
+        run: |
+          $version = '${{ github.ref_name }}'.TrimStart('v')
+          Invoke-WebRequest https://aka.ms/wingetcreate/latest -OutFile wingetcreate.exe
+          $failed = 0
+          foreach ($id in 'SosomLab.nShiftSpace', 'SosomLab.nShiftSpace.LED') {
+            $dir = "packaging/winget/manifests/s/SosomLab/$($id -replace '^SosomLab\.','')/$version"
+            Write-Host "== submit $id $version"
+            ./wingetcreate.exe submit --token $env:WINGET_TOKEN --prtitle "New version: $id version $version" $dir
+            if ($LASTEXITCODE -ne 0) { Write-Warning "submit failed: $id"; $failed++ }
+          }
+          if ($failed -gt 0) { exit 1 }

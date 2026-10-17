@@ -16,8 +16,8 @@ git push origin v0.3.0
    ├─ build    빌드 + 8KB 크기 회귀 검사 → Release에 zip 4종 첨부 (일반·LED × x64·x86)
    ├─ chocolatey      체크섬 주입 → choco pack → choco push  (시크릿 CHOCO_API_KEY)
    ├─ chocolatey-led  LED판 nshiftspace-led 동일 절차
-   └─ winget          wingetcreate update → winget-pkgs PR 자동 제출 (시크릿 WINGET_TOKEN)
-                      일반판 SosomLab.nShiftSpace + LED판 SosomLab.nShiftSpace.LED (최초 등록 전엔 실패 허용)
+   └─ winget          TEMPLATE.*.yaml 에 버전·SHA256·날짜 주입 → wingetcreate submit → winget-pkgs PR (시크릿 WINGET_TOKEN)
+                      일반판 SosomLab.nShiftSpace + LED판 SosomLab.nShiftSpace.LED
 ```
 
 정의: [`.github/workflows/build.yml`](https://github.com/SosomLab/nexa-shortcut/blob/main/.github/workflows/build.yml)
@@ -29,11 +29,11 @@ git push origin v0.3.0
 | GitHub Release 생성·자산 첨부 | ✅ 자동 |
 | Chocolatey **게시**(`choco push`) | ✅ 자동 (v0.1.0·v0.2.0에서 검증됨) |
 | Chocolatey **승인**(모더레이션) | ❌ 별개 — 새 버전마다 큐를 다시 거침 (0.1.0 실적 약 27일) |
-| winget PR **제출** | ⚠️ 자동 — v0.2.0 첫 실행은 **실패**(아키텍처 짝짓기 오류, 수동 PR로 대체). URL에 `\|x64`/`\|x86` 지정을 추가해 수정했으며 v0.3.0에서 재검증 |
+| winget PR **제출** | ⚠️ 자동(새 방식) — `wingetcreate update`는 v0.2.0·v0.3.0 모두 실패해 수동 PR로 대체했고, 이후 CI는 템플릿 렌더링 + `wingetcreate submit`으로 교체. **다음 태그에서 첫 검증** |
 | winget PR **병합** | ❌ 별개 — 검증 파이프라인 통과 후 모더레이터 승인 |
 
-> ⚠️ winget 자동 제출이 실패하면 `packaging/winget/manifests/…/<버전>/`에 사본 3종을 만들어
-> `winget validate --manifest <폴더>`로 검증한 뒤 포크(kiros33/winget-pkgs)에서 수동 PR을 올립니다 (0.2.0이 그 예).
+> ⚠️ winget 자동 제출이 실패하면 `packaging/winget/manifests/…/TEMPLATE.*.yaml`을 `<버전>/` 폴더에 복사해 버전·SHA256·날짜를
+> 채우고 `winget validate --manifest <폴더>`로 검증한 뒤 포크(kiros33/winget-pkgs)에서 수동 PR을 올립니다 (0.2.0·0.3.0이 그 예).
 
 ## ⛔ 운영 규칙 — 게시된 태그는 재발행 금지
 

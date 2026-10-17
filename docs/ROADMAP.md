@@ -49,8 +49,10 @@ DESIGN.md의 "공통 초경량 원칙"이 곧 완료 기준의 일부다. 새 �
   작업 스케줄러 최고 권한 방식 포함 ([PACKAGING.md](PACKAGING.md) "설치 후 자동 실행 설정")
 - [x] winget 자동 제출 첫 실행 (v0.2.0, 2026-10-17) — **실패**: `wingetcreate`가 x64 zip을 x86 항목에 짝지음.
   워크플로 URL에 `|x64`/`|x86` 지정을 추가해 수정, 0.2.0은 수동 PR [#454746](https://github.com/microsoft/winget-pkgs/pull/454746)
-- [ ] **v0.3.0 태그 시 수정된 winget 자동 제출 재검증**
-- [ ] Chocolatey 0.2.0 모더레이션 승인 확인 (제출 2026-10-17 22:24, 0.1.0 실적 약 27일) · winget PR #454746 병합 확인
+- [x] v0.3.0 태그에서 `|x64` 지정 재검증 — **또 실패** (zip+중첩 포터블은 `wingetcreate update`로 안 됨)
+- [ ] **다음 태그에서 새 CI 방식 검증** — 템플릿 렌더링 + `wingetcreate submit` (일반판·LED판)
+- [ ] Chocolatey 승인 확인 — `nshiftspace` 0.2.0·0.3.0, `nshiftspace-led` 0.3.0 (0.1.0 실적 약 27일)
+- [ ] winget PR 병합 확인 — #454746(0.2.0), #454771(0.3.0), #454772(LED 신규 패키지)
 - [ ] 자동 실행 절차를 실제 Windows PC에서 실측 검증 (특히 winget 별칭 생성에 개발자 모드가
   필요한지 여부, 방법 C 예약 작업의 승격 실행 동작)
 
@@ -103,8 +105,8 @@ DESIGN.md의 "공통 초경량 원칙"이 곧 완료 기준의 일부다. 새 �
   활동 2초 뒤 일회성 타이머 트리밍. 기동 후 68K / 76K / 120K / 116K (DESIGN "2차 개선")
 - [x] LED판 별도 패키지 구성 — `packaging/chocolatey-led/` (id `nshiftspace-led`), winget 템플릿
   `packaging/winget/manifests/s/SosomLab/nShiftSpace.LED/`, CI `chocolatey-led` 잡 + winget LED update 스텝(최초 등록 전 실패 허용)
-- [ ] v0.3.0 태그 → Chocolatey `nshiftspace`·`nshiftspace-led` push, winget `SosomLab.nShiftSpace` 자동 제출 재검증,
-  `SosomLab.nShiftSpace.LED` 최초 등록 PR(수동, 템플릿에 SHA256 주입)
+- [x] v0.3.0 태그 (2026-10-17 23:16) — zip 4종, Chocolatey `nshiftspace`·`nshiftspace-led` push 성공, winget 자동 제출 재실패 →
+  수동 PR #454771(일반판 0.3.0)·#454772(LED 신규 패키지). CI winget 잡을 템플릿+`submit` 방식으로 교체
 - [ ] 릴리스 후 사용자 PC 작업 관리자에서 메뉴 사용 뒤 메모리 재확인 (IME 부착 제거 효과 실측)
 
 ---

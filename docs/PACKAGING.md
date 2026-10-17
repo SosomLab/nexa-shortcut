@@ -4,12 +4,12 @@ nShiftSpace의 Windows 패키지 관리자 배포 현황, 등록 절차, 상태 
 
 ## 한눈에 보기
 
-| 채널 | 패키지 식별자 | 설치 명령 | 상태 (2026-10-17) |
+| 채널 | 패키지 식별자 | 설치 명령 | 상태 (2026-10-17 23:30) |
 |---|---|---|---|
-| Chocolatey | `nshiftspace` | `choco install nshiftspace` | 0.1.0 승인·게시 중 / **0.2.0 제출 완료, 모더레이션 대기** (`PackageStatus=Submitted`, 2026-10-17 22:24 push) |
-| winget | `SosomLab.nShiftSpace` | `winget install SosomLab.nShiftSpace` | 0.1.0 등록·게시 중 / **0.2.0 PR 제출, 검증 대기** ([microsoft/winget-pkgs#454746](https://github.com/microsoft/winget-pkgs/pull/454746)) |
-| Chocolatey (LED판) | `nshiftspace-led` | `choco install nshiftspace-led` | v0.3.0에서 최초 제출 (아래 진행 이력) |
-| winget (LED판) | `SosomLab.nShiftSpace.LED` | `winget install SosomLab.nShiftSpace.LED` | v0.3.0에서 최초 등록 PR (아래 진행 이력) |
+| Chocolatey | `nshiftspace` | `choco install nshiftspace` | 0.1.0 승인·게시 중 / 0.2.0·**0.3.0 제출 완료, 모더레이션 대기** |
+| winget | `SosomLab.nShiftSpace` | `winget install SosomLab.nShiftSpace` | 0.1.0 등록·게시 중 / 0.2.0 PR [microsoft/winget-pkgs#454746](https://github.com/microsoft/winget-pkgs/pull/454746) 검증 통과·승인 대기 / **0.3.0 PR [microsoft/winget-pkgs#454771](https://github.com/microsoft/winget-pkgs/pull/454771)** |
+| Chocolatey (LED판) | `nshiftspace-led` | `choco install nshiftspace-led` | **0.3.0 최초 제출 완료, 모더레이션 대기** (2026-10-17 23:16 push) |
+| winget (LED판) | `SosomLab.nShiftSpace.LED` | `winget install SosomLab.nShiftSpace.LED` | **0.3.0 최초 등록 PR [microsoft/winget-pkgs#454772](https://github.com/microsoft/winget-pkgs/pull/454772)** 검증 대기 |
 
 설치되는 버전은 **양쪽 모두 아직 0.1.0**이다. v0.2.0(2026-10-17 태그)은 GitHub Release에 zip 4종이 올라갔고,
 Chocolatey 모더레이션과 winget PR 병합이 끝나면 각 채널에서 0.2.0이 설치된다.
@@ -324,6 +324,7 @@ uninstall 스크립트와 함께 넣는 것이 타당하다. [ROADMAP.md](ROADMA
 | 2026-07-30 22:40 | 재점검: 패키지 페이지에 "approved by moderator flcdrg on 30 Jul 2026" 표시, 검증기 결과 `PackageTestResultStatus=Passing`·`PackageValidationResultStatus=Passing`, 커뮤니티 검색 피드 노출 확인. CI 자동 게시 잡은 v0.1.0 런(28671030609)에서 `choco push`까지 성공했음을 확인 |
 | 2026-08-02 | 상태 재확인 — 변동 없음. 피드 API `IsApproved=true`·`PackageStatus=Approved`·`IsLatestVersion=true`, 검증/테스트 모두 `Passing` 유지, 게시 버전은 0.1.0 단일, 누적 다운로드 11(7/30과 동일) |
 | 2026-10-17 22:24 | **v0.2.0 `choco push` 성공** (CI 런 39036391096 `chocolatey` 잡) — nuspec 설명을 5KB·자동 실행 메뉴·LED판 안내로 갱신한 버전. 피드 API `Version=0.2.0`, `PackageStatus=Submitted`, `PackageSubmittedStatus=Pending`, 검증/테스트 `Pending` — 모더레이션 큐 진입 |
+| 2026-10-17 23:16 | **v0.3.0 `choco push` 성공 — `nshiftspace` 0.3.0과 신규 `nshiftspace-led` 0.3.0** (CI 런 39039940540, `chocolatey`·`chocolatey-led` 잡). 두 패키지 모두 모더레이션 큐 진입. 0.2.0과 0.3.0이 동시에 큐에 있으므로 승인 순서는 모더레이터에 달림 |
 
 ---
 
@@ -341,14 +342,18 @@ uninstall 스크립트와 함께 넣는 것이 타당하다. [ROADMAP.md](ROADMA
 ### 구성 요소
 
 - [packaging/winget/manifests/s/SosomLab/nShiftSpace/](../packaging/winget/manifests/s/SosomLab/nShiftSpace/) —
-  버전별(0.1.0, 0.2.0) 매니페스트 3종 사본 (version / installer / defaultLocale, 스키마 1.6)
+  `TEMPLATE.*.yaml`(CI 렌더링 원본) + 버전별(0.1.0, 0.2.0, 0.3.0) 매니페스트 3종 사본 (스키마 1.6).
+  LED판은 [nShiftSpace.LED/](../packaging/winget/manifests/s/SosomLab/nShiftSpace.LED/) (템플릿 + 0.3.0)
   - zip 안의 포터블 exe: `InstallerType: zip` + `NestedInstallerType: portable`, 별칭 `nshiftspace`
 - CI `winget` 잡 — `v*` 태그 시 `wingetcreate update`로 업데이트 PR 자동 제출
-  (시크릿 `WINGET_TOKEN`, 등록 완료). **v0.2.0에서 첫 실행 — 실패.** `wingetcreate update`가 x64 zip URL을
-  기존 매니페스트의 x86 설치 항목에 짝지어 `Nested installer not found in zip archive: nShiftSpace-x86.exe`로 종료.
-  URL에 아키텍처 지정(`…x64.zip|x64`, `…x86.zip|x86`)을 붙이는 것으로 수정했고(v0.3.0에서 재검증 필요),
-  0.2.0은 저장소 사본 매니페스트를 갱신해 포크에서 수동 PR로 제출했다.
-- 제출용 포크: https://github.com/kiros33/winget-pkgs (브랜치 `sosomlab-nshiftspace-0.1.0`, `SosomLab.nShiftSpace-0.2.0`)
+  (시크릿 `WINGET_TOKEN`, 등록 완료). **v0.2.0·v0.3.0에서 `wingetcreate update` 두 번 모두 실패** — x64 zip URL을
+  기존 매니페스트의 x86 설치 항목에 짝지어 `Nested installer not found in zip archive: nShiftSpace-x86.exe`.
+  URL 뒤 `|x64`/`|x86` 지정도 소용없었다 (zip+중첩 포터블 조합의 한계). **v0.3.0 이후 CI는 `update`를 버리고**
+  저장소의 `TEMPLATE.*.yaml`에 버전·SHA256·날짜를 주입해 매니페스트를 만든 뒤 `wingetcreate submit <폴더>`로 PR을
+  만든다 (일반판·LED판 모두, 렌더링 결과는 `winget-manifests` 아티팩트). 다음 태그에서 첫 검증.
+  0.2.0·0.3.0은 같은 템플릿 방식으로 로컬에서 만들어 포크에서 수동 PR로 제출했다.
+- 제출용 포크: https://github.com/kiros33/winget-pkgs (브랜치 `sosomlab-nshiftspace-0.1.0`, `SosomLab.nShiftSpace-0.2.0`,
+  `SosomLab.nShiftSpace-0.3.0`, `SosomLab.nShiftSpace.LED-0.3.0`)
 
 ### 진행 이력
 
@@ -363,6 +368,9 @@ uninstall 스크립트와 함께 넣는 것이 타당하다. [ROADMAP.md](ROADMA
 | 2026-08-02 | 상태 재확인 — 변동 없음. PR #397365 `merged=true`(2026-07-16T20:23:39Z UTC), winget-pkgs master의 `manifests/s/SosomLab/nShiftSpace/0.1.0/`에 매니페스트 3종 존재. 등록된 버전 디렉터리는 `0.1.0` 하나뿐이며, 게시 매니페스트에서 별칭 `PortableCommandAlias: nshiftspace`·`NestedInstallerType: portable` 재확인 |
 | 2026-10-17 22:24 | v0.2.0 태그 CI `winget` 잡 **실패** — `wingetcreate` 아키텍처 짝짓기 오류(위 구성 요소 설명). 워크플로에 `\|x64`/`\|x86` 지정 추가 |
 | 2026-10-17 22:35 | **0.2.0 수동 PR 제출** — 저장소 사본을 0.2.0으로 갱신(zip SHA256 2종·ReleaseDate·설명·ReleaseNotesUrl), `winget validate` 통과, 포크 브랜치 `SosomLab.nShiftSpace-0.2.0`에서 [microsoft/winget-pkgs#454746](https://github.com/microsoft/winget-pkgs/pull/454746) 제출. 검증 파이프라인·모더레이터 승인 대기 |
+| 2026-10-17 23:16 | v0.3.0 태그 CI `winget` 잡 — `|x64` 지정에도 **동일 오류로 재실패**. CI를 템플릿 렌더링 + `wingetcreate submit` 방식으로 교체 |
+| 2026-10-17 23:25 | 0.2.0 PR #454746 라벨 `Azure-Pipeline-Passed`·`Validation-Completed`·`New-Manifest` — 검증 통과, 모더레이터 승인 대기 |
+| 2026-10-17 23:28 | **0.3.0 수동 PR 2건 제출** — 일반판 [microsoft/winget-pkgs#454771](https://github.com/microsoft/winget-pkgs/pull/454771) (브랜치 `SosomLab.nShiftSpace-0.3.0`), **LED판 신규 패키지** [microsoft/winget-pkgs#454772](https://github.com/microsoft/winget-pkgs/pull/454772) (`SosomLab.nShiftSpace.LED`, 별칭 `nshiftspace-led`, 브랜치 `SosomLab.nShiftSpace.LED-0.3.0`). 둘 다 로컬 `winget validate` 통과 |
 
 ---
 
