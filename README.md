@@ -98,15 +98,18 @@ iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocola
 
 ```powershell
 choco install nshiftspace -y   # 설치
-nShiftSpace-x64                # 실행 (64비트 기준. 32비트 OS는 nShiftSpace-x86)
+nShiftSpace-x64                # 실행 — 0.3.0까지 (64비트 기준. 32비트 OS는 nShiftSpace-x86)
 choco upgrade nshiftspace -y   # 업그레이드
 choco uninstall nshiftspace -y # 제거
 ```
 
-OS 아키텍처에 맞는 exe 하나만 `%ChocolateyInstall%\lib\nshiftspace\tools\`에 설치되고,
-같은 이름의 shim이 PATH에 등록된다. `.gui` 마커가 함께 생성되어 shim은 프로그램을 띄운 뒤 바로 빠진다.
-다만 shim 자체는 콘솔 프로그램이라 **자동 실행(`Run` 값·바로가기)에 shim 경로를 쓰면 로그인 때 콘솔 창이 잠깐 뜬다** —
-자동 실행은 트레이 메뉴로 켜거나 tools 폴더의 exe를 등록할 것.
+OS 아키텍처에 맞는 exe 하나만 `%ChocolateyInstall%\lib\nshiftspace\tools\`에 설치된다.
+
+- **0.3.0까지**: 같은 이름의 shim(`nShiftSpace-x64`)이 PATH에 등록된다. shim은 콘솔 프로그램이라
+  **자동 실행(`Run` 값·바로가기)에 shim 경로를 쓰면 로그인 때 콘솔 창이 잠깐 뜬다** — 자동 실행은 트레이 메뉴로 켜거나
+  tools 폴더의 exe를 등록할 것.
+- **0.3.1(예정)부터**: shim을 만들지 않는다. 시작 메뉴의 **nShiftSpace**(LED판은 **nShiftSpace LED**)로 실행하거나
+  tools 폴더의 exe를 직접 실행한다. `nShiftSpace-x64` 명령은 없어진다. 제거할 때 이 패키지를 가리키는 자동 실행 값도 함께 지운다.
 
 > 제거 전에 실행 중이면 Chocolatey가 프로세스를 먼저 종료한다(`chocolateybeforemodify.ps1`).
 > winget은 그런 처리가 없으므로 **실행 중인 nShiftSpace를 트레이에서 종료한 뒤** 제거/업그레이드할 것.

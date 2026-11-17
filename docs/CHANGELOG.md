@@ -5,6 +5,45 @@
 
 ---
 
+## 2026-11-17 — 0.3.1(예정) Chocolatey shim 제거 · 제거 시 자동 실행 값 정리 · 세션 분담 규칙 도입
+
+### 요청
+- 로그인 때 콘솔 창이 뜨는 문제(아래 항목에서 원인 확정)를 패키지에서 고칠 것.
+- 개발/협업 두 세션의 역할 분담을 nexa-sql · nexa-dir3 · m4plan-fp를 참고해 정할 것.
+
+### 분석 내용
+- 콘솔 창은 Chocolatey shim이 콘솔 프로그램이라 생긴다. shim이 있는 한 사용자가 그 경로를 자동 실행이나 바로가기에 쓸 수 있다.
+- Chocolatey 문서 기준: exe 옆에 같은 이름(대소문자 일치) + `.ignore` 빈 파일을 두면 shim을 만들지 않는다.
+  `chocolateyUninstall.ps1`은 제거 때만, `chocolateyBeforeModify.ps1`은 업그레이드·제거 때(이전 버전 것이) 실행된다.
+  업그레이드 때 이전 버전의 shim이 지워지는지는 문서에 없다 — **미확인**.
+- 메뉴로 켠 자동 실행 값이 제거 뒤에 남는 문제(ROADMAP 3절 과제)도 같은 스크립트에서 다룰 수 있다.
+- 이 PC의 `Run` 값은 사용자 승인을 받아 shim 경로에서 `"C:\ProgramData\chocolatey\lib\nshiftspace-led\tools\nShiftSpace-led-x64.exe"`로 바꿨다.
+  다음 로그인 때 콘솔 창이 사라졌는지는 **미확인** (사용자 확인 예정).
+
+### 설계 방향
+- shim을 만들지 않는다. 명령(`nShiftSpace-x64`)이 없어지는 대신 공용 시작 메뉴 바로가기를 둔다.
+- 0.3.0 이하 사용자가 업그레이드할 때, 자동 실행 값이 이 패키지의 shim을 가리키면 실제 exe 경로로 옮긴다. 그 밖의 값은 건드리지 않는다.
+- 제거할 때 자동 실행 값은 **정리한다** — 단, 이 패키지의 tools 폴더 exe나 옛 shim을 가리킬 때만.
+- 소스·CI는 바꾸지 않는다. 버전은 태그로만 정해진다.
+
+### 개발 내용 및 소스 위치
+- 커밋 2e7ae67 (개발 세션) — `packaging/chocolatey/tools/`·`packaging/chocolatey-led/tools/`의 `chocolateyinstall.ps1`(`.ignore` 마커,
+  시작 메뉴 바로가기 `nShiftSpace.lnk` / `nShiftSpace LED.lnk`, `Run` 값 이전)과 `chocolateyuninstall.ps1`(신규: 바로가기 제거, `Run` 값 조건부 삭제).
+- 사전 검증 (협업 세션, 설치·게시 없이):
+  - 스크립트 6개 Windows PowerShell 5.1 구문 오류 0, UTF-8 BOM 있음. 자리표시자는 install 스크립트의 `__VERSION__`·`__CHECKSUM32__`·`__CHECKSUM64__`뿐이고
+    CI 치환(build.yml)과 맞는다. nuspec `<files>`가 `tools\**`라 uninstall 스크립트가 포함된다.
+  - `Run` 값 판정 모의 시험 40건 통과 (판 2 × 설치/제거 × 값 10가지: shim 따옴표 유/무·대문자, tools exe, 다른 판 shim·tools, 무관한 경로 2, 빈 따옴표, 값 없음).
+    임시 레지스트리 키에서 실행했고 실제 `Run` 값은 변하지 않았다.
+  - 임시 사본에서 `choco pack` 두 패키지 성공 (0.3.1 + 가짜 체크섬), nupkg의 tools에 스크립트 3개 포함.
+  - 4종 빌드는 **미실행** (이 PC에 mingw 도구가 없음). 소스·Makefile·CI는 4c51824 이후 변경 없음.
+  - 실제 설치·업그레이드·제거 시험은 하지 않았다 (릴리스 전 V2).
+- 커밋 834ba8d (개발 세션) — **세션 분담 규칙 도입**: 루트 `CLAUDE.md`, 전역 규칙 사본 `docs/claude-global-rules.md`, `tools/install-global-rules.sh`.
+- 문서 (협업 세션): `docs/PACKAGING.md`("채널별 동작 차이"에 0.3.1 예정 동작·한계·사전 검증), `docs/ROADMAP.md`(shim 과제 진행 중, `Run` 값 정리 결정 완료),
+  `README.md`, `docs/wiki/`(`Installation.md`·`Autostart.md`·`Troubleshooting.md`·`Usage.md`: Chocolatey 실행 방법을 버전별로).
+  게시 전이므로 "0.3.1(예정)"으로만 적었다. Wiki 재발행·push는 릴리스 마무리 때.
+
+---
+
 ## 2026-11-17 — 채널 승인 반영 · 로그인 때 콘솔 창이 뜨는 원인 확정 (Chocolatey shim)
 
 ### 요청
