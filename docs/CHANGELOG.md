@@ -5,6 +5,38 @@
 
 ---
 
+## 2026-11-18 — v0.3.2 릴리스 결과: 태그 런 전 잡 성공 · guard가 Chocolatey 2종과 winget LED판을 보류
+
+### 요청
+- v0.3.2 태그 런을 끝까지 추적하고 결과를 기록할 것.
+
+### 분석 내용
+- 태그 `v0.3.2`(커밋 f7bfe02) 런 44112548056 — `build`·`guard`·`chocolatey`·`chocolatey-led`·`winget` 모두 성공 (00:17~00:18). 같은 커밋의 main push 런 44112546569는
+  `build` 성공, 나머지는 건너뜀.
+- `build`: `-DNSS_VERSION=0.3.2`로 컴파일. exe 6,656 / 6,656 / 7,680 / 7,680바이트 (8KB 검사 통과). [GitHub Release v0.3.2](https://github.com/SosomLab/nexa-shortcut/releases/tag/v0.3.2)에 zip 4종.
+  릴리스 zip에서 꺼낸 exe의 머리 줄 문자열은 `nShiftSpace v0.3.2` / `nShiftSpace LED v0.3.2`, 4개 모두 PE 서브시스템 2.
+- **`guard` — 보류 경로가 Chocolatey에서 처음 돌았다.** 원문:
+  - `choco: nshiftspace 직전 버전(0.3.1)이 검수 대기 중 — 0.3.2 은(는) 보류한다. 승인 뒤 force=true 수동 실행으로 제출.` (`nshiftspace-led`도 같음)
+  - `winget: SosomLab.nShiftSpace 0.3.2 미등록 · 열린 PR 없음 — 게시한다.`
+  - `winget: SosomLab.nShiftSpace.LED 직전 버전 PR이 검수 대기 중 — 0.3.2 은(는) 보류한다. 병합 뒤 force=true 수동 실행으로 제출.`
+- `chocolatey`·`chocolatey-led`: pack까지 하고 `choco push (미등록 버전만)` 단계는 건너뜀. nupkg는 아티팩트로 남았다. 피드에 0.3.2 항목 없음(HTTP 404).
+- `winget`: 일반판만 제출 — `Manifest validation succeeded: True`, PR [#482402](https://github.com/microsoft/winget-pkgs/pull/482402) (`New version: SosomLab.nShiftSpace version 0.3.2`).
+  렌더된 매니페스트의 `InstallerSha256` 2개가 릴리스 zip과 일치. LED판 매니페스트는 렌더만 되어 아티팩트(`winget-manifests`)에 있다.
+- 매니페스트의 `ReleaseDate`는 `2026-11-17`이다 — CI가 UTC 날짜를 쓰고 태그는 한국 시간 11-18 00:17(UTC 11-17 15:17)에 올라갔다. 문서의 릴리스 날짜(11-18)와 하루 다르다.
+- 00:20 조회: #482402 열림(라벨 아직 없음), Chocolatey 0.3.1 두 패키지 `Submitted`(미승인), winget LED판 #454772 열림.
+- 미확인: guard의 제외 판정과 `force=true` 경로, winget LED판 제출 경로는 이번에도 돌지 않았다. 0.3.2 Chocolatey 패키지는 게시되지 않아 설치 시험 대상이 아니다.
+
+### 설계 방향
+- Chocolatey 0.3.2는 0.3.1이 승인된 뒤, winget LED판은 #454772가 병합된 뒤 태그 `v0.3.2`에서 `force=true` 수동 실행으로 제출한다 (ROADMAP 2절, 사용자 승인 필요).
+- 이 PC의 설치본은 0.3.1 그대로 둔다 (0.3.2로 올릴지는 사용자 결정).
+
+### 개발 내용 및 소스 위치
+- `docs/PACKAGING.md`(상태 표, guard 두 번째 실전, Chocolatey·winget 이력), `docs/ROADMAP.md`(2절 상태·후속 과제 6건, 3절 v0.3.2), `README.md`, `docs/wiki/Home.md`.
+- winget 0.3.2 매니페스트의 저장소 사본은 이 커밋에 없다 (개발 세션 소유).
+- Wiki 발행 (2026-11-18, 사용자 승인) — `tools/publish-wiki.sh`, 0.3.2 기준 원고. Wiki HEAD aef7408.
+
+---
+
 ## 2026-11-18 — v0.3.2: 트레이 메뉴에 이름·버전 표시 · "시작 메뉴에 바로가기" 메뉴
 
 ### 요청

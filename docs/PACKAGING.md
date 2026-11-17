@@ -4,17 +4,17 @@ nShiftSpace의 Windows 패키지 관리자 배포 현황, 등록 절차, 상태 
 
 ## 한눈에 보기
 
-| 채널 | 패키지 식별자 | 설치 명령 | 상태 (2026-11-17 23:08 조회) |
+| 채널 | 패키지 식별자 | 설치 명령 | 상태 (2026-11-18 00:20 조회) |
 |---|---|---|---|
-| Chocolatey | `nshiftspace` | `choco install nshiftspace` | 0.1.0·0.2.0·0.3.0 승인 / **0.3.1 제출 — 자동 검증·설치 테스트 통과, 모더레이터 심사 대기** (`Submitted`, 검증·테스트 `Passing`, 스캔 `Pending`) |
-| winget | `SosomLab.nShiftSpace` | `winget install SosomLab.nShiftSpace` | 0.1.0·0.2.0·0.3.0 등록 — 0.2.0 PR [#454746](https://github.com/microsoft/winget-pkgs/pull/454746)·0.3.0 PR [#454771](https://github.com/microsoft/winget-pkgs/pull/454771) 2026-10-20 병합 / **0.3.1 PR [#482170](https://github.com/microsoft/winget-pkgs/pull/482170) 2026-11-17 20:49 병합 — `winget show` 0.3.1** |
-| Chocolatey (LED판) | `nshiftspace-led` | `choco install nshiftspace-led` | 0.3.0 승인 (2026-10-21) / **0.3.1 제출 — 자동 검증·설치 테스트 통과, 모더레이터 심사 대기** |
-| winget (LED판) | `SosomLab.nShiftSpace.LED` | `winget install SosomLab.nShiftSpace.LED` | **미등록** — 0.3.0 최초 등록 PR [microsoft/winget-pkgs#454772](https://github.com/microsoft/winget-pkgs/pull/454772) 검증 통과, 모더레이터 승인 대기. **0.3.1은 guard가 보류** (직전 버전 PR이 열려 있음) — #454772 병합 뒤 `force=true` 수동 실행으로 제출 |
+| Chocolatey | `nshiftspace` | `choco install nshiftspace` | 0.1.0·0.2.0·0.3.0 승인 / **0.3.1 제출 — 자동 검증·설치 테스트 통과, 모더레이터 심사 대기** (`Submitted`, 검증·테스트 `Passing`, 스캔 `Pending`) / **0.3.2는 guard가 보류** (0.3.1 심사 대기) — 0.3.1 승인 뒤 `force=true` 수동 실행으로 제출 |
+| winget | `SosomLab.nShiftSpace` | `winget install SosomLab.nShiftSpace` | 0.1.0·0.2.0·0.3.0 등록 — 0.2.0 PR [#454746](https://github.com/microsoft/winget-pkgs/pull/454746)·0.3.0 PR [#454771](https://github.com/microsoft/winget-pkgs/pull/454771) 2026-10-20 병합 / **0.3.1 PR [#482170](https://github.com/microsoft/winget-pkgs/pull/482170) 2026-11-17 20:49 병합 — `winget show` 0.3.1** / **0.3.2 PR [#482402](https://github.com/microsoft/winget-pkgs/pull/482402) 제출 — 검증·승인 대기** |
+| Chocolatey (LED판) | `nshiftspace-led` | `choco install nshiftspace-led` | 0.3.0 승인 (2026-10-21) / **0.3.1 제출 — 자동 검증·설치 테스트 통과, 모더레이터 심사 대기** / **0.3.2는 guard가 보류** |
+| winget (LED판) | `SosomLab.nShiftSpace.LED` | `winget install SosomLab.nShiftSpace.LED` | **미등록** — 0.3.0 최초 등록 PR [microsoft/winget-pkgs#454772](https://github.com/microsoft/winget-pkgs/pull/454772) 검증 통과, 모더레이터 승인 대기. **0.3.1·0.3.2는 guard가 보류** (직전 버전 PR이 열려 있음) — #454772 병합 뒤 태그 `v0.3.2`에서 `force=true` 수동 실행으로 제출 |
 
 설치되는 버전은 **winget 일반판 0.3.1**, **Chocolatey 일반판·LED판 0.3.0**이다 (Chocolatey는 0.3.1이 승인되면 0.3.1). winget LED판은 PR이 병합돼야 설치된다.
 v0.3.1(2026-11-17 태그)은 GitHub Release에 zip 4종이 올라가 있다.
 0.3.1은 프로그램이 0.3.0과 같고 Chocolatey 패키지의 설치 방식만 바뀐 버전이다.
-v0.3.2(2026-11-18)는 프로그램에 메뉴 머리 줄과 "시작 메뉴에 바로가기" 메뉴를 넣은 버전이다 — 위 표는 0.3.2 태그 전 상태이고, 채널 게시 결과는 태그 런 뒤에 기록한다.
+v0.3.2(2026-11-18)는 프로그램에 메뉴 머리 줄과 "시작 메뉴에 바로가기" 메뉴를 넣은 버전이다 — GitHub Release에 zip 4종이 올라갔고, 채널로는 winget 일반판만 제출됐다 (Chocolatey 2종과 winget LED판은 직전 버전 심사가 끝나야 낸다).
 
 두 채널 모두 GitHub Release의 zip(`nShiftSpace-x64.zip` / `nShiftSpace-x86.zip`, LED판은 `nShiftSpace-led-*.zip`)을
 다운로드해 설치하는 원격형 패키지다. LED판은 **별도 패키지 이름**으로 게시하고 기존 이름은 일반판을 유지한다
@@ -40,6 +40,9 @@ GitHub Release 생성과 nupkg·매니페스트 아티팩트는 그대로 남는
 
 **첫 실전 — v0.3.1 태그 런(2026-11-17)**: Chocolatey 2종과 winget 일반판은 "미등록 · 대기 중인 직전 버전 없음 — 게시한다",
 winget LED판은 "직전 버전 PR이 검수 대기 중 — 0.3.1 은(는) 보류한다"(#454772)로 판정했고, 뒤 잡들이 그대로 따랐다.
+
+**두 번째 실전 — v0.3.2 태그 런(2026-11-18)**: Chocolatey 보류 경로가 처음 돌았다 — "직전 버전(0.3.1)이 검수 대기 중 — 0.3.2 은(는) 보류한다"(2종 모두),
+pack은 하고 push 단계만 건너뛰었다. winget 일반판은 게시, LED판은 다시 보류.
 제외 판정(같은 버전이 이미 등록됨)과 `force=true` 경로는 아직 실전에서 돌지 않았다.
 
 조회가 실패하면 중복 제출을 피하려고 제외 쪽으로 판정한다. 보류된 버전을 직전 버전 승인 뒤에 내거나,
@@ -400,6 +403,7 @@ uninstall 스크립트와 함께 넣는 것이 타당하다. [ROADMAP.md](ROADMA
 | 2026-11-17 | 상태 재확인 — `nshiftspace` 0.1.0·0.2.0·0.3.0, `nshiftspace-led` 0.3.0 모두 `IsApproved=true`·`PackageStatus=Approved`. 같은 날 shim 자동 실행 시 콘솔 창 문제 원인 확정(위 "채널별 동작 차이") |
 | 2026-11-17 19:37 | **v0.3.1 `choco push` 성공 — `nshiftspace` 0.3.1 · `nshiftspace-led` 0.3.1** (CI 런 44066308486, `chocolatey`·`chocolatey-led` 잡). 게시된 nupkg 확인: 설치 스크립트 UTF-8 BOM 있음(처음으로), 자리표시자 없음, 체크섬이 릴리스 zip의 SHA256과 일치, uninstall 스크립트 포함. 피드 API 둘 다 `PackageStatus=Submitted`, `PackageSubmittedStatus=Pending`, 검증·테스트 `Pending` (19:40 조회) |
 | 2026-11-17 23:08 | 0.3.1 상태 조회 — 두 패키지 모두 자동 검증 `PackageValidationResultStatus=Passing`(20:15), 설치 테스트 `PackageTestResultStatus=Passing`(`nshiftspace` 20:29, `nshiftspace-led` 20:31), `PackageScanStatus=Pending`. `PackageStatus=Submitted`·`IsApproved=false` — 모더레이터 심사 대기. 승인 전이라 `choco install`은 0.3.0을 받는다 |
+| 2026-11-18 00:18 | **v0.3.2 태그 런(44112548056) — guard가 두 패키지 모두 보류**: "직전 버전(0.3.1)이 검수 대기 중 — 0.3.2 은(는) 보류한다". `chocolatey`·`chocolatey-led` 잡은 pack까지 하고 push 단계를 건너뜀 (nupkg는 아티팩트). 피드에 0.3.2 없음. 00:20 조회에서 0.3.1은 여전히 `Submitted` |
 
 ---
 
@@ -453,6 +457,7 @@ uninstall 스크립트와 함께 넣는 것이 타당하다. [ROADMAP.md](ROADMA
 | 2026-11-17 | 상태 재확인 — winget-pkgs master의 `manifests/s/SosomLab/nShiftSpace/`에 `0.1.0`·`0.2.0`·`0.3.0`, `winget show SosomLab.nShiftSpace` 버전 0.3.0. **LED판 PR #454772는 열려 있음** — 라벨 `Azure-Pipeline-Passed`·`Validation-Completed`·`New-Package`, 리뷰 필요 상태. 11-17 05:27 모더레이터가 `@wingetbot run`으로 검증을 다시 돌렸고 06:48 봇이 "모더레이터 승인 필요" 안내. 작성자 조치 요구 없음. `winget show SosomLab.nShiftSpace.LED`는 아직 찾지 못함 |
 | 2026-11-17 19:37 | **v0.3.1 태그 CI `winget` 잡 성공 — 새 방식(템플릿 렌더링 + `wingetcreate submit`) 첫 실전.** `Manifest validation succeeded: True`, 일반판 PR [microsoft/winget-pkgs#482170](https://github.com/microsoft/winget-pkgs/pull/482170) 자동 생성 (제목 `New version: SosomLab.nShiftSpace version 0.3.1`). 렌더된 매니페스트의 `InstallerSha256` 2개가 릴리스 zip과 일치, `ReleaseDate: 2026-11-17`. LED판은 guard 보류 판정으로 제출하지 않았고 매니페스트만 아티팩트(`winget-manifests`)로 남겼다. 19:40 조회: #482170 열림, 라벨 아직 없음 |
 | 2026-11-17 20:49 | **0.3.1 PR #482170 병합** — 제출 약 1시간 10분 뒤. 라벨 `Azure-Pipeline-Passed`·`Validation-Completed`·`Moderator-Approved`·`Publish-Pipeline-Succeeded`·`New-Manifest`. 23:08 조회에서 `winget show SosomLab.nShiftSpace` 버전 0.3.1. 저장소 사본은 커밋 a7a8faf. LED판 #454772는 그대로 열림 (라벨 변화 없음, 마지막 갱신 11-17 06:48) |
+| 2026-11-18 00:18 | **v0.3.2 태그 CI `winget` 잡 성공** — 일반판 PR [#482402](https://github.com/microsoft/winget-pkgs/pull/482402) 자동 생성 (`New version: SosomLab.nShiftSpace version 0.3.2`), `Manifest validation succeeded: True`, `InstallerSha256` 2개가 릴리스 zip과 일치. `ReleaseDate: 2026-11-17`(CI는 UTC 날짜). LED판은 guard 보류로 제출하지 않음 (#454772 열림). 00:20 조회: #482402 열림, 라벨 없음 |
 
 ---
 

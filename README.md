@@ -69,7 +69,7 @@ MSVC에서도 CRT를 링크하지 않으므로(/NODEFAULTLIB + /ENTRY:start) 초
 > 쓰는 것도 가능합니다.
 >
 > 최신 릴리스는 **v0.3.2**(2026-11-18) — 트레이 메뉴에 이름·버전 표시와 "시작 메뉴에 바로가기" 메뉴가 생겼습니다.
-> 0.3.2는 채널 심사가 끝나면 올라갑니다. 그 전까지 winget은 0.3.1, Chocolatey는 0.3.0이 설치됩니다 (2026-11-18 기준).
+> 0.3.2는 winget에 제출되어 심사 중이고, Chocolatey에는 0.3.1 심사가 끝난 뒤 제출합니다. 그 전까지 winget은 0.3.1, Chocolatey는 0.3.0이 설치됩니다 (2026-11-18 기준).
 
 > 키보드 LED 표시판은 **별도 패키지**로 게시한다 — Chocolatey `nshiftspace-led`, winget `SosomLab.nShiftSpace.LED`
 > (v0.3.0부터. Chocolatey는 2026-10-21 승인되어 설치 가능, winget은 등록 PR 심사 중). 아래 명령에서 패키지 이름만 바꾸면 된다.
