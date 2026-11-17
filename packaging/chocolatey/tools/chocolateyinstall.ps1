@@ -21,6 +21,8 @@ $exe = Get-ChildItem $toolsDir -Filter $exePattern | Select-Object -First 1
 Get-ChildItem $toolsDir -Filter $exePattern | ForEach-Object {
   New-Item "$($_.FullName).ignore" -ItemType File -Force | Out-Null
 }
+# 0.3.0 이하가 만든 shim이 남아 있으면 지운다(업그레이드 때 Chocolatey가 지우는지와 무관하게).
+try { Uninstall-BinFile -Name $exe.BaseName } catch { Write-Warning "Old shim was not removed: $($_.Exception.Message)" }
 
 $shortcut = Join-Path ([Environment]::GetFolderPath('CommonPrograms')) 'nShiftSpace.lnk'
 try {

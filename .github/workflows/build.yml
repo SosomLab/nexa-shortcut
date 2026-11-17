@@ -195,7 +195,7 @@ jobs:
             -replace '__VERSION__', $version `
             -replace '__CHECKSUM32__', $sum32 `
             -replace '__CHECKSUM64__', $sum64 |
-            Set-Content "$dir/tools/chocolateyinstall.ps1"
+            Set-Content "$dir/tools/chocolateyinstall.ps1" -Encoding utf8BOM  # Chocolatey 요구: ps1은 UTF-8 BOM
 
       - name: choco pack
         shell: pwsh
@@ -238,7 +238,7 @@ jobs:
             -replace '__VERSION__', $version `
             -replace '__CHECKSUM32__', $sum32 `
             -replace '__CHECKSUM64__', $sum64 |
-            Set-Content "$dir/tools/chocolateyinstall.ps1"
+            Set-Content "$dir/tools/chocolateyinstall.ps1" -Encoding utf8BOM  # Chocolatey 요구: ps1은 UTF-8 BOM
 
       - name: choco pack
         shell: pwsh
