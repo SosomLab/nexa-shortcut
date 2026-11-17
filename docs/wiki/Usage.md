@@ -14,7 +14,7 @@
 | 설치 방법 | 실행 |
 |---|---|
 | winget | `nshiftspace` |
-| Chocolatey | 0.3.1(예정)부터 **시작 메뉴 → nShiftSpace** (LED판은 **nShiftSpace LED**). 0.3.0까지는 `nShiftSpace-x64` 명령 (32비트 OS는 `nShiftSpace-x86`) |
+| Chocolatey | 0.3.1부터 **시작 메뉴 → nShiftSpace** (LED판은 **nShiftSpace LED**). 0.3.0까지는 `nShiftSpace-x64` 명령 (32비트 OS는 `nShiftSpace-x86`) |
 | zip 직접 | exe 더블클릭 |
 
 실행하면 **창이 뜨지 않고** 트레이(작업 표시줄 오른쪽 알림 영역)에 아이콘만 생깁니다.

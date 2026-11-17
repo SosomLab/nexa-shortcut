@@ -59,7 +59,7 @@ README에도 요약이 있으며, 여기서는 채널별 차이와 문제 해결
 | 사전 준비 | Windows 11 / Windows 10 1809+ 기본 포함 (없으면 Store의 "앱 설치 관리자") | Chocolatey 설치 필요 — https://chocolatey.org/install |
 | 권한 | 일반 사용자 | **관리자 권한 PowerShell** |
 | 설치 | `winget install SosomLab.nShiftSpace` | `choco install nshiftspace -y` |
-| 실행 | `nshiftspace` (포터블 별칭) | 0.3.0까지 `nShiftSpace-x64` (또는 `-x86`) / 0.3.1(예정)부터 시작 메뉴 **nShiftSpace**·**nShiftSpace LED** 또는 tools 폴더 exe |
+| 실행 | `nshiftspace` (포터블 별칭) | 0.3.0까지 `nShiftSpace-x64` (또는 `-x86`) / 0.3.1부터 시작 메뉴 **nShiftSpace**·**nShiftSpace LED** 또는 tools 폴더 exe |
 | 업그레이드 | `winget upgrade SosomLab.nShiftSpace` | `choco upgrade nshiftspace -y` |
 | 제거 | `winget uninstall SosomLab.nShiftSpace` | `choco uninstall nshiftspace -y` |
 | 설치 경로 | `%LOCALAPPDATA%\Microsoft\WinGet\Packages\` (별칭 링크는 `…\WinGet\Links\`) | `%ChocolateyInstall%\lib\nshiftspace\tools\` |
@@ -79,7 +79,7 @@ README에도 요약이 있으며, 여기서는 채널별 차이와 문제 해결
     shim을 `--shimgen-noop`으로 실행해 `conhost.exe`가 자식으로 생기는 것을 확인했다.
   - **자동 실행에는 shim이 아니라 tools 폴더의 exe를 등록한다.** 트레이 메뉴 "로그인 시 자동 실행"은 실행 중인 exe 경로
     (`GetModuleFileName`)를 쓰므로 shim으로 실행했더라도 tools 폴더 경로가 기록된다.
-  - **0.3.1(예정)에서 패키지를 고친다** (커밋 2e7ae67, 두 패키지 공통):
+  - **0.3.1에서 패키지를 고쳤다** (릴리스 2026-11-17, 채널 심사 전. 커밋 2e7ae67·b09e736, 두 패키지 공통):
     - 설치 스크립트가 `.gui` 대신 `<exe>.ignore` 마커를 만들어 **shim을 생성하지 않는다.** `nShiftSpace-x64` 명령이 없어지므로
       공용 시작 메뉴에 바로가기를 둔다 (일반판 `nShiftSpace.lnk`, LED판 `nShiftSpace LED.lnk`).
     - **0.3.0 이하에서 올라오는 사용자**: `HKCU\…\Run`의 `nShiftSpace` 값이 `chocolatey\bin`의 이 패키지 shim을 가리키면
@@ -92,8 +92,20 @@ README에도 요약이 있으며, 여기서는 채널별 차이와 문제 해결
     - CI가 설치 스크립트에 버전·체크섬을 넣을 때 UTF-8 BOM을 유지한다 (`-Encoding utf8BOM`, 커밋 b09e736). 0.3.0까지 게시본은 BOM이 없었다.
     - 한계: `Run` 값은 `choco`를 실행한 계정의 HKCU만 본다. 다른 계정으로 승격해 설치·제거하면 원래 사용자의 값은 그대로다.
     - 2026-11-17 사전 검증(설치 없이): Windows PowerShell 5.1 구문 오류 0, `Run` 값 판정 모의 시험 40건(판 2 × 설치/제거 × 10가지 값) 통과,
-      `choco pack` 두 패키지 성공·nupkg에 uninstall 스크립트 포함. **실제 설치·업그레이드 시험과 업그레이드 때 옛 shim이
-      지워지는지는 미확인** (릴리스 전 V2에서 확인).
+      `choco pack` 두 패키지 성공·nupkg에 uninstall 스크립트 포함.
+    - 2026-11-17 **실제 업그레이드 시험** (`nshiftspace-led` 0.3.0 → 로컬에서 만든 0.3.1 nupkg, `choco upgrade --source <폴더>`, choco 2.7.5) — 통과:
+      - 종료 코드 0 (`--force` 재실행도 0), 체크섬 일치.
+      - `chocolateyin`의 shim이 없어졌다. 로그의 "Removing shim …"은 설치 스크립트의 `Uninstall-BinFile`이 낸 것으로,
+        **Chocolatey는 업그레이드 때 옛 shim을 미리 지우지 않는다** — 직접 제거가 실제로 필요했다.
+      - tools 폴더: exe + `.ignore`, `.gui` 없음, uninstall 스크립트 있음. 공용 시작 메뉴에 `nShiftSpace LED.lnk`(대상 = tools 폴더 exe).
+      - `Run` 값: tools 경로였을 때는 그대로, 옛 shim 경로로 되돌려 놓고 `--force`로 다시 올리자 tools 경로로 이전됐다.
+      - beforemodify가 실행 중 프로세스를 종료했다. 시작 메뉴 바로가기로 다시 실행했을 때 프로세스 경로 = tools 폴더 exe,
+        `conhost.exe` 생성 0건. 콘솔 창이 보이지 않는지의 육안 확인과 트레이·단축키 동작은 **미확인**.
+      - 경고: "Unable to move directory '…\lib
+shiftspace-led': (5) 액세스가 거부되었습니다: […\lib-bkp
+shiftspace-led\<버전>]" →
+        "Retrying by moving individual files" 뒤 정상 진행. 두 번 모두 났고 원인은 미확인, 결과에는 영향이 없었다.
+      - 일반판(`nshiftspace`)은 그 PC에 설치돼 있지 않아 모의 시험과 pack으로만 확인했다. 제거 스크립트는 실물로 실행하지 않았다.
 - **시작 프로그램 등록**: 두 채널 모두 자동 등록하지 않는다. 사용자가 프로그램 트레이 메뉴
   "로그인 시 자동 실행"으로 켤 수 있다 (HKCU `Run` 값, v0.2.0부터). 수동 절차는 아래
   ["설치 후 자동 실행 설정"](#설치-후-자동-실행-설정) 절 참고.
@@ -311,7 +323,7 @@ Unregister-ScheduledTask -TaskName 'nShiftSpace' -Confirm:$false
 ### 구성 요소
 
 - [packaging/chocolatey/nshiftspace.nuspec](../packaging/chocolatey/nshiftspace.nuspec) — 패키지 메타데이터 (`__VERSION__` 템플릿)
-- [packaging/chocolatey/tools/chocolateyinstall.ps1](../packaging/chocolatey/tools/chocolateyinstall.ps1) — 릴리스 zip 다운로드·설치, GUI shim 마커
+- [packaging/chocolatey/tools/chocolateyinstall.ps1](../packaging/chocolatey/tools/chocolateyinstall.ps1) — 릴리스 zip 다운로드·설치, shim 제외(`.ignore`) 마커·시작 메뉴 바로가기·옛 shim 정리 (0.3.1부터. 0.3.0까지는 `.gui` 마커)
 - [packaging/chocolatey/tools/chocolateybeforemodify.ps1](../packaging/chocolatey/tools/chocolateybeforemodify.ps1) — 업그레이드/제거 전 프로세스 종료
 - CI `chocolatey` 잡 ([.github/workflows/build.yml](../.github/workflows/build.yml)) — `v*` 태그 시
   체크섬 주입 → `choco pack` → `choco push` (시크릿 `CHOCO_API_KEY`, 등록 완료).
@@ -346,7 +358,7 @@ if ($pp.Startup) {
 |---|---|
 | 설치 컨텍스트 | `choco install`은 **관리자 권한**으로 실행된다. 같은 사용자가 UAC 승격한 것이라면 `Startup`이 그 사용자 폴더로 잡히지만, **SYSTEM 계정이나 다른 사용자로 실행**되면(배포 도구·CM 연동 등) 엉뚱한 프로필에 바로가기가 생긴다 |
 | 기본값 | 사용자가 요청하지 않은 자동 실행 등록은 침습적이다. `--params "/Startup"` **opt-in**으로 두는 것이 Chocolatey 관례에 맞다 |
-| 제거 처리 | `chocolateyuninstall.ps1`을 새로 만들어 바로가기를 지워야 한다 (0.3.0까지는 uninstall 스크립트가 없음. 0.3.1 예정분에 신설되어 시작 메뉴 바로가기와 `Run` 값을 정리한다) |
+| 제거 처리 | `chocolateyuninstall.ps1`을 새로 만들어 바로가기를 지워야 한다 (0.3.0까지는 uninstall 스크립트가 없음. 0.3.1에 신설되어 시작 메뉴 바로가기와 `Run` 값을 정리한다) |
 | 배포 비용 | 패키지 스크립트 변경 = **새 버전 배포 + 모더레이션 재심사**. 0.1.0 실적 기준 승인까지 약 27일 |
 | 채널 간 불일치 | winget에는 같은 기능을 넣을 수 없어 두 채널의 설치 후 상태가 달라진다 |
 

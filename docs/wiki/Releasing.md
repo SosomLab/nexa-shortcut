@@ -3,7 +3,7 @@
 ## 한 줄 요약
 
 ```bash
-git tag v0.3.0 && git push origin v0.3.0
+git tag v0.3.1 && git push origin v0.3.1
 ```
 
 이 한 번으로 **GitHub Release → Chocolatey 게시 → winget 업데이트 PR**까지 자동 진행됩니다.
@@ -11,9 +11,10 @@ git tag v0.3.0 && git push origin v0.3.0
 ## 자동화 흐름
 
 ```
-git push origin v0.3.0
+git push origin v0.3.1
    │
    ├─ build    빌드 + 8KB 크기 회귀 검사 → Release에 zip 4종 첨부 (일반·LED × x64·x86)
+   ├─ guard    패키지별 게시 판정 — 같은 버전이 이미 등록돼 있으면 제외, 직전 버전이 심사 대기 중이면 보류
    ├─ chocolatey      체크섬 주입 → choco pack → choco push  (시크릿 CHOCO_API_KEY)
    ├─ chocolatey-led  LED판 nshiftspace-led 동일 절차
    └─ winget          TEMPLATE.*.yaml 에 버전·SHA256·날짜 주입 → wingetcreate submit → winget-pkgs PR (시크릿 WINGET_TOKEN)
@@ -27,8 +28,8 @@ git push origin v0.3.0
 | 단계 | 자동 여부 |
 |---|---|
 | GitHub Release 생성·자산 첨부 | ✅ 자동 |
-| Chocolatey **게시**(`choco push`) | ✅ 자동 (v0.1.0·v0.2.0에서 검증됨) |
-| Chocolatey **승인**(모더레이션) | ❌ 별개 — 새 버전마다 큐를 다시 거침 (0.1.0 실적 약 27일) |
+| Chocolatey **게시**(`choco push`) | ✅ 자동 (v0.1.0·v0.2.0·v0.3.0에서 검증됨) |
+| Chocolatey **승인**(모더레이션) | ❌ 별개 — 새 버전마다 큐를 다시 거침 (실적: 0.1.0 약 27일, 0.2.0·0.3.0 약 3일) |
 | winget PR **제출** | ⚠️ 자동(새 방식) — `wingetcreate update`는 v0.2.0·v0.3.0 모두 실패해 수동 PR로 대체했고, 이후 CI는 템플릿 렌더링 + `wingetcreate submit`으로 교체. **다음 태그에서 첫 검증** |
 | winget PR **병합** | ❌ 별개 — 검증 파이프라인 통과 후 모더레이터 승인 |
 
@@ -67,8 +68,10 @@ gh api repos/microsoft/winget-pkgs/contents/manifests/s/SosomLab/nShiftSpace --j
 | 파일 | 역할 |
 |---|---|
 | [`packaging/chocolatey/nshiftspace.nuspec`](https://github.com/SosomLab/nexa-shortcut/blob/main/packaging/chocolatey/nshiftspace.nuspec) | 패키지 메타데이터 (`__VERSION__` 템플릿) |
-| [`packaging/chocolatey/tools/chocolateyinstall.ps1`](https://github.com/SosomLab/nexa-shortcut/blob/main/packaging/chocolatey/tools/chocolateyinstall.ps1) | zip 다운로드·설치, GUI shim 마커 |
+| [`packaging/chocolatey/tools/chocolateyinstall.ps1`](https://github.com/SosomLab/nexa-shortcut/blob/main/packaging/chocolatey/tools/chocolateyinstall.ps1) | zip 다운로드·설치, shim 제외(`.ignore`) 마커, 시작 메뉴 바로가기, 옛 shim 정리 (0.3.1부터) |
 | [`packaging/chocolatey/tools/chocolateybeforemodify.ps1`](https://github.com/SosomLab/nexa-shortcut/blob/main/packaging/chocolatey/tools/chocolateybeforemodify.ps1) | 업그레이드/제거 전 프로세스 종료 |
+| [`packaging/chocolatey/tools/chocolateyuninstall.ps1`](https://github.com/SosomLab/nexa-shortcut/blob/main/packaging/chocolatey/tools/chocolateyuninstall.ps1) | 제거 시 시작 메뉴 바로가기와 자동 실행 값 정리 (0.3.1부터) |
+| [`packaging/chocolatey-led/`](https://github.com/SosomLab/nexa-shortcut/tree/main/packaging/chocolatey-led) | LED판 패키지 `nshiftspace-led` (같은 구성) |
 | [`packaging/winget/manifests/`](https://github.com/SosomLab/nexa-shortcut/tree/main/packaging/winget/manifests) | winget 매니페스트 3종 사본 (스키마 1.6) |
 
 템플릿 플레이스홀더(`__VERSION__`, `__CHECKSUM32__`, `__CHECKSUM64__`)는 저장소 파일에

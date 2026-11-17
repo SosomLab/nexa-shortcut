@@ -5,7 +5,7 @@
 
 ---
 
-## 2026-11-17 — 0.3.1(예정) Chocolatey shim 제거 · 제거 시 자동 실행 값 정리 · 세션 분담 규칙 도입
+## 2026-11-17 — v0.3.1: Chocolatey shim 제거 · 제거 시 자동 실행 값 정리 · 세션 분담 규칙 도입
 
 ### 요청
 - 로그인 때 콘솔 창이 뜨는 문제(아래 항목에서 원인 확정)를 패키지에서 고칠 것.
@@ -36,7 +36,23 @@
     임시 레지스트리 키에서 실행했고 실제 `Run` 값은 변하지 않았다.
   - 임시 사본에서 `choco pack` 두 패키지 성공 (0.3.1 + 가짜 체크섬), nupkg의 tools에 스크립트 3개 포함.
   - 4종 빌드는 **미실행** (이 PC에 mingw 도구가 없음). 소스·Makefile·CI는 4c51824 이후 변경 없음.
-  - 실제 설치·업그레이드·제거 시험은 하지 않았다 (릴리스 전 V2).
+- 릴리스 전 실제 업그레이드 시험 (협업 세션, 사용자 승인) — `nshiftspace-led` 0.3.0 → 로컬에서 만든 0.3.1 nupkg (URL은 v0.3.0 릴리스 zip,
+  실제 SHA256, 치환은 CI와 같은 `-Encoding utf8BOM` — BOM 유지 확인), choco 2.7.5. **7개 항목 통과**:
+  1. `choco upgrade` 종료 코드 0, `--force` 재실행도 0.
+  2. `chocolateyin`에 shim 없음. 로그 "Removing shim …in
+ShiftSpace-led-x64.exe"는 `Uninstall-BinFile`이 낸 것 —
+     **Chocolatey는 업그레이드 때 옛 shim을 미리 지우지 않으므로 직접 제거(b09e736)가 실제로 필요했다.**
+  3. tools 폴더에 exe + `.ignore`, `.gui` 없음.
+  4. 공용 시작 메뉴 `nShiftSpace LED.lnk` → tools 폴더 exe.
+  5. `Run` 값이 tools 경로일 때 그대로 유지.
+  6. `Run` 값을 옛 shim 경로로 되돌리고 `--force` → tools 경로로 이전 ("Updated the 'Start at login' entry …").
+  7. beforemodify로 프로세스 종료 → 시작 메뉴 바로가기로 재실행: 프로세스 경로 = tools 폴더 exe, 부모 explorer, `conhost.exe` 생성 0건.
+  - 미확인: 콘솔 창이 보이지 않는지의 육안 확인, 트레이 아이콘·Shift+Space 동작, 다음 로그인 때의 동작 (사용자 확인).
+  - 경고 "Unable to move directory … (5) 액세스가 거부되었습니다: […\lib-bkp
+shiftspace-led\…]"가 두 번 모두 났다. Chocolatey가 파일 단위로
+    다시 옮겨 정상 진행했고 결과에는 영향이 없었다. 원인 미확인.
+  - 일반판(`nshiftspace`)은 설치돼 있지 않아 모의 시험 + pack으로만 확인. 제거 스크립트는 실물로 실행하지 않았다.
+  - 그 PC에는 로컬 0.3.1이 설치된 상태로 남았다 (정식 게시본으로 맞추려면 게시 뒤 `choco upgrade nshiftspace-led --force`).
 - 커밋 b09e736 (개발 세션) — 사전 검증에서 나온 두 가지 보강:
   - 설치 스크립트가 `.ignore`를 만든 뒤 `Uninstall-BinFile -Name <exe 이름>`으로 **옛 shim을 직접 지운다** (업그레이드 때 Chocolatey가
     지우는지 문서로 확인하지 못했기 때문). 헬퍼 소스(choco 2.7.5 `helpers\functions\Uninstall-BinFile.ps1`) 기준 shim이 없으면
@@ -45,9 +61,10 @@
     (설치된 0.3.0 사본으로 확인. 한글이 주석에만 있어 동작에는 영향 없었음).
   - 재검증: 설치 스크립트 2개 PS 5.1 구문 오류 0, 임시 사본 `choco pack` 두 패키지 성공. CI 치환 결과의 BOM은 다음 태그 런에서 확인.
 - 커밋 834ba8d (개발 세션) — **세션 분담 규칙 도입**: 루트 `CLAUDE.md`, 전역 규칙 사본 `docs/claude-global-rules.md`, `tools/install-global-rules.sh`.
-- 문서 (협업 세션): `docs/PACKAGING.md`("채널별 동작 차이"에 0.3.1 예정 동작·한계·사전 검증), `docs/ROADMAP.md`(shim 과제 진행 중, `Run` 값 정리 결정 완료),
+- 문서 (협업 세션): `docs/PACKAGING.md`("채널별 동작 차이"에 0.3.1 동작·한계·사전 검증·실제 업그레이드 시험), `docs/ROADMAP.md`(shim 과제 완료, `Run` 값 정리 결정 완료),
   `README.md`, `docs/wiki/`(`Installation.md`·`Autostart.md`·`Troubleshooting.md`·`Usage.md`: Chocolatey 실행 방법을 버전별로).
-  게시 전이므로 "0.3.1(예정)"으로만 적었다. Wiki 재발행·push는 릴리스 마무리 때.
+  `docs/wiki/Releasing.md`(태그 예시·guard 잡·패키지 스크립트 표), `docs/wiki/Home.md`(현재 버전).
+  채널 게시·심사 상태는 태그 런 결과를 본 뒤 따로 기록한다. Wiki 재발행·push는 릴리스 마무리 때.
 
 ---
 
