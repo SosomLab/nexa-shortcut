@@ -25,14 +25,23 @@
   - 오늘 한 Wiki 발행이 CHANGELOG에 빠져 있었다.
 
 ### 설계 방향
-- 다음 개발 대상은 nexa-mapper(ROADMAP 5절). 배포 쪽은 후속 과제 6건으로 줄여 ROADMAP 2절에 우선순위 순으로 둔다:
+- 다음 개발 대상은 nexa-mapper(ROADMAP 5절). 배포 쪽은 후속 과제 6건(설치본 맞추기는 같은 날 끝나 5건 남음 — 아래)으로 줄여 ROADMAP 2절에 우선순위 순으로 둔다:
   Chocolatey 0.3.1 승인 확인 → #454772 병합 뒤 LED판 0.3.1 `force=true` 제출 → 이 PC 설치본을 정식 게시본으로 → 사용자 실측 3종 →
   일반판 0.3.1 실물 설치·제거 시험 → 자동 실행 절차 실측.
 
 ### 개발 내용 및 소스 위치
 - 커밋 a7a8faf (개발 세션) — winget 0.3.1 매니페스트 사본, 일반판만, CI 렌더 결과(#482170 제출분):
   `packaging/winget/manifests/s/SosomLab/nShiftSpace/0.3.1`.
-- Wiki 발행 (2026-11-17, 사용자 승인) — `tools/publish-wiki.sh`, 0.3.1 릴리스 시점 원고. 이번 정리로 바뀐 원고(`Home.md`·`Roadmap.md`)의 발행은 별도.
+- Wiki 발행 (2026-11-17, 사용자 승인) — `tools/publish-wiki.sh`로 두 번: 0.3.1 릴리스 시점 원고, 그리고 이번 정리로 바뀐 `Home.md`·`Roadmap.md`(Wiki HEAD 6dee0af).
+- **이 PC 설치본을 정식 0.3.1로 맞춤** (23:15, 사용자 승인) — 태그 런 44066308486의 아티팩트 `chocolatey-led-package`(CI가 push한 것과 같은 nupkg)로
+  `choco upgrade nshiftspace-led --source <폴더> --version 0.3.1 --force -y`, 종료 코드 0.
+  - 이전 상태: 시험용 로컬 0.3.1 (v0.3.0 zip, exe SHA256 `D9AB875D…274A0B`, 설치 스크립트 URL v0.3.0).
+  - 결과: tools 폴더 exe SHA256 `B0B9E19A…7D42ED` = v0.3.1 릴리스 zip 안 exe. 설치 스크립트 URL v0.3.1, `checksum64` = zip SHA256(`7eaa5c8f…ff6f55`).
+    `.ignore` 있음·`.gui` 없음, `chocolatey\bin`에 shim 0개, `choco list` 0.3.1.
+  - `Run` 값은 전후 모두 `"C:\ProgramData\chocolatey\lib\nshiftspace-led\tools\nShiftSpace-led-x64.exe"` (바꿀 필요 없었음). 공용 시작 메뉴 `nShiftSpace LED.lnk` → 같은 exe.
+  - beforemodify가 프로세스를 종료 → 바로가기를 explorer로 열어 다시 실행: 1개, 경로 = tools 폴더 exe, 부모 explorer. 실행 4초 뒤 새 `conhost.exe` 없음
+    (시점 조회라 그 사이에 생겼다 사라진 것은 잡지 못한다). "Unable to move directory … lib-bkp" 경고는 이번에도 났고 결과에는 영향 없음.
+  - 미확인: 트레이 아이콘·Shift+Space 동작, 다음 로그인 때 콘솔 창이 없는지 (사용자 육안).
 - `docs/ROADMAP.md` — 2절을 상태 표 + 후속 과제(우선순위 순) + 완료 항목 접기로 재구성, 1절에 다음 할 일, 3절 제목·상태 표 갱신 항목, 8절에 v0.3.1.
 - `docs/PACKAGING.md` — 상태 표(23:08 조회), "shim과 콘솔" 첫머리를 버전별로, 깨진 경로 표기, winget 구성 요소(0.3.1 사본·CI 설명), Chocolatey·winget 이력 행.
 - `docs/CHANGELOG.md` — 깨진 경로 표기, 오늘 항목들의 낡은 문장 3곳.
