@@ -5,6 +5,37 @@
 
 ---
 
+## 2026-11-17 — v0.3.1 릴리스 결과: 태그 런 전 잡 성공 · guard와 winget 새 제출 방식 첫 실전
+
+### 요청
+- v0.3.1 태그 런을 끝까지 추적하고 결과를 기록할 것.
+
+### 분석 내용
+- 태그 `v0.3.1`(커밋 cea29a9) 런 44066308486 — `build`·`guard`·`chocolatey`·`chocolatey-led`·`winget` 모두 성공. 같은 커밋의 main push 런 44066308107은
+  `build` 성공, 나머지는 설계대로 건너뜀.
+- `build`: exe 4종 5,120 / 5,632 / 6,144 / 6,656바이트 (0.3.0과 같음, 8KB 검사 통과). GitHub Release v0.3.1에 zip 4종.
+- **`guard` 첫 실전** — 예상과 같았다.
+  - `choco: nshiftspace 0.3.1 미등록 · 대기 중인 직전 버전 없음 — 게시한다.` (`nshiftspace-led`도 같음)
+  - `winget: SosomLab.nShiftSpace 0.3.1 미등록 · 열린 PR 없음 — 게시한다.`
+  - `winget: SosomLab.nShiftSpace.LED 직전 버전 PR이 검수 대기 중 — 0.3.1 은(는) 보류한다. 병합 뒤 force=true 수동 실행으로 제출.`
+    (`#454772 New package: SosomLab.nShiftSpace.LED version 0.3.0`)
+- `chocolatey`·`chocolatey-led`: pack·push 성공. 게시된 nupkg를 내려받아 확인 — 설치 스크립트 첫 3바이트 `EF BB BF`(BOM 유지, b09e736의 효과),
+  자리표시자 없음, 체크섬이 릴리스 zip의 SHA256과 일치, tools에 beforemodify·install·uninstall 3개.
+- **`winget` 새 방식 첫 실전** — 템플릿 렌더링 뒤 `wingetcreate submit`: `Manifest validation succeeded: True`,
+  PR [microsoft/winget-pkgs#482170](https://github.com/microsoft/winget-pkgs/pull/482170) 생성. 렌더된 매니페스트의 SHA256 4개가 릴리스 zip과 일치. LED판은 guard 판정대로 제출하지 않음.
+- 19:40 조회: Chocolatey 0.3.1 두 패키지 `Submitted`·검증/테스트 `Pending`, winget #482170 열림(라벨 없음), #454772 그대로 열림.
+- 미확인: guard의 제외 판정과 `force=true` 경로, winget LED판 제출 경로는 이번에 돌지 않았다. 일반판 Chocolatey 패키지의 실제 설치 시험은 하지 않았다.
+
+### 설계 방향
+- winget LED판 0.3.1은 #454772가 병합된 뒤 태그 `v0.3.1`에서 `force=true` 수동 실행으로 제출한다 (ROADMAP 2절 과제).
+
+### 개발 내용 및 소스 위치
+- `docs/PACKAGING.md`(상태 표, guard 첫 실전, 구성 요소, Chocolatey·winget 이력), `docs/ROADMAP.md`(새 CI 방식 검증 완료, 심사 확인·LED 제출 과제),
+  `README.md`, `docs/wiki/Home.md`·`Releasing.md`.
+- winget 0.3.1 매니페스트의 저장소 사본(`packaging/winget/manifests/…/0.3.1`)은 이 커밋에 없다 (개발 세션 소유).
+
+---
+
 ## 2026-11-17 — v0.3.1: Chocolatey shim 제거 · 제거 시 자동 실행 값 정리 · 세션 분담 규칙 도입
 
 ### 요청

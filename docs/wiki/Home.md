@@ -58,10 +58,10 @@ choco install nshiftspace -y
 
 | 채널 | 식별자 | 상태 |
 |---|---|---|
-| winget | `SosomLab.nShiftSpace` | ✅ 등록 완료 (2026-07-17) |
-| Chocolatey | `nshiftspace` | ✅ 승인 완료 (2026-07-30) |
+| winget | `SosomLab.nShiftSpace` | ✅ 등록 완료 (2026-07-17) · 0.3.0 설치 가능 · 0.3.1 PR 심사 중 ([#482170](https://github.com/microsoft/winget-pkgs/pull/482170)) |
+| Chocolatey | `nshiftspace` | ✅ 승인 완료 (2026-07-30) · 0.3.0 설치 가능 · 0.3.1 심사 중 |
 | winget (LED판) | `SosomLab.nShiftSpace.LED` | ⏳ 최초 등록 PR 검증 통과, 승인 대기 (2026-11-17 기준, [#454772](https://github.com/microsoft/winget-pkgs/pull/454772)) |
-| Chocolatey (LED판) | `nshiftspace-led` | ✅ 승인 완료 (2026-10-21) |
+| Chocolatey (LED판) | `nshiftspace-led` | ✅ 승인 완료 (2026-10-21) · 0.3.0 설치 가능 · 0.3.1 심사 중 |
 
 ---
 

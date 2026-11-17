@@ -65,6 +65,9 @@ MSVC에서도 CRT를 링크하지 않으므로(/NODEFAULTLIB + /ENTRY:start) 초
 > ✅ **두 채널 모두 등록이 완료되었습니다** (winget 2026-07-17 병합, Chocolatey 2026-07-30 승인).
 > [GitHub Releases](https://github.com/SosomLab/nexa-shortcut/releases)에서 zip을 직접 내려받아
 > 쓰는 것도 가능합니다.
+>
+> 최신 릴리스는 **v0.3.1**(2026-11-17) — 프로그램은 0.3.0과 같고 Chocolatey 패키지의 설치 방식만 바뀌었습니다.
+> 0.3.1은 두 채널에서 심사 중이며, 그 전까지는 0.3.0이 설치됩니다.
 
 > 키보드 LED 표시판은 **별도 패키지**로 게시한다 — Chocolatey `nshiftspace-led`, winget `SosomLab.nShiftSpace.LED`
 > (v0.3.0부터. Chocolatey는 2026-10-21 승인되어 설치 가능, winget은 등록 PR 심사 중). 아래 명령에서 패키지 이름만 바꾸면 된다.

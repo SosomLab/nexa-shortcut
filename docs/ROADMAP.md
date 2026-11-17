@@ -39,7 +39,8 @@ DESIGN.md의 "공통 초경량 원칙"이 곧 완료 기준의 일부다. 새 �
 
 두 채널 모두 최초 등록 심사를 통과해 설치 명령이 동작한다. 상세는 [PACKAGING.md](PACKAGING.md) 참고.
 **2026-11-17 기준 설치되는 버전은 일반판이 양쪽 모두 0.3.0, LED판은 Chocolatey만 0.3.0.**
-winget LED판 신규 패키지 PR(#454772)만 모더레이터 승인을 기다리고 있다.
+같은 날 v0.3.1을 릴리스했다 — Chocolatey 2종과 winget 일반판(#482170)이 심사 큐에 있고, winget LED판은 신규 패키지 PR(#454772)이
+아직 열려 있어 0.3.1 제출을 보류했다.
 
 - [x] Chocolatey `nshiftspace` 0.1.0 모더레이션 승인 (2026-07-30 21:01)
 - [x] winget `SosomLab.nShiftSpace` 0.1.0 PR 병합 —
@@ -51,7 +52,11 @@ winget LED판 신규 패키지 PR(#454772)만 모더레이터 승인을 기다�
 - [x] winget 자동 제출 첫 실행 (v0.2.0, 2026-10-17) — **실패**: `wingetcreate`가 x64 zip을 x86 항목에 짝지음.
   워크플로 URL에 `|x64`/`|x86` 지정을 추가해 수정, 0.2.0은 수동 PR [#454746](https://github.com/microsoft/winget-pkgs/pull/454746)
 - [x] v0.3.0 태그에서 `|x64` 지정 재검증 — **또 실패** (zip+중첩 포터블은 `wingetcreate update`로 안 됨)
-- [ ] **다음 태그에서 새 CI 방식 검증** — 템플릿 렌더링 + `wingetcreate submit` (일반판·LED판)
+- [x] **새 CI 방식 검증** — v0.3.1 태그(2026-11-17)에서 템플릿 렌더링 + `wingetcreate submit`이 일반판 PR #482170을 자동 생성.
+  `guard` 잡도 첫 실전에서 예상대로 판정 (Chocolatey 2종·winget 일반판 게시, winget LED판 보류). LED판 제출 경로와
+  guard의 제외 판정·`force=true` 경로는 아직 실전 미검증
+- [ ] v0.3.1 심사 확인 — Chocolatey `nshiftspace`·`nshiftspace-led` 0.3.1 승인, winget #482170 병합. 반영되면 README·Wiki·PACKAGING 상태 갱신
+- [ ] winget LED판 0.3.1 제출 — #454772(0.3.0) 병합 뒤 Actions에서 태그 `v0.3.1`로 `build` 워크플로를 `force=true` 수동 실행
 - [x] Chocolatey 승인 확인 — `nshiftspace` 0.2.0·0.3.0, `nshiftspace-led` 0.3.0 모두 `Approved` (2026-10-21 00:53, 제출 약 3일 뒤.
   0.1.0 때는 약 27일)
 - [x] winget 일반판 PR 병합 확인 — #454746(0.2.0)·#454771(0.3.0) 2026-10-20 병합, `winget show`로 0.3.0 확인 (2026-11-17)
