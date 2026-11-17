@@ -4,10 +4,10 @@ nShiftSpace의 Windows 패키지 관리자 배포 현황, 등록 절차, 상태 
 
 ## 한눈에 보기
 
-| 채널 | 패키지 식별자 | 설치 명령 | 상태 (2026-11-18 00:20 조회) |
+| 채널 | 패키지 식별자 | 설치 명령 | 상태 (2026-11-18 00:28 조회) |
 |---|---|---|---|
 | Chocolatey | `nshiftspace` | `choco install nshiftspace` | 0.1.0·0.2.0·0.3.0 승인 / **0.3.1 제출 — 자동 검증·설치 테스트 통과, 모더레이터 심사 대기** (`Submitted`, 검증·테스트 `Passing`, 스캔 `Pending`) / **0.3.2는 guard가 보류** (0.3.1 심사 대기) — 0.3.1 승인 뒤 `force=true` 수동 실행으로 제출 |
-| winget | `SosomLab.nShiftSpace` | `winget install SosomLab.nShiftSpace` | 0.1.0·0.2.0·0.3.0 등록 — 0.2.0 PR [#454746](https://github.com/microsoft/winget-pkgs/pull/454746)·0.3.0 PR [#454771](https://github.com/microsoft/winget-pkgs/pull/454771) 2026-10-20 병합 / **0.3.1 PR [#482170](https://github.com/microsoft/winget-pkgs/pull/482170) 2026-11-17 20:49 병합 — `winget show` 0.3.1** / **0.3.2 PR [#482402](https://github.com/microsoft/winget-pkgs/pull/482402) 제출 — 검증·승인 대기** |
+| winget | `SosomLab.nShiftSpace` | `winget install SosomLab.nShiftSpace` | 0.1.0·0.2.0·0.3.0 등록 — 0.2.0 PR [#454746](https://github.com/microsoft/winget-pkgs/pull/454746)·0.3.0 PR [#454771](https://github.com/microsoft/winget-pkgs/pull/454771) 2026-10-20 병합 / **0.3.1 PR [#482170](https://github.com/microsoft/winget-pkgs/pull/482170) 2026-11-17 20:49 병합 — `winget show` 0.3.1** / **0.3.2 PR [#482402](https://github.com/microsoft/winget-pkgs/pull/482402) 제출 — 검증·승인 대기** (라벨 `New-Manifest`) |
 | Chocolatey (LED판) | `nshiftspace-led` | `choco install nshiftspace-led` | 0.3.0 승인 (2026-10-21) / **0.3.1 제출 — 자동 검증·설치 테스트 통과, 모더레이터 심사 대기** / **0.3.2는 guard가 보류** |
 | winget (LED판) | `SosomLab.nShiftSpace.LED` | `winget install SosomLab.nShiftSpace.LED` | **미등록** — 0.3.0 최초 등록 PR [microsoft/winget-pkgs#454772](https://github.com/microsoft/winget-pkgs/pull/454772) 검증 통과, 모더레이터 승인 대기. **0.3.1·0.3.2는 guard가 보류** (직전 버전 PR이 열려 있음) — #454772 병합 뒤 태그 `v0.3.2`에서 `force=true` 수동 실행으로 제출 |
 
@@ -421,7 +421,7 @@ uninstall 스크립트와 함께 넣는 것이 타당하다. [ROADMAP.md](ROADMA
 ### 구성 요소
 
 - [packaging/winget/manifests/s/SosomLab/nShiftSpace/](../packaging/winget/manifests/s/SosomLab/nShiftSpace/) —
-  `TEMPLATE.*.yaml`(CI 렌더링 원본) + 버전별(0.1.0, 0.2.0, 0.3.0, 0.3.1) 매니페스트 3종 사본 (스키마 1.6). 0.3.1 사본은 CI 렌더 결과 그대로다 (커밋 a7a8faf).
+  `TEMPLATE.*.yaml`(CI 렌더링 원본) + 버전별(0.1.0, 0.2.0, 0.3.0, 0.3.1, 0.3.2) 매니페스트 3종 사본 (스키마 1.6). 0.3.1·0.3.2 사본은 CI 렌더 결과 그대로다 (커밋 a7a8faf · f990a3b).
   LED판은 [nShiftSpace/LED/](../packaging/winget/manifests/s/SosomLab/nShiftSpace/LED/) (템플릿 + 0.3.0) —
   **식별자의 점은 폴더 구분**이라 `SosomLab.nShiftSpace.LED`의 경로는 `manifests/s/SosomLab/nShiftSpace/LED/<버전>`이다.
   - zip 안의 포터블 exe: `InstallerType: zip` + `NestedInstallerType: portable`, 별칭 `nshiftspace`
@@ -458,6 +458,7 @@ uninstall 스크립트와 함께 넣는 것이 타당하다. [ROADMAP.md](ROADMA
 | 2026-11-17 19:37 | **v0.3.1 태그 CI `winget` 잡 성공 — 새 방식(템플릿 렌더링 + `wingetcreate submit`) 첫 실전.** `Manifest validation succeeded: True`, 일반판 PR [microsoft/winget-pkgs#482170](https://github.com/microsoft/winget-pkgs/pull/482170) 자동 생성 (제목 `New version: SosomLab.nShiftSpace version 0.3.1`). 렌더된 매니페스트의 `InstallerSha256` 2개가 릴리스 zip과 일치, `ReleaseDate: 2026-11-17`. LED판은 guard 보류 판정으로 제출하지 않았고 매니페스트만 아티팩트(`winget-manifests`)로 남겼다. 19:40 조회: #482170 열림, 라벨 아직 없음 |
 | 2026-11-17 20:49 | **0.3.1 PR #482170 병합** — 제출 약 1시간 10분 뒤. 라벨 `Azure-Pipeline-Passed`·`Validation-Completed`·`Moderator-Approved`·`Publish-Pipeline-Succeeded`·`New-Manifest`. 23:08 조회에서 `winget show SosomLab.nShiftSpace` 버전 0.3.1. 저장소 사본은 커밋 a7a8faf. LED판 #454772는 그대로 열림 (라벨 변화 없음, 마지막 갱신 11-17 06:48) |
 | 2026-11-18 00:18 | **v0.3.2 태그 CI `winget` 잡 성공** — 일반판 PR [#482402](https://github.com/microsoft/winget-pkgs/pull/482402) 자동 생성 (`New version: SosomLab.nShiftSpace version 0.3.2`), `Manifest validation succeeded: True`, `InstallerSha256` 2개가 릴리스 zip과 일치. `ReleaseDate: 2026-11-17`(CI는 UTC 날짜). LED판은 guard 보류로 제출하지 않음 (#454772 열림). 00:20 조회: #482402 열림, 라벨 없음 |
+| 2026-11-18 00:28 | 상태 조회 — #482402 열림, 라벨 `New-Manifest`·리뷰 필요 (검증 결과 라벨은 아직 없음). 저장소 사본은 커밋 f990a3b. #454772는 그대로 열림 (마지막 갱신 11-17 06:48), `winget show SosomLab.nShiftSpace` 0.3.1 |
 
 ---
 

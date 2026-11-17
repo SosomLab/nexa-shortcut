@@ -28,9 +28,9 @@ git push origin v0.3.2
 | 단계 | 자동 여부 |
 |---|---|
 | GitHub Release 생성·자산 첨부 | ✅ 자동 |
-| Chocolatey **게시**(`choco push`) | ✅ 자동 (v0.1.0~v0.3.1에서 검증됨) |
+| Chocolatey **게시**(`choco push`) | ✅ 자동 (v0.1.0~v0.3.1에서 검증됨. v0.3.2는 0.3.1이 심사 중이라 guard가 보류 — pack까지만) |
 | Chocolatey **승인**(모더레이션) | ❌ 별개 — 새 버전마다 큐를 다시 거침 (실적: 0.1.0 약 27일, 0.2.0·0.3.0 약 3일) |
-| winget PR **제출** | ⚠️ 자동(새 방식) — `wingetcreate update`는 v0.2.0·v0.3.0 모두 실패해 수동 PR로 대체했고, 이후 CI는 템플릿 렌더링 + `wingetcreate submit`으로 교체. **v0.3.1에서 일반판 PR 자동 생성 확인** (LED판은 직전 버전 PR이 열려 있어 보류) |
+| winget PR **제출** | ⚠️ 자동(새 방식) — `wingetcreate update`는 v0.2.0·v0.3.0 모두 실패해 수동 PR로 대체했고, 이후 CI는 템플릿 렌더링 + `wingetcreate submit`으로 교체. **v0.3.1·v0.3.2에서 일반판 PR 자동 생성 확인** (LED판은 직전 버전 PR이 열려 있어 두 번 모두 보류) |
 | winget PR **병합** | ❌ 별개 — 검증 파이프라인 통과 후 모더레이터 승인 |
 
 > ⚠️ winget 자동 제출이 실패하면 `packaging/winget/manifests/…/TEMPLATE.*.yaml`을 `<버전>/` 폴더에 복사해 버전·SHA256·날짜를

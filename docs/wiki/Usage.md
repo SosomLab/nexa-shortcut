@@ -13,7 +13,7 @@
 
 | 설치 방법 | 실행 |
 |---|---|
-| winget | `nshiftspace` |
+| winget | `nshiftspace` — 0.3.2부터는 트레이 메뉴 **시작 메뉴에 바로가기**로 시작 메뉴에서도 실행 |
 | Chocolatey | 0.3.1부터 **시작 메뉴 → nShiftSpace** (LED판은 **nShiftSpace LED**). 0.3.0까지는 `nShiftSpace-x64` 명령 (32비트 OS는 `nShiftSpace-x86`) |
 | zip 직접 | exe 더블클릭 |
 
@@ -81,7 +81,7 @@ Windows의 UIPI(User Interface Privilege Isolation) 보안 정책 때문이며,
 | 중복 실행 방지 | 뮤텍스로 차단. 두 번째 인스턴스는 즉시 종료됩니다 |
 | 트레이 아이콘 복구 | explorer.exe가 재시작되어도 (`TaskbarCreated` 감지) 아이콘이 자동으로 되살아납니다 |
 | 로그인 시 자동 실행 | 트레이 아이콘 우클릭 → **로그인 시 자동 실행** 체크 한 번. 자세한 내용은 [자동 실행 설정](Autostart) |
-| 무설정 | 기본 상태에서는 레지스트리에 아무것도 쓰지 않습니다. "로그인 시 자동 실행"을 켠 경우에만 `Run` 값 하나를 쓰고, 끄면 지웁니다. **제거 전에 끄세요** — 그러면 exe 하나만 지우면 완전 제거 |
+| 무설정 | 기본 상태에서는 레지스트리에 아무것도 쓰지 않습니다. "로그인 시 자동 실행"을 켠 경우에만 `Run` 값 하나를 쓰고, 끄면 지웁니다. "시작 메뉴에 바로가기"(0.3.2부터)도 켠 경우에만 `.lnk` 하나를 만듭니다. **제거 전에 둘 다 끄세요** — 그러면 exe 하나만 지우면 완전 제거 (Chocolatey는 제거할 때 자동으로 정리) |
 
 ## 키보드 LED 표시판 (선택)
 
@@ -102,7 +102,7 @@ Shift+Space 기능은 같고, 추가로 **아무 키나 누르는 동안 트레�
 설정은 저장하지 않으며 다시 실행하면 켜짐으로 시작합니다 (레지스트리·설정 파일을 쓰지 않는 원칙).
 항상 꺼 두고 싶다면 일반판을 쓰세요.
 
-- 패키지: winget `SosomLab.nShiftSpace.LED`, Chocolatey `nshiftspace-led` (v0.3.0부터. Chocolatey는 설치 가능, winget은 등록 심사 중 — 2026-11-17 기준).
+- 패키지: winget `SosomLab.nShiftSpace.LED`, Chocolatey `nshiftspace-led` (v0.3.0부터. Chocolatey는 설치 가능, winget은 등록 심사 중 — 2026-11-18 기준).
   일반판 패키지(`SosomLab.nShiftSpace` / `nshiftspace`)는 이름 그대로 일반판입니다. 또는 zip으로 직접 받으세요.
 - 두 판은 **동시에 실행되지 않습니다** (같은 단축키·중복 실행 방지를 공유). 하나를 종료하고 다른 것을 실행하세요.
 - 여러 키를 같이 누른 경우 어느 키든 떼면 꺼집니다. 켜진 상태에서 explorer가 재시작되면 꺼짐으로 초기화됩니다.

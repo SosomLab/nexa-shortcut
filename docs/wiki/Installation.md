@@ -24,7 +24,7 @@ nShiftSpace는 **설치 프로그램이 없는 포터블 exe** 하나가 전부�
 | 실행 | `nshiftspace` (winget) / 시작 메뉴 **nShiftSpace** (choco 0.3.1부터. 0.3.0까지는 `nShiftSpace-x64`) | `nshiftspace-led` (winget) / 시작 메뉴 **nShiftSpace LED** (choco 0.3.1부터. 0.3.0까지는 `nShiftSpace-led-x64`) |
 
 둘 중 **하나만** 설치하세요 (같은 단축키를 쓰므로 동시에 실행되지 않습니다). LED판 패키지는 v0.3.0부터 있으며,
-Chocolatey는 설치할 수 있고 winget은 등록 심사가 끝나야 설치됩니다 (2026-11-17 기준). 아래 명령은 일반판 기준이며, LED판은 패키지 이름만 바꾸면 됩니다.
+Chocolatey는 설치할 수 있고 winget은 등록 심사가 끝나야 설치됩니다 (2026-11-18 기준). 아래 명령은 일반판 기준이며, LED판은 패키지 이름만 바꾸면 됩니다.
 
 ---
 
