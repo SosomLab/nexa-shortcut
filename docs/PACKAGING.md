@@ -87,6 +87,9 @@ README에도 요약이 있으며, 여기서는 채널별 차이와 문제 해결
     - `chocolateyuninstall.ps1` 신설 — 제거할 때 시작 메뉴 바로가기를 지우고, `Run` 값이 이 패키지의 tools 폴더 exe나
       옛 shim을 가리킬 때만 그 값을 지운다. 업그레이드 때는 이 스크립트가 돌지 않으므로 자동 실행 설정은 유지된다
       (Chocolatey 문서: uninstall 스크립트는 제거 때만, beforemodify는 업그레이드·제거 때 실행).
+    - 0.3.0 이하가 만든 shim은 설치 스크립트가 `Uninstall-BinFile`로 직접 지운다 (커밋 b09e736). shim이 없으면 조용히 지나간다
+      (choco 2.7.5 헬퍼 소스로 확인).
+    - CI가 설치 스크립트에 버전·체크섬을 넣을 때 UTF-8 BOM을 유지한다 (`-Encoding utf8BOM`, 커밋 b09e736). 0.3.0까지 게시본은 BOM이 없었다.
     - 한계: `Run` 값은 `choco`를 실행한 계정의 HKCU만 본다. 다른 계정으로 승격해 설치·제거하면 원래 사용자의 값은 그대로다.
     - 2026-11-17 사전 검증(설치 없이): Windows PowerShell 5.1 구문 오류 0, `Run` 값 판정 모의 시험 40건(판 2 × 설치/제거 × 10가지 값) 통과,
       `choco pack` 두 패키지 성공·nupkg에 uninstall 스크립트 포함. **실제 설치·업그레이드 시험과 업그레이드 때 옛 shim이

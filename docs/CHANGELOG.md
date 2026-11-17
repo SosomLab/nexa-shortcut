@@ -37,6 +37,13 @@
   - 임시 사본에서 `choco pack` 두 패키지 성공 (0.3.1 + 가짜 체크섬), nupkg의 tools에 스크립트 3개 포함.
   - 4종 빌드는 **미실행** (이 PC에 mingw 도구가 없음). 소스·Makefile·CI는 4c51824 이후 변경 없음.
   - 실제 설치·업그레이드·제거 시험은 하지 않았다 (릴리스 전 V2).
+- 커밋 b09e736 (개발 세션) — 사전 검증에서 나온 두 가지 보강:
+  - 설치 스크립트가 `.ignore`를 만든 뒤 `Uninstall-BinFile -Name <exe 이름>`으로 **옛 shim을 직접 지운다** (업그레이드 때 Chocolatey가
+    지우는지 문서로 확인하지 못했기 때문). 헬퍼 소스(choco 2.7.5 `helpers\functions\Uninstall-BinFile.ps1`) 기준 shim이 없으면
+    디버그 메시지만 남기고 지나간다.
+  - CI(`.github/workflows/build.yml`)의 설치 스크립트 치환에 `-Encoding utf8BOM` — 지금까지 게시된 설치 스크립트는 BOM이 빠져 있었다
+    (설치된 0.3.0 사본으로 확인. 한글이 주석에만 있어 동작에는 영향 없었음).
+  - 재검증: 설치 스크립트 2개 PS 5.1 구문 오류 0, 임시 사본 `choco pack` 두 패키지 성공. CI 치환 결과의 BOM은 다음 태그 런에서 확인.
 - 커밋 834ba8d (개발 세션) — **세션 분담 규칙 도입**: 루트 `CLAUDE.md`, 전역 규칙 사본 `docs/claude-global-rules.md`, `tools/install-global-rules.sh`.
 - 문서 (협업 세션): `docs/PACKAGING.md`("채널별 동작 차이"에 0.3.1 예정 동작·한계·사전 검증), `docs/ROADMAP.md`(shim 과제 진행 중, `Run` 값 정리 결정 완료),
   `README.md`, `docs/wiki/`(`Installation.md`·`Autostart.md`·`Troubleshooting.md`·`Usage.md`: Chocolatey 실행 방법을 버전별로).
