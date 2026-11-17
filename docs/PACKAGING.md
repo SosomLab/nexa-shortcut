@@ -111,6 +111,16 @@ README에도 요약이 있으며, 여기서는 채널별 차이와 문제 해결
       - 경고: "Unable to move directory '…\lib\nshiftspace-led': (5) 액세스가 거부되었습니다: […\lib-bkp\nshiftspace-led\<버전>]" →
         "Retrying by moving individual files" 뒤 정상 진행. 두 번 모두 났고 원인은 미확인, 결과에는 영향이 없었다.
       - 일반판(`nshiftspace`)은 그 PC에 설치돼 있지 않아 모의 시험과 pack으로만 확인했다. 제거 스크립트는 실물로 실행하지 않았다.
+- **시작 메뉴 바로가기**:
+
+  | 채널 | 누가 만드나 | 위치 | 제거할 때 |
+  |---|---|---|---|
+  | Chocolatey (0.3.1부터) | 설치 스크립트 | 공용 `%ProgramData%\Microsoft\Windows\Start Menu\Programs\nShiftSpace.lnk` (LED판 `nShiftSpace LED.lnk`) | uninstall 스크립트가 지운다 |
+  | winget | 패키지는 만들지 않는다 (포터블). **다음 버전(0.3.2 예정)부터** 트레이 메뉴 "시작 메뉴에 바로가기"로 사용자가 만든다 | 사용자 `%APPDATA%\Microsoft\Windows\Start Menu\Programs\` (같은 이름) | **남는다** — `winget uninstall` 전에 메뉴에서 끈다 |
+  | zip 직접 | winget과 같음 | 같음 | exe를 지우기 전에 메뉴에서 끈다 |
+
+  다음 버전의 프로그램은 공용 쪽에 같은 이름의 바로가기가 있으면(Chocolatey 설치본) 메뉴 항목을 체크된 채 비활성으로 보여 준다.
+  메뉴로 만든 바로가기는 실행 중인 exe 경로(`GetModuleFileName`)를 가리킨다 — winget 별칭으로 실행했을 때 어느 경로가 되는지는 미확인.
 - **시작 프로그램 등록**: 두 채널 모두 자동 등록하지 않는다. 사용자가 프로그램 트레이 메뉴
   "로그인 시 자동 실행"으로 켤 수 있다 (HKCU `Run` 값, v0.2.0부터). 수동 절차는 아래
   ["설치 후 자동 실행 설정"](#설치-후-자동-실행-설정) 절 참고.

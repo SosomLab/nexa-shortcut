@@ -50,6 +50,10 @@ winget uninstall SosomLab.nShiftSpace # 제거
 > ⚠️ **업그레이드·제거 전에 트레이에서 먼저 종료하세요.** winget에는 실행 중인 프로그램을
 > 종료해 주는 처리가 없어서, 켜져 있으면 파일 잠김으로 실패합니다.
 
+winget은 시작 메뉴에 바로가기를 만들지 않습니다. 다음 버전(0.3.2 예정)부터는 트레이 아이콘 우클릭 →
+**시작 메뉴에 바로가기**를 체크하면 프로그램이 직접 만듭니다. 이 바로가기는 `winget uninstall`로 지워지지 않으므로
+**제거하기 전에 메뉴에서 체크를 끄세요.**
+
 ---
 
 ## Chocolatey
@@ -110,6 +114,7 @@ OS 아키텍처에 맞는 exe **하나만** `%ChocolateyInstall%\lib\nshiftspace
 | 권한 | 일반 사용자 | **관리자 권한 PowerShell** |
 | 설치 | `winget install SosomLab.nShiftSpace` | `choco install nshiftspace -y` |
 | 실행 | `nshiftspace` | 시작 메뉴 **nShiftSpace** (0.3.0까지는 `nShiftSpace-x64`) |
+| 시작 메뉴 바로가기 | 트레이 메뉴로 직접 만듦 (다음 버전부터) — 제거 전에 끄기 | 설치할 때 자동 (0.3.1부터), 제거할 때 자동 삭제 |
 | 업그레이드 | `winget upgrade SosomLab.nShiftSpace` | `choco upgrade nshiftspace -y` |
 | 제거 | `winget uninstall SosomLab.nShiftSpace` | `choco uninstall nshiftspace -y` |
 | 실행 중 자동 종료 | ❌ 직접 종료 필요 | ✅ 자동 |

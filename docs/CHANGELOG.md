@@ -5,6 +5,63 @@
 
 ---
 
+## 2026-11-18 — 트레이 메뉴에 이름·버전 표시 · "시작 메뉴에 바로가기" 메뉴 (미릴리스 — 다음 버전, 0.3.2 예정)
+
+### 요청
+- 트레이 메뉴에서 프로그램 이름과 버전을 볼 수 있게 할 것.
+- winget으로 설치하면 시작 메뉴에 바로가기가 없다 — 프로그램이 직접 만들 수 있게 할 것.
+
+### 분석 내용
+- winget 포터블 패키지는 시작 메뉴 바로가기를 만들지 않는다. Chocolatey 패키지는 0.3.1부터 공용 시작 메뉴에 둔다.
+- `.lnk` 저장에는 COM(`IShellLink`·`IPersistFile`)이 필요하다. ole32를 import하면 시작할 때부터 로드되어 상주 메모리가 늘어난다.
+- 셸 폴더 API(`SHGetFolderPath`)는 큰 DLL을 끌어온다 — 경로는 환경 변수(`%APPDATA%`·`%ProgramData%`)로 구할 수 있다.
+
+### 설계 방향
+- 메뉴 맨 위에 누를 수 없는 머리 줄 `nShiftSpace v<버전>`(LED판은 `nShiftSpace LED v<버전>`). 버전은 빌드가 `-DNSS_VERSION`으로 준다
+  (Makefile·build.bat는 `git describe`, CI 태그 빌드는 태그 이름, 없으면 `dev`).
+- "시작 메뉴에 바로가기(&M)" 체크 항목 — 사용자 시작 메뉴(`%APPDATA%\Microsoft\Windows\Start Menu\Programs`)에 실행 중인 exe를 가리키는
+  `nShiftSpace.lnk`(LED판은 `nShiftSpace LED.lnk`)를 만들거나 지운다. 공용 시작 메뉴에 같은 이름이 있고 사용자 쪽에 없으면 체크된 채 비활성
+  (공용 쪽은 관리자만 지울 수 있다 = Chocolatey 설치본).
+- ole32는 import하지 않고 항목을 누른 순간에만 `LoadLibrary`로 쓴다.
+
+### 개발 내용 및 소스 위치
+- 커밋 7a3e413 (개발 세션) — `src/nShiftSpace.c`(머리 줄 `APP_TITLE`, `IDM_SHORTCUT` = 13, `shortcut_exists`·`create_shortcut`), `Makefile`·`build.bat`·
+  `.github/workflows/build.yml`(`NSS_VERSION`).
+- CI 런 44106885359 `build` 성공 — 크기 x64 6,656 · x86 6,656 · LED x64 7,680 · LED x86 7,680바이트 (0.3.1은 5,120 / 5,632 / 6,144 / 6,656. 한도 8,192).
+  LED판의 남은 여유는 512바이트다.
+- 실물 시험 (협업 세션, 2026-11-18, 사용자 승인 — 런 44106885359의 아티팩트를 임시 폴더에서 실행, 설치본 프로세스는 잠시 종료 뒤 복구):
+  - 정적: 4개 모두 PE 서브시스템 2(GUI). import DLL은 0.3.1과 같은 5개(advapi32·imm32·kernel32·shell32·user32) — ole32 없음.
+    kernel32 함수만 7 → 13개 (`LoadLibraryW`·`GetProcAddress`·`FreeLibrary`·`ExpandEnvironmentStringsW`·`GetFileAttributesW`·`DeleteFileW` 추가).
+    머리 줄 문자열은 `nShiftSpace v7a3e413` / `nShiftSpace LED v7a3e413` (main 런은 얕은 체크아웃이라 커밋 해시).
+  - 메뉴 (실제로 띄워 `MN_GETHMENU`·`GetMenuState`·`GetMenuString`으로 읽음):
+    - 일반판: 머리 줄(회색) / 구분선 / 로그인 시 자동 실행 / 시작 메뉴에 바로가기 / 구분선 / 종료.
+    - LED판: 머리 줄(회색) / 구분선 / 로그인 시 자동 실행 / 시작 메뉴에 바로가기 / 키보드 LED 표시 / 구분선 / 종료.
+    - 공용 `nShiftSpace LED.lnk`가 있는 이 PC에서 LED판의 바로가기 항목은 **체크 + 비활성**(상태 0x0009), 일반판은 체크 없음·활성. x86 두 개도 같다.
+  - 일반판 x64 바로가기: `WM_COMMAND` 13 → 사용자 시작 메뉴에 `nShiftSpace.lnk` 생성, 대상 = 실행한 exe 경로. 메뉴에 체크 표시. 다시 보내면 삭제.
+  - LED판 x64, 항목이 비활성일 때 `WM_COMMAND` 13을 직접 보내면(메뉴로는 누를 수 없는 경로) 사용자 쪽에 `nShiftSpace LED.lnk`가 생기고
+    항목이 체크 + 활성으로 바뀐다. 다시 보내면 지워지고 공용 바로가기는 그대로다.
+  - 메모리 (x64, 사설 작업 집합 / 커밋, 관리자 권한 셸에서 실행):
+
+    | 시점 | 0.3.1 일반 | 새 일반 | 0.3.1 LED | 새 LED |
+    |---|---|---|---|---|
+    | 실행 4초 뒤 | 60K / 1,356K | 68K / 1,372K | 64K / 1,384K | 64K / 1,380K |
+    | 메뉴 열고 닫은 4초 뒤 | 72K / 1,584K | 72K / 1,600K | 76K / 1,612K | 72K / 1,608K |
+    | 바로가기 생성 1.5초 뒤 | — | 1,224K / 2,192K | — | — |
+    | 바로가기 생성 4.5초 뒤 | — | 68K / 2,192K | — | — |
+    | 바로가기 삭제 4.5초 뒤 | — | 76K / 2,192K | — | — |
+
+    평소 수치는 0.3.1과 같다. 바로가기를 한 번 만들면 작업 관리자 수치(사설 작업 집합)는 2초 뒤 트리밍으로 돌아오지만
+    **커밋이 약 0.6MB 늘어난 채 남고, ole32.dll이 내려가지 않는다** — 모듈 25 → 37개 (`ole32`·`clbcatq`·`propsys`·`linkinfo`·`ntshrui` 등).
+    `FreeLibrary`(src/nShiftSpace.c:173) 뒤에도 남는 원인은 미확인 (추정: COM이 올린 셸 링크 구현 DLL들이 ole32를 참조). 개발 세션에 보고.
+  - x86 두 개: 실행 4초 뒤 112K / 116K, 메뉴 표시·종료 정상.
+  - 종료(`IDM_EXIT`)는 5개 실행 모두 종료 코드 0. 시험으로 만든 `.lnk`는 남지 않았고 `Run` 값·설치본 exe는 변하지 않았다. 설치본은 시작 메뉴 바로가기로 다시 실행.
+  - 미확인: 메뉴가 화면에 보이는 모습(글자·회색 표시)의 육안 확인, 일반 권한으로 실행했을 때의 동작(시험은 관리자 권한 셸에서 실행),
+    winget 별칭(`Links\nshiftspace.exe`)으로 실행했을 때 바로가기 대상이 어느 경로가 되는지, 4종 로컬 빌드(이 PC에 컴파일러 없음 — CI로 대신).
+- 문서 (협업 세션): `docs/DESIGN.md`(초경량 원칙의 라이브러리 줄, "시작 메뉴 바로가기 · 메뉴 머리 줄" 절), `docs/ROADMAP.md`(1절 1-d, 불변 원칙, 3절 "다음 버전"),
+  `docs/PACKAGING.md`(채널별 시작 메뉴 바로가기 표), `README.md`, `docs/wiki/Usage.md`·`Installation.md`·`Build.md`. Wiki 발행은 릴리스 때.
+
+---
+
 ## 2026-11-17 — 내용 정리 · 진행사항 최신화: winget 0.3.1 병합 · Chocolatey 0.3.1 자동 검증 통과
 
 ### 요청

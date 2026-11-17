@@ -12,7 +12,7 @@
 - C + Win32 API만 사용. GUI 프레임워크·CRT 미사용 (`-nostdlib`, 진입점 `start`).
 - 링크 라이브러리는 kernel32 / user32 / shell32 로 제한. 예외: advapi32 — "로그인 시 자동 실행"의
   HKCU `Run` 값 읽기/쓰기 전용 3개 함수, imm32 — `ImmDisableIME` 하나. 둘 다 user32가 이미 로드하는 DLL이라
-  메모리 추가 부담은 없다.
+  메모리 추가 부담은 없다. ole32는 **import하지 않고** "시작 메뉴에 바로가기" 메뉴를 누른 순간에만 `LoadLibrary`로 쓴다 (다음 버전, 아래 절).
 - 큰 구조체는 전역(.bss)에 두어 컴파일러의 `memset` 호출 생성을 회피.
 - 메모리 표시 최소화 두 가지: `ImmDisableIME(-1)`로 이 스레드의 IME/TSF 스택이 붙지 않게 하고, 마지막 메시지 2초 뒤
   일회성 타이머로 `SetProcessWorkingSetSize(-1, -1)` (작업 관리자 "메모리" ≈1MB → 0.07~0.12MB. 아래 "메모리" 절).
@@ -96,6 +96,27 @@ LED를 끄면 Raw Input 등록을 **해제**(`RIDEV_REMOVE`, 이때 `hwndTarget`
   `.rdata`를 `.text`에 합치는 링커 스크립트로 512B를 더 줄일 수는 있으나 빌드 경로 3종(mingw/MSYS2/MSVC)에 공통 적용하기 어려워 보류.
 - 8KB 예산 대비 여유: 가장 큰 x86 LED판(6,656B) 기준 1.3KB. CI 크기 검사는 `dist/*.exe` 전체에 적용되므로 LED판도 같은 예산을 받는다.
 
+## 공통 기능 — 시작 메뉴 바로가기 · 메뉴 머리 줄 (구현됨, 미릴리스 — 다음 버전)
+
+커밋 7a3e413. 상세 시험 결과는 [CHANGELOG.md](CHANGELOG.md) 2026-11-18 항목.
+
+- **머리 줄**: 메뉴 맨 위에 `nShiftSpace v<버전>`(LED판 `nShiftSpace LED v<버전>`), `MF_GRAYED`로 누를 수 없다.
+  버전은 빌드가 `-DNSS_VERSION`으로 넘긴다 — Makefile·build.bat는 `git describe`, CI 태그 빌드는 태그 이름, 없으면 `dev`.
+- **시작 메뉴에 바로가기** (체크): 사용자 시작 메뉴 `%APPDATA%\Microsoft\Windows\Start Menu\Programs`에 실행 중인 exe를 가리키는
+  `nShiftSpace.lnk`(LED판 `nShiftSpace LED.lnk`)를 만들거나 지운다. winget 포터블 설치에는 바로가기가 없어서 프로그램이 직접 만든다.
+  - 표시는 메뉴를 열 때마다 파일 존재 여부로 정한다 (자동 실행 메뉴와 같은 방식, 상태 변수 없음).
+  - 공용 시작 메뉴(`%ProgramData%\…\Programs`)에 같은 이름이 있고 사용자 쪽에 없으면 **체크된 채 비활성** — Chocolatey 패키지가 둔 바로가기이고
+    공용 쪽은 관리자만 지울 수 있다. 바로가기 이름은 Chocolatey 패키지와 같게 맞췄다.
+  - 경로는 `SHGetFolderPath` 대신 환경 변수를 편다 (`ExpandEnvironmentStrings`) — 셸 폴더 API는 큰 DLL을 끌어온다.
+  - `.lnk` 저장은 COM(`IShellLinkW` → `IPersistFile::Save`)이다. ole32를 import하면 시작할 때부터 로드되므로 누른 순간에만
+    `LoadLibrary("ole32.dll")` + `GetProcAddress`로 쓴다. GUID 3개는 uuid 라이브러리를 링크하지 않도록 소스에 직접 둔다.
+- 비용: x64 일반판 5,120 → 6,656B, x86 5,632 → 6,656B, LED판 6,144 / 6,656 → 7,680 / 7,680B. **LED판은 8KB 한도까지 512B 남았다.**
+- 메모리 실측(2026-11-18, x64): 평소 사설 작업 집합은 0.3.1과 같다 (실행 뒤 60~68K, 메뉴 사용 뒤 72~76K).
+  바로가기를 한 번 만들면 사설 작업 집합은 2초 뒤 트리밍으로 68K로 돌아오지만 커밋이 1.6MB → 2.2MB로 늘어난 채 남고,
+  `FreeLibrary` 뒤에도 ole32 등 12개 모듈이 내려가지 않는다 (원인 미확인).
+
+---
+
 ## 공통 기능 — 로그인 시 자동 실행 (구현됨, 양쪽 빌드)
 
 트레이 메뉴 **"로그인 시 자동 실행"** 체크 항목. 체크 표시는 메뉴를 열 때마다 `Run` 값 존재 여부로 결정한다
@@ -107,7 +128,7 @@ LED를 끄면 Raw Input 등록을 **해제**(`RIDEV_REMOVE`, 이때 `hwndTarget`
 표시 → RegGetValue == ERROR_SUCCESS
 ```
 
-### 방식 선택
+### 방식 선택 (자동 실행)
 
 | 후보 | 판단 |
 |---|---|
