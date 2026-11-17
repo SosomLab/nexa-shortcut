@@ -23,8 +23,8 @@ nShiftSpace는 **설치 프로그램이 없는 포터블 exe** 하나가 전부�
 | zip | `nShiftSpace-x64.zip` / `-x86.zip` | `nShiftSpace-led-x64.zip` / `-x86.zip` |
 | 실행 별칭 | `nshiftspace` (winget) / `nShiftSpace-x64` (choco) | `nshiftspace-led` (winget) / `nShiftSpace-led-x64` (choco) |
 
-둘 중 **하나만** 설치하세요 (같은 단축키를 쓰므로 동시에 실행되지 않습니다). LED판 패키지는 v0.3.0에서 처음 제출되어
-각 채널의 심사가 끝나야 설치됩니다. 아래 명령은 일반판 기준이며, LED판은 패키지 이름만 바꾸면 됩니다.
+둘 중 **하나만** 설치하세요 (같은 단축키를 쓰므로 동시에 실행되지 않습니다). LED판 패키지는 v0.3.0부터 있으며,
+Chocolatey는 설치할 수 있고 winget은 등록 심사가 끝나야 설치됩니다 (2026-11-17 기준). 아래 명령은 일반판 기준이며, LED판은 패키지 이름만 바꾸면 됩니다.
 
 ---
 
@@ -73,8 +73,11 @@ choco uninstall nshiftspace -y # 제거
 ```
 
 OS 아키텍처에 맞는 exe **하나만** `%ChocolateyInstall%\lib\nshiftspace\tools\` 에 설치되고,
-같은 이름의 shim이 PATH에 등록됩니다. GUI 프로그램이라 shim이 콘솔을 붙잡지 않도록
-`.gui` 마커 파일이 함께 생성됩니다.
+같은 이름의 shim이 PATH에 등록됩니다. `.gui` 마커 파일이 함께 생성되어 shim은 프로그램을 띄운 뒤 바로 빠집니다.
+
+> ⚠️ shim(`…\chocolatey\bin\nShiftSpace-x64.exe`)은 콘솔 프로그램입니다. 터미널에서 실행할 때는 괜찮지만,
+> **자동 실행에 shim 경로를 등록하면 로그인할 때 검은 창이 잠깐 떴다 사라집니다.**
+> 자동 실행은 [트레이 메뉴](Autostart)로 켜거나 tools 폴더의 exe를 등록하세요.
 
 > ✅ Chocolatey는 업그레이드·제거 전에 실행 중인 nShiftSpace를 **자동으로 종료**합니다.
 

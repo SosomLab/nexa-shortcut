@@ -4,7 +4,7 @@ nexa-shortcut 프로젝트의 **목표**와 그 목표를 이루기 위한 **할
 설계 근거는 [DESIGN.md](DESIGN.md), 완료된 작업의 상세 이력은 [CHANGELOG.md](CHANGELOG.md),
 패키지 배포 현황은 [PACKAGING.md](PACKAGING.md)에 있다. 이 문서는 **앞으로 할 일**에 집중한다.
 
-- 기준일: 2026-10-17
+- 기준일: 2026-11-17
 - 표기: `[ ]` 미착수 · `[~]` 진행 중 · `[x]` 완료
 
 ---
@@ -14,7 +14,7 @@ nexa-shortcut 프로젝트의 **목표**와 그 목표를 이루기 위한 **할
 | # | 목표 | 산출물 | 상태 |
 |---|---|---|---|
 | 1 | **nShiftSpace** — Shift+Space 한/영 전환 단일 기능 초경량 상주 프로그램 | `nShiftSpace-x64/x86.exe` (v0.1.0 4.5KB → 현재 5.0/5.5KB) | ✅ 완료 (v0.1.0 배포) |
-| 1-a | **키보드 LED 표시판** — 아무 키나 누르는 동안 트레이 아이콘 켜짐 (Raw Input, 메뉴로 켜고 끔) | `nShiftSpace-led-x64/x86.exe` (6.0/6.5KB) · 패키지 `nshiftspace-led` / `SosomLab.nShiftSpace.LED` | ✅ v0.2.0 릴리스, 패키지는 v0.3.0에서 최초 제출 |
+| 1-a | **키보드 LED 표시판** — 아무 키나 누르는 동안 트레이 아이콘 켜짐 (Raw Input, 메뉴로 켜고 끔) | `nShiftSpace-led-x64/x86.exe` (6.0/6.5KB) · 패키지 `nshiftspace-led` / `SosomLab.nShiftSpace.LED` | ✅ v0.2.0 릴리스 · 패키지 v0.3.0 (Chocolatey 승인 2026-10-21, winget PR 심사 중) |
 | 1-b | **로그인 시 자동 실행** — 트레이 메뉴 체크로 HKCU `Run` 값 등록/삭제 (양쪽 빌드 공통) | 트레이 메뉴 항목 | ✅ v0.2.0 릴리스 |
 | 1-c | **메모리 표시 개선** — IME 비활성화 + 활동 2초 뒤 작업 집합 비우기 (작업 관리자 ≈1MB → 0.07~0.12MB) | 양쪽 빌드 공통 | ✅ v0.2.0(1차) · v0.3.0(2차) |
 | 2 | **nexa-mapper** — `mappings.ini`로 사용자가 정의하는 단순 키 재매핑 엔진 | `nMapper-x64/x86.exe` + `mappings.ini` | ⬜ 미착수 |
@@ -38,7 +38,8 @@ DESIGN.md의 "공통 초경량 원칙"이 곧 완료 기준의 일부다. 새 �
 ## 2. 배포 채널 — 등록 완료, 남은 과제 4건
 
 두 채널 모두 최초 등록 심사를 통과해 설치 명령이 동작한다. 상세는 [PACKAGING.md](PACKAGING.md) 참고.
-**2026-10-17 기준 설치되는 버전은 양쪽 모두 0.1.0.** 0.2.0·0.3.0(일반판)과 0.3.0(LED판 신규 패키지)이 두 채널의 심사 큐에 있다.
+**2026-11-17 기준 설치되는 버전은 일반판이 양쪽 모두 0.3.0, LED판은 Chocolatey만 0.3.0.**
+winget LED판 신규 패키지 PR(#454772)만 모더레이터 승인을 기다리고 있다.
 
 - [x] Chocolatey `nshiftspace` 0.1.0 모더레이션 승인 (2026-07-30 21:01)
 - [x] winget `SosomLab.nShiftSpace` 0.1.0 PR 병합 —
@@ -51,9 +52,14 @@ DESIGN.md의 "공통 초경량 원칙"이 곧 완료 기준의 일부다. 새 �
   워크플로 URL에 `|x64`/`|x86` 지정을 추가해 수정, 0.2.0은 수동 PR [#454746](https://github.com/microsoft/winget-pkgs/pull/454746)
 - [x] v0.3.0 태그에서 `|x64` 지정 재검증 — **또 실패** (zip+중첩 포터블은 `wingetcreate update`로 안 됨)
 - [ ] **다음 태그에서 새 CI 방식 검증** — 템플릿 렌더링 + `wingetcreate submit` (일반판·LED판)
-- [ ] Chocolatey 승인 확인 — `nshiftspace` 0.2.0(자동 검증·테스트 통과, `Ready`)·0.3.0, `nshiftspace-led` 0.3.0 (0.1.0 실적 약 27일)
-- [ ] winget PR 병합 확인 — #454746(0.2.0, 검증 통과), #454771(0.3.0), #454772(LED 신규 — 폴더 경로 오류를 `nShiftSpace/LED/0.3.0`으로
-  고쳐 재검증 중)
+- [x] Chocolatey 승인 확인 — `nshiftspace` 0.2.0·0.3.0, `nshiftspace-led` 0.3.0 모두 `Approved` (2026-10-21 00:53, 제출 약 3일 뒤.
+  0.1.0 때는 약 27일)
+- [x] winget 일반판 PR 병합 확인 — #454746(0.2.0)·#454771(0.3.0) 2026-10-20 병합, `winget show`로 0.3.0 확인 (2026-11-17)
+- [ ] winget LED판 PR 병합 확인 — #454772(신규 패키지). 검증 통과(`Validation-Completed`), 모더레이터 승인 대기 (2026-11-17 조회).
+  병합되면 README·Wiki·PACKAGING의 LED판 상태 표시를 갱신
+- [ ] **Chocolatey shim으로 자동 실행하면 로그인 때 콘솔 창이 잠깐 뜨는 문제** (2026-11-17 원인 확정) — shim이 콘솔 프로그램이라
+  `.gui` 마커로는 창 생성을 막지 못한다. 문서는 tools 폴더 exe만 안내하도록 고쳤고, **패키지 쪽 대책(shim을 만들지 않기 등)은 미정**.
+  상세는 [PACKAGING.md](PACKAGING.md) "채널별 동작 차이"
 - [ ] 자동 실행 절차를 실제 Windows PC에서 실측 검증 (특히 winget 별칭 생성에 개발자 모드가
   필요한지 여부, 방법 C 예약 작업의 승격 실행 동작)
 
@@ -99,7 +105,7 @@ DESIGN.md의 "공통 초경량 원칙"이 곧 완료 기준의 일부다. 새 �
 - [ ] 자동 실행 메뉴 실측 — winget `Links` 별칭(`nshiftspace`)으로 실행한 상태에서 켰을 때 `Run` 값에
   별칭 경로가 기록되는지(별칭이 심볼릭 링크인지 복사본인지에 따라 다름), 재로그인 후 실제로 뜨는지
 - [ ] `chocolateyuninstall.ps1`에서 `Run` 값 정리 여부 결정 (메뉴로 켠 자동 실행이 제거 후 남는 문제)
-- [ ] 두 채널 0.2.0 반영 확인 후 README·Wiki·PACKAGING 상태 표 갱신 (2절 과제)
+- [~] 두 채널 반영 확인 후 README·Wiki·PACKAGING 상태 표 갱신 — 원고는 2026-11-17 갱신, **Wiki 재발행 대기**
 
 ### v0.3.0 — 메모리 2차 개선 · LED판 별도 패키지
 

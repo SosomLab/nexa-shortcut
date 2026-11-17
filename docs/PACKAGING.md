@@ -4,15 +4,14 @@ nShiftSpace의 Windows 패키지 관리자 배포 현황, 등록 절차, 상태 
 
 ## 한눈에 보기
 
-| 채널 | 패키지 식별자 | 설치 명령 | 상태 (2026-10-18 00:10) |
+| 채널 | 패키지 식별자 | 설치 명령 | 상태 (2026-11-17 조회) |
 |---|---|---|---|
-| Chocolatey | `nshiftspace` | `choco install nshiftspace` | 0.1.0 승인·게시 중 / 0.2.0 자동 검증·테스트 통과(`Ready`, 모더레이터 대기) / 0.3.0 검증·테스트 통과(`Pending`) |
-| winget | `SosomLab.nShiftSpace` | `winget install SosomLab.nShiftSpace` | 0.1.0 등록·게시 중 / 0.2.0 PR [microsoft/winget-pkgs#454746](https://github.com/microsoft/winget-pkgs/pull/454746) 검증 통과·승인 대기 / **0.3.0 PR [microsoft/winget-pkgs#454771](https://github.com/microsoft/winget-pkgs/pull/454771)** |
-| Chocolatey (LED판) | `nshiftspace-led` | `choco install nshiftspace-led` | 0.3.0 최초 제출, 검증 통과·테스트 대기 (`Pending`) |
-| winget (LED판) | `SosomLab.nShiftSpace.LED` | `winget install SosomLab.nShiftSpace.LED` | 0.3.0 최초 등록 PR [microsoft/winget-pkgs#454772](https://github.com/microsoft/winget-pkgs/pull/454772) — 경로 오류 수정 후 재검증 중 |
+| Chocolatey | `nshiftspace` | `choco install nshiftspace` | 0.1.0·0.2.0·0.3.0 모두 승인 (0.2.0·0.3.0은 2026-10-21) |
+| winget | `SosomLab.nShiftSpace` | `winget install SosomLab.nShiftSpace` | 0.1.0·0.2.0·0.3.0 등록 — 0.2.0 PR [#454746](https://github.com/microsoft/winget-pkgs/pull/454746)·0.3.0 PR [#454771](https://github.com/microsoft/winget-pkgs/pull/454771) 2026-10-20 병합 |
+| Chocolatey (LED판) | `nshiftspace-led` | `choco install nshiftspace-led` | 0.3.0 승인 (2026-10-21) |
+| winget (LED판) | `SosomLab.nShiftSpace.LED` | `winget install SosomLab.nShiftSpace.LED` | **미등록** — 0.3.0 최초 등록 PR [microsoft/winget-pkgs#454772](https://github.com/microsoft/winget-pkgs/pull/454772) 검증 통과, 모더레이터 승인 대기 |
 
-설치되는 버전은 **양쪽 모두 아직 0.1.0**이다. v0.2.0(2026-10-17 태그)은 GitHub Release에 zip 4종이 올라갔고,
-Chocolatey 모더레이션과 winget PR 병합이 끝나면 각 채널에서 0.2.0이 설치된다.
+설치되는 버전은 일반판이 **양쪽 모두 0.3.0**, LED판은 **Chocolatey만 0.3.0**이다. winget LED판은 PR이 병합돼야 설치된다.
 
 두 채널 모두 GitHub Release의 zip(`nShiftSpace-x64.zip` / `nShiftSpace-x86.zip`, LED판은 `nShiftSpace-led-*.zip`)을
 다운로드해 설치하는 원격형 패키지다. LED판은 **별도 패키지 이름**으로 게시하고 기존 이름은 일반판을 유지한다
@@ -71,8 +70,16 @@ README에도 요약이 있으며, 여기서는 채널별 차이와 문제 해결
 - **실행 중 프로세스 처리**: Chocolatey는 `chocolateybeforemodify.ps1`이 업그레이드/제거 전에
   실행 중인 nShiftSpace를 종료한다 (LED 패키지는 `nShiftSpace-led*`만). **winget에는 이런 처리가 없으므로** 트레이에서 먼저 종료해야
   파일 잠김으로 실패하지 않는다.
-- **shim과 콘솔**: Chocolatey는 tools 폴더의 exe에 shim을 만든다. GUI(트레이) 프로그램이라
-  콘솔이 붙잡히지 않도록 설치 스크립트가 `nShiftSpace-*.exe.gui` 마커 파일을 생성한다.
+- **shim과 콘솔**: Chocolatey는 tools 폴더의 exe에 shim(`%ChocolateyInstall%\bin\nShiftSpace-*.exe`)을 만든다.
+  설치 스크립트가 만드는 `nShiftSpace-*.exe.gui` 마커는 shim이 **대상 종료를 기다리지 않고 바로 빠지게** 할 뿐이다.
+  shim 자체는 콘솔 서브시스템 프로그램이라, 콘솔 없이 실행되면(자동 실행 `Run` 값·바로가기·탐색기 더블클릭) **콘솔 창이 잠깐 떴다
+  사라진다.** 터미널에서 `nShiftSpace-x64`로 실행할 때는 새 창이 뜨지 않는다.
+  - 2026-11-17 실측(`nshiftspace-led` 0.3.0): shim 22,528바이트·서브시스템 3(콘솔), tools 폴더 exe 6,144바이트·서브시스템 2(GUI).
+    `Run` 값이 shim을 가리키던 PC에서 로그인마다 콘솔 창이 0.5~1.1초 떴고(Shell-Core 이벤트 9707→9708 간격),
+    shim을 `--shimgen-noop`으로 실행해 `conhost.exe`가 자식으로 생기는 것을 확인했다.
+  - **자동 실행에는 shim이 아니라 tools 폴더의 exe를 등록한다.** 트레이 메뉴 "로그인 시 자동 실행"은 실행 중인 exe 경로
+    (`GetModuleFileName`)를 쓰므로 shim으로 실행했더라도 tools 폴더 경로가 기록된다.
+  - 패키지 쪽 대책(shim을 만들지 않기 등)은 **미정**.
 - **시작 프로그램 등록**: 두 채널 모두 자동 등록하지 않는다. 사용자가 프로그램 트레이 메뉴
   "로그인 시 자동 실행"으로 켤 수 있다 (HKCU `Run` 값, v0.2.0부터). 수동 절차는 아래
   ["설치 후 자동 실행 설정"](#설치-후-자동-실행-설정) 절 참고.
@@ -345,6 +352,8 @@ uninstall 스크립트와 함께 넣는 것이 타당하다. [ROADMAP.md](ROADMA
 | 2026-08-02 | 상태 재확인 — 변동 없음. 피드 API `IsApproved=true`·`PackageStatus=Approved`·`IsLatestVersion=true`, 검증/테스트 모두 `Passing` 유지, 게시 버전은 0.1.0 단일, 누적 다운로드 11(7/30과 동일) |
 | 2026-10-17 22:24 | **v0.2.0 `choco push` 성공** (CI 런 39036391096 `chocolatey` 잡) — nuspec 설명을 5KB·자동 실행 메뉴·LED판 안내로 갱신한 버전. 피드 API `Version=0.2.0`, `PackageStatus=Submitted`, `PackageSubmittedStatus=Pending`, 검증/테스트 `Pending` — 모더레이션 큐 진입 |
 | 2026-10-17 23:16 | **v0.3.0 `choco push` 성공 — `nshiftspace` 0.3.0과 신규 `nshiftspace-led` 0.3.0** (CI 런 39039940540, `chocolatey`·`chocolatey-led` 잡). 두 패키지 모두 모더레이션 큐 진입. 0.2.0과 0.3.0이 동시에 큐에 있으므로 승인 순서는 모더레이터에 달림 |
+| 2026-10-21 00:53 | **0.2.0·0.3.0·`nshiftspace-led` 0.3.0 승인** — 피드 API `PackageApprovedDate` 기준 `nshiftspace` 0.2.0 00:53:42, 0.3.0 00:53:49, `nshiftspace-led` 0.3.0 00:54:19. 제출 약 3일 뒤 (2026-11-17 조회로 확인) |
+| 2026-11-17 | 상태 재확인 — `nshiftspace` 0.1.0·0.2.0·0.3.0, `nshiftspace-led` 0.3.0 모두 `IsApproved=true`·`PackageStatus=Approved`. 같은 날 shim 자동 실행 시 콘솔 창 문제 원인 확정(위 "채널별 동작 차이") |
 
 ---
 
@@ -394,6 +403,8 @@ uninstall 스크립트와 함께 넣는 것이 타당하다. [ROADMAP.md](ROADMA
 | 2026-10-17 23:28 | **0.3.0 수동 PR 2건 제출** — 일반판 [microsoft/winget-pkgs#454771](https://github.com/microsoft/winget-pkgs/pull/454771) (브랜치 `SosomLab.nShiftSpace-0.3.0`), **LED판 신규 패키지** [microsoft/winget-pkgs#454772](https://github.com/microsoft/winget-pkgs/pull/454772) (`SosomLab.nShiftSpace.LED`, 별칭 `nshiftspace-led`, 브랜치 `SosomLab.nShiftSpace.LED-0.3.0`). 둘 다 로컬 `winget validate` 통과 |
 | 2026-10-17 23:20 | LED PR #454772 `Manifest-Validation-Error` — 봇 진단: 경로가 `nShiftSpace.LED\\0.3.0`인데 기대 경로는 `nShiftSpace\\LED\\0.3.0` (식별자의 점 = 폴더). 로컬 `winget validate`는 폴더 규칙을 보지 않아 잡지 못했다 |
 | 2026-10-18 00:05 | 포크 브랜치에서 3개 파일을 `manifests/s/SosomLab/nShiftSpace/LED/0.3.0/`으로 옮김(삭제+추가) → PR 재검증. 저장소 템플릿 폴더도 `nShiftSpace/LED/`로 이동, CI 렌더·guard 경로를 "점 → /" 규칙으로 수정, 렌더 결과는 `rendered/<id>/<버전>/`에 모아 아티팩트로 |
+| 2026-10-20 01:18 | **0.2.0 PR #454746 병합**, 01:22 **0.3.0 PR #454771 병합** — #454771 라벨 `Moderator-Approved`·`Publish-Pipeline-Succeeded` (2026-11-17 조회로 확인) |
+| 2026-11-17 | 상태 재확인 — winget-pkgs master의 `manifests/s/SosomLab/nShiftSpace/`에 `0.1.0`·`0.2.0`·`0.3.0`, `winget show SosomLab.nShiftSpace` 버전 0.3.0. **LED판 PR #454772는 열려 있음** — 라벨 `Azure-Pipeline-Passed`·`Validation-Completed`·`New-Package`, 리뷰 필요 상태. 11-17 05:27 모더레이터가 `@wingetbot run`으로 검증을 다시 돌렸고 06:48 봇이 "모더레이터 승인 필요" 안내. 작성자 조치 요구 없음. `winget show SosomLab.nShiftSpace.LED`는 아직 찾지 못함 |
 
 ---
 

@@ -5,6 +5,46 @@
 
 ---
 
+## 2026-11-17 — 채널 승인 반영 · 로그인 때 콘솔 창이 뜨는 원인 확정 (Chocolatey shim)
+
+### 요청
+- v0.3.0 이후 상태 점검과 기록 정리.
+- 윈도우 재시작(로그인) 때 까만 콘솔 창이 떴다 사라지는 일이 반복됨 — 원인 프로그램 점검, nShiftSpace도 의심 대상.
+
+### 분석 내용
+- **채널 상태 (2026-11-17 조회)**: Chocolatey `nshiftspace` 0.2.0·0.3.0과 `nshiftspace-led` 0.3.0이 2026-10-21 00:53 승인.
+  winget #454746(0.2.0)·#454771(0.3.0)은 2026-10-20 병합, `winget show SosomLab.nShiftSpace` 버전 0.3.0.
+  winget LED판 #454772는 열려 있음 — 검증 통과(`Validation-Completed`), 모더레이터 승인 대기, 작성자 조치 요구 없음.
+  문서는 10-18 기준("설치되는 버전은 0.1.0")으로 남아 있었다.
+- **콘솔 창 원인 확정**: 해당 PC의 `HKCU\…\Run`의 `nShiftSpace` 값이 Chocolatey shim
+  `C:\ProgramData\chocolatey\bin\nShiftSpace-led-x64.exe`를 가리키고 있었다.
+  - shim은 22,528바이트·PE 서브시스템 3(콘솔), 대상인 `lib\nshiftspace-led\tools\nShiftSpace-led-x64.exe`는 6,144바이트·서브시스템 2(GUI).
+    tools 폴더에 `.gui` 마커는 있었다 — 마커는 shim이 대상 종료를 기다리지 않게 할 뿐 shim의 콘솔 창 생성은 막지 못한다.
+  - Shell-Core/Operational 이벤트 9707→9708 간격(= shim 수명): 11-09 0.52초, 11-10 1.08초·0.58초, 11-11 0.63초, 11-17 0.69초.
+  - 실증: shim을 `--shimgen-noop`(대상 미실행)으로 실행하고 `Win32_ProcessStartTrace`로 추적 → shim의 자식으로 `conhost.exe` 생성.
+  - 그 PC의 다른 자동 실행 항목(Run·시작프로그램 폴더·로그온 예약 작업) 가운데 콘솔 서브시스템 대상은 이 shim 하나뿐이었다.
+  - 프로그램 본체는 원인이 아니다 — `-mwindows`(Makefile) / `/SUBSYSTEM:WINDOWS`(build.bat)로 빌드되고, 소스에 프로세스 생성·콘솔 할당 호출이 없다.
+    트레이 메뉴의 자동 실행은 `GetModuleFileName` 경로를 쓰므로 shim으로 실행했더라도 tools 폴더 exe가 기록된다.
+    즉 shim 경로는 메뉴가 아니라 수동 등록으로 들어간 값이며(주체 미확인), Wiki 자동 실행 페이지가 Chocolatey 사용자에게
+    "shim 또는 tools 폴더의 exe"를 모두 안내하고 있었다.
+- 미확인: 프로세스 생성 감사(4688)·Sysmon·TaskScheduler 로그가 꺼져 있어 과거 로그인 시점의 `conhost` 생성 기록은 없다.
+  같은 PC의 다른 프로그램(로그온 예약 작업으로 뜨는 파이썬 서버 등)이 콘솔 창을 보였는지는 확정하지 못했다.
+
+### 설계 방향
+- 문서는 확인한 사실 범위로만 고친다: shim은 콘솔 프로그램이라 자동 실행에 쓰면 콘솔 창이 잠깐 뜬다 → 자동 실행에는 tools 폴더 exe.
+- **패키지 쪽 대책(shim을 만들지 않기 등)은 미정** — ROADMAP 2절에 과제로 올린다.
+- guard 잡은 태그 런에서 돈 적이 없어 **실전 미검증** 상태 그대로 둔다.
+
+### 개발 내용 및 소스 위치
+- `docs/PACKAGING.md` — 상태 표, "채널별 동작 차이"의 shim 항목(실측 수치 포함), Chocolatey·winget 진행 이력에 10-20/10-21/11-17 행.
+- `docs/ROADMAP.md` — 기준일, 1절 1-a 상태, 2절 상태 문단과 과제(승인·병합 완료 체크, LED PR 대기, shim 콘솔 창 과제 신설), 3절 상태 표 갱신 항목.
+- `README.md` — LED판 패키지 상태 문구, Chocolatey shim 설명.
+- `docs/wiki/` — `Autostart.md`(shim 권장 제거·경고 추가), `Installation.md`, `Troubleshooting.md`("검은 창" 행), `Home.md`, `Usage.md`, `Roadmap.md`.
+  **Wiki 재발행은 하지 않았다** (원고만 수정).
+- 소스·패키지 스크립트·CI는 변경 없음. 해당 PC의 `Run` 값도 그대로다.
+
+---
+
 ## 2026-10-18 — 진행사항 최신화: winget LED PR 경로 오류 수정 · 심사 상태 갱신
 
 ### 요청

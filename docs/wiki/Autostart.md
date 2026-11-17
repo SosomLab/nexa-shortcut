@@ -20,8 +20,12 @@ winget과 Chocolatey **둘 다 시작 프로그램에 자동 등록하지 않습
 | 설치 방법 | 이렇게 실행한 뒤 켜세요 | 이유 |
 |---|---|---|
 | winget | `nshiftspace` (별칭) | 별칭 경로(`Links`)가 기록되어야 `winget upgrade` 후에도 유지됩니다. 탐색기에서 `Packages\…` 아래 exe를 직접 실행한 뒤 켜면 업그레이드 때 끊어집니다 |
-| Chocolatey | `nShiftSpace-x64` (shim) 또는 tools 폴더의 exe | 경로에 버전이 없어 어느 쪽이든 유지됩니다 |
+| Chocolatey | `nShiftSpace-x64` | 메뉴는 실제 exe(`…\chocolatey\lib\nshiftspace\tools\`) 경로를 기록합니다. 경로에 버전이 없어 업그레이드 후에도 유지됩니다 |
 | zip | 압축 푼 위치의 exe | 그 위치가 그대로 기록됩니다 |
+
+> ⚠️ **Chocolatey shim 경로(`…\chocolatey\bin\nShiftSpace-x64.exe`)를 `Run` 값이나 바로가기에 직접 적지 마세요.**
+> shim은 콘솔 프로그램이라 로그인할 때 검은 창이 잠깐 떴다 사라집니다. 이미 그렇게 등록돼 있다면
+> 메뉴의 체크를 껐다 켜면 실제 exe 경로로 다시 기록됩니다.
 
 > ⚠️ **제거하기 전에 체크를 해제하세요.** 그렇지 않으면 `Run` 값이 남습니다 (Windows는 없는 파일을 무시하지만
 > 작업 관리자 → 시작 프로그램 탭에 흔적이 남습니다). 지우는 명령은 아래 "해제 방법"의 방법 B와 같습니다.

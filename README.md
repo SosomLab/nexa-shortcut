@@ -67,7 +67,7 @@ MSVC에서도 CRT를 링크하지 않으므로(/NODEFAULTLIB + /ENTRY:start) 초
 > 쓰는 것도 가능합니다.
 
 > 키보드 LED 표시판은 **별도 패키지**로 게시한다 — Chocolatey `nshiftspace-led`, winget `SosomLab.nShiftSpace.LED`
-> (v0.3.0에서 최초 제출, 각 채널 심사 완료 후 설치 가능). 아래 명령에서 패키지 이름만 바꾸면 된다.
+> (v0.3.0부터. Chocolatey는 2026-10-21 승인되어 설치 가능, winget은 등록 PR 심사 중). 아래 명령에서 패키지 이름만 바꾸면 된다.
 > 일반판과 LED판은 같은 단축키를 쓰므로 둘 중 하나만 설치한다.
 
 #### winget (일반 PowerShell)
@@ -104,7 +104,9 @@ choco uninstall nshiftspace -y # 제거
 ```
 
 OS 아키텍처에 맞는 exe 하나만 `%ChocolateyInstall%\lib\nshiftspace\tools\`에 설치되고,
-같은 이름의 shim이 PATH에 등록된다. GUI 프로그램이므로 shim이 콘솔을 붙잡지 않도록 `.gui` 마커가 함께 생성된다.
+같은 이름의 shim이 PATH에 등록된다. `.gui` 마커가 함께 생성되어 shim은 프로그램을 띄운 뒤 바로 빠진다.
+다만 shim 자체는 콘솔 프로그램이라 **자동 실행(`Run` 값·바로가기)에 shim 경로를 쓰면 로그인 때 콘솔 창이 잠깐 뜬다** —
+자동 실행은 트레이 메뉴로 켜거나 tools 폴더의 exe를 등록할 것.
 
 > 제거 전에 실행 중이면 Chocolatey가 프로세스를 먼저 종료한다(`chocolateybeforemodify.ps1`).
 > winget은 그런 처리가 없으므로 **실행 중인 nShiftSpace를 트레이에서 종료한 뒤** 제거/업그레이드할 것.

@@ -6,14 +6,14 @@ nexa-shortcut은 **초경량 단축키 유틸리티 모음**을 목표로 합니
 | # | 목표 | 산출물 | 상태 |
 |---|---|---|---|
 | 1 | **nShiftSpace** — Shift+Space 한/영 전환 | `nShiftSpace-x64/x86.exe` (5KB) | ✅ 완료 (v0.1.0) |
-| 1-a | **키보드 LED 표시판** — 키를 누르는 동안 트레이 아이콘 켜짐 (메뉴로 켜고 끔) | `nShiftSpace-led-x64/x86.exe` (6KB) · 패키지 `nshiftspace-led` / `SosomLab.nShiftSpace.LED` | ✅ v0.2.0 (패키지는 v0.3.0 심사 중) |
+| 1-a | **키보드 LED 표시판** — 키를 누르는 동안 트레이 아이콘 켜짐 (메뉴로 켜고 끔) | `nShiftSpace-led-x64/x86.exe` (6KB) · 패키지 `nshiftspace-led` / `SosomLab.nShiftSpace.LED` | ✅ v0.2.0 (패키지는 v0.3.0 — Chocolatey 승인, winget 심사 중) |
 | 1-b | **로그인 시 자동 실행** 트레이 메뉴 | 메뉴 항목 (양쪽 빌드) | ✅ v0.2.0 |
 | 2 | **nexa-mapper** — 사용자 정의 키 재매핑 엔진 | `nMapper.exe` + `mappings.ini` | ⬜ 예정 |
 | 3 | **exe 내보내기** — 설정 내장 독립 exe 생성 | 엔진 내 "실행파일 만들기" | ⬜ 예정 |
 | — | 배포 채널 (winget · Chocolatey) | 두 채널 설치 명령 동작 | ✅ 완료 |
 
 1-a·1-b와 메모리 표시 개선(작업 관리자 약 1MB → 0.1MB)은 **v0.2.0·v0.3.0**(2026-10-17)으로 릴리스되었습니다.
-winget·Chocolatey는 각 채널의 심사가 끝나면 0.2.0으로 올라가며, 그 전까지는 0.1.0이 설치됩니다.
+winget·Chocolatey 일반판은 0.3.0이 설치됩니다 (2026-10-20~21 심사 통과). LED판은 Chocolatey에서 설치할 수 있고 winget은 등록 심사 중입니다.
 
 ---
 

@@ -100,7 +100,7 @@ Shift+Space 기능은 같고, 추가로 **아무 키나 누르는 동안 트레�
 설정은 저장하지 않으며 다시 실행하면 켜짐으로 시작합니다 (레지스트리·설정 파일을 쓰지 않는 원칙).
 항상 꺼 두고 싶다면 일반판을 쓰세요.
 
-- 패키지: winget `SosomLab.nShiftSpace.LED`, Chocolatey `nshiftspace-led` (v0.3.0에서 최초 제출, 심사 후 설치 가능).
+- 패키지: winget `SosomLab.nShiftSpace.LED`, Chocolatey `nshiftspace-led` (v0.3.0부터. Chocolatey는 설치 가능, winget은 등록 심사 중 — 2026-11-17 기준).
   일반판 패키지(`SosomLab.nShiftSpace` / `nshiftspace`)는 이름 그대로 일반판입니다. 또는 zip으로 직접 받으세요.
 - 두 판은 **동시에 실행되지 않습니다** (같은 단축키·중복 실행 방지를 공유). 하나를 종료하고 다른 것을 실행하세요.
 - 여러 키를 같이 누른 경우 어느 키든 떼면 꺼집니다. 켜진 상태에서 explorer가 재시작되면 꺼짐으로 초기화됩니다.
