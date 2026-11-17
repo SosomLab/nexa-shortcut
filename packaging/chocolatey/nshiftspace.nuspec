@@ -13,13 +13,13 @@
     <licenseUrl>https://github.com/SosomLab/nexa-shortcut/blob/main/LICENSE</licenseUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <tags>korean ime hangul hotkey shift-space keyboard lightweight portable</tags>
-    <summary>Ultra-lightweight Shift+Space Korean/English IME toggle for Windows (5KB)</summary>
+    <summary>Ultra-lightweight Shift+Space Korean/English IME toggle for Windows (7KB)</summary>
     <description><![CDATA[
 **nShiftSpace** (Nexa ShiftSpace) is an ultra-lightweight Windows tray utility
 that toggles the Korean/English IME with **Shift+Space** — the classic Korean
 keyboard layout behavior.
 
-- Single ~5KB executable, no C runtime, pure Win32 API
+- Single ~7KB executable, no C runtime, pure Win32 API
 - Zero CPU while idle (uses `RegisterHotKey`, no keyboard hook)
 - About 0.1MB in Task Manager (IME disabled for this process, working set trimmed after activity)
 - Tray menu: "Start at login" toggle (HKCU Run value, written only when you turn it on) and Exit

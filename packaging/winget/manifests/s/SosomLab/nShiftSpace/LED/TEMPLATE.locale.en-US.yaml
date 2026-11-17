@@ -16,7 +16,7 @@ Description: |-
   Windows tray utility that toggles the Korean/English IME with Shift+Space.
   The tray icon turns green while any key is held and blue when released, using
   Raw Input (no keyboard hook). The "Keyboard LED" tray toggle unregisters Raw
-  Input when off. Single ~6KB executable, pure Win32 API, no C runtime, zero CPU
+  Input when off. Single ~8KB executable, pure Win32 API, no C runtime, zero CPU
   while idle, "Start at login" tray toggle. Install either SosomLab.nShiftSpace
   or this package, not both - they share the same hotkey.
 Moniker: nshiftspace-led

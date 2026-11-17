@@ -14,7 +14,7 @@ ShortDescription: Ultra-lightweight Shift+Space Korean/English IME toggle for Wi
 Description: |-
   nShiftSpace (Nexa ShiftSpace) is an ultra-lightweight Windows tray utility
   that toggles the Korean/English IME with Shift+Space — the classic Korean
-  keyboard layout behavior. Single ~5KB executable built with pure Win32 API
+  keyboard layout behavior. Single ~7KB executable built with pure Win32 API
   and no C runtime; zero CPU while idle, about 0.1MB in Task Manager.
   The tray menu has a "Start at login" toggle (HKCU Run value, written only
   when you turn it on) and Exit. A keyboard-LED variant is available as a
