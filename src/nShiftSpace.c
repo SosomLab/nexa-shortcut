@@ -18,6 +18,11 @@
  *     예외 2: imm32 — ImmDisableIME 하나. 둘 다 user32 가 이미 로드하는 DLL이라 추가 부담 없음.)
  *
  * 트레이 메뉴:
+ *  - 맨 위에 프로그램 이름과 버전 (누를 수 없는 머리 줄)
+ *  - 시작 메뉴에 바로가기 (체크) — 사용자 시작 메뉴(Programs)에 자기 exe를 가리키는 .lnk를 만들거나 지운다.
+ *    .lnk 저장에는 COM(IShellLink)이 필요한데, ole32 를 import 하면 시작할 때부터 로드되어 메모리가 늘어난다.
+ *    그래서 메뉴를 누른 순간에만 LoadLibrary 로 불러 쓰고 바로 내린다. Chocolatey 패키지가 공용 시작 메뉴에
+ *    같은 이름의 바로가기를 이미 두었으면 체크된 채 비활성으로 보여 준다(공용 쪽은 관리자만 지울 수 있다).
  *  - 로그인 시 자동 실행 (체크) — HKCU\Software\Microsoft\Windows\CurrentVersion\Run 에
  *    "nShiftSpace" 값으로 자기 exe 경로(따옴표 포함)를 쓰거나 지운다. 사용자가 켤 때만 쓴다 (기본: 안 씀).
  *  - 키보드 LED 표시 (체크, NSS_LED 빌드만)
@@ -35,6 +40,7 @@
  *              (무설정 원칙): 시작 시 항상 켜짐.
  */
 #include <windows.h>
+#include <shlobj.h>   /* IShellLinkW · IPersistFile 선언만 쓴다 — ole32 는 import 하지 않는다 */
 
 #ifndef MOD_NOREPEAT
 #define MOD_NOREPEAT 0x4000  /* Vista 이전 SDK 헤더 대비 */
@@ -47,6 +53,7 @@
 #define IDM_EXIT      10
 #define IDM_LED       11 /* NSS_LED 빌드 전용: 키보드 LED 표시 켜기/끄기 */
 #define IDM_AUTOSTART 12 /* 로그인 시 자동 실행 켜기/끄기 */
+#define IDM_SHORTCUT  13 /* 시작 메뉴 바로가기 만들기/지우기 */
 #define IDI_TRAY    1  /* res/nShiftSpace.rc 의 아이콘 리소스 ID (꺼짐/기본) */
 #define IDI_TRAY_ON 2  /* LED 켜짐 아이콘 (NSS_LED 빌드에만 존재) */
 
@@ -54,6 +61,24 @@ static NOTIFYICONDATAW g_nid;
 static WNDCLASSW       g_wc;
 static UINT            g_taskbar_created;
 static WCHAR           g_run_cmd[MAX_PATH + 3];  /* "<exe 경로>" + NUL — Run 값 */
+
+/* 트레이 메뉴 맨 위에 보이는 "이름 v버전" 줄.
+ * 버전은 빌드가 -DNSS_VERSION=0.3.2 처럼 따옴표 없이 넘긴다(Makefile · build.bat · CI는 태그 이름).
+ * 없으면 "dev". 두 단계 매크로로 L"..." 문자열로 바꾼다. */
+#ifndef NSS_VERSION
+#define NSS_VERSION dev
+#endif
+#define NSS_STR2(x)  #x
+#define NSS_STR(x)   NSS_STR2(x)
+#define NSS_WIDE2(s) L##s
+#define NSS_WIDE(s)  NSS_WIDE2(s)
+#ifdef NSS_LED
+#define APP_TITLE L"nShiftSpace LED v" NSS_WIDE(NSS_STR(NSS_VERSION))
+#define LNK_NAME  L"\\nShiftSpace LED.lnk"   /* Chocolatey 패키지의 바로가기 이름과 같다 */
+#else
+#define APP_TITLE L"nShiftSpace v" NSS_WIDE(NSS_STR(NSS_VERSION))
+#define LNK_NAME  L"\\nShiftSpace.lnk"
+#endif
 
 #define RUN_KEY L"Software\\Microsoft\\Windows\\CurrentVersion\\Run"
 #define RUN_VAL L"nShiftSpace"
@@ -82,6 +107,70 @@ static void set_autostart(BOOL on)
     } else {
         RegDeleteKeyValueW(HKEY_CURRENT_USER, RUN_KEY, RUN_VAL);
     }
+}
+
+/* --- 시작 메뉴 바로가기 ---
+ * g_lnk 에 시작 메뉴 Programs 폴더의 바로가기 경로를 만들고 그 파일이 있는지 돌려준다.
+ * common: FALSE = 사용자(%APPDATA%), TRUE = 공용(%ProgramData%).
+ * SHGetFolderPath 대신 환경 변수를 편다 — 셸 폴더 API는 windows.storage 등 큰 DLL을 끌어와
+ * 메뉴를 열 때마다 메모리를 늘린다. */
+#define PROGRAMS_DIR L"\\Microsoft\\Windows\\Start Menu\\Programs"
+static WCHAR g_lnk[MAX_PATH + 32];
+static WCHAR g_exe[MAX_PATH];
+
+static BOOL shortcut_exists(BOOL common)
+{
+    if (!ExpandEnvironmentStringsW(common ? L"%ProgramData%" PROGRAMS_DIR LNK_NAME
+                                          : L"%APPDATA%" PROGRAMS_DIR LNK_NAME,
+                                   g_lnk, MAX_PATH + 32)) {
+        g_lnk[0] = 0;
+        return FALSE;
+    }
+    return GetFileAttributesW(g_lnk) != INVALID_FILE_ATTRIBUTES;
+}
+
+/* uuid 라이브러리를 링크하지 않도록 필요한 GUID 셋만 직접 둔다 */
+static const GUID k_clsid_shell_link =
+    { 0x00021401, 0, 0, { 0xC0, 0, 0, 0, 0, 0, 0, 0x46 } };
+static const GUID k_iid_shell_link_w =
+    { 0x000214F9, 0, 0, { 0xC0, 0, 0, 0, 0, 0, 0, 0x46 } };
+static const GUID k_iid_persist_file =
+    { 0x0000010B, 0, 0, { 0xC0, 0, 0, 0, 0, 0, 0, 0x46 } };
+
+typedef HRESULT (WINAPI *co_initialize_t)(LPVOID);
+typedef void    (WINAPI *co_uninitialize_t)(void);
+typedef HRESULT (WINAPI *co_create_instance_t)(const GUID *, void *, DWORD, const GUID *, void **);
+
+/* g_lnk 경로에 자기 exe 를 가리키는 바로가기를 저장한다. ole32 는 이 함수 안에서만 올라온다. */
+static void create_shortcut(void)
+{
+    HMODULE ole = LoadLibraryW(L"ole32.dll");
+    co_initialize_t      co_init;
+    co_uninitialize_t    co_uninit;
+    co_create_instance_t co_create;
+    IShellLinkW  *link;
+    IPersistFile *file;
+
+    if (!ole)
+        return;
+    co_init   = (co_initialize_t)(void *)GetProcAddress(ole, "CoInitialize");
+    co_uninit = (co_uninitialize_t)(void *)GetProcAddress(ole, "CoUninitialize");
+    co_create = (co_create_instance_t)(void *)GetProcAddress(ole, "CoCreateInstance");
+    if (co_init && co_uninit && co_create && SUCCEEDED(co_init(NULL))) {
+        if (SUCCEEDED(co_create(&k_clsid_shell_link, NULL, CLSCTX_INPROC_SERVER,
+                                &k_iid_shell_link_w, (void **)&link))) {
+            GetModuleFileNameW(NULL, g_exe, MAX_PATH);
+            link->lpVtbl->SetPath(link, g_exe);
+            if (SUCCEEDED(link->lpVtbl->QueryInterface(link, &k_iid_persist_file,
+                                                       (void **)&file))) {
+                file->lpVtbl->Save(file, g_lnk, TRUE);
+                file->lpVtbl->Release(file);
+            }
+            link->lpVtbl->Release(link);
+        }
+        co_uninit();
+    }
+    FreeLibrary(ole);
 }
 
 #ifdef NSS_LED
@@ -189,9 +278,22 @@ static LRESULT CALLBACK wnd_proc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
         if (LOWORD(lp) == WM_RBUTTONUP || LOWORD(lp) == WM_LBUTTONUP) {
             POINT pt;
             HMENU menu = CreatePopupMenu();
+            /* 맨 위: 프로그램 이름과 버전 (누를 수 없는 머리 줄) */
+            AppendMenuW(menu, MF_STRING | MF_GRAYED, 0, APP_TITLE);
+            AppendMenuW(menu, MF_SEPARATOR, 0, NULL);
             /* "로그인 시 자동 실행(&S)" — 체크 표시는 Run 값 존재 여부 */
             AppendMenuW(menu, autostart_enabled() ? MF_STRING | MF_CHECKED : MF_STRING,
                         IDM_AUTOSTART, L"로그인 시 자동 실행(&S)");
+            /* "시작 메뉴에 바로가기(&M)" — 사용자 또는 공용 시작 메뉴에 있으면 체크.
+               공용 쪽에만 있으면(Chocolatey 설치) 우리가 지울 수 없으므로 비활성으로 보여 준다. */
+            {
+                BOOL common = shortcut_exists(TRUE);
+                BOOL user   = shortcut_exists(FALSE);
+                AppendMenuW(menu,
+                            MF_STRING | ((user || common) ? MF_CHECKED : 0)
+                                      | ((common && !user) ? MF_GRAYED : 0),
+                            IDM_SHORTCUT, L"시작 메뉴에 바로가기(&M)");
+            }
 #ifdef NSS_LED
             /* "키보드 LED 표시(&L)" — 체크 표시로 현재 상태를 보여준다 */
             AppendMenuW(menu, g_led_enabled ? MF_STRING | MF_CHECKED : MF_STRING,
@@ -216,6 +318,12 @@ static LRESULT CALLBACK wnd_proc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
         }
         else if (LOWORD(wp) == IDM_AUTOSTART)
             set_autostart(!autostart_enabled());
+        else if (LOWORD(wp) == IDM_SHORTCUT) {
+            if (shortcut_exists(FALSE))
+                DeleteFileW(g_lnk);
+            else if (g_lnk[0])
+                create_shortcut();
+        }
 #ifdef NSS_LED
         else if (LOWORD(wp) == IDM_LED)
             set_led_enabled(hwnd, !g_led_enabled);

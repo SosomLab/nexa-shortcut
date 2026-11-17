@@ -23,6 +23,14 @@ CFLAGS := -Os -s -mwindows -nostdlib -DUNICODE -D_UNICODE \
 # advapi32: "로그인 시 자동 실행"(HKCU Run 값) 전용 / imm32: ImmDisableIME 전용
 LIBS   := -lkernel32 -luser32 -lshell32 -ladvapi32 -limm32
 
+# 트레이 메뉴 머리 줄의 버전. 기본은 git 태그(v 제외), 태그 사이에서는 0.3.1-2-gabc1234 꼴, git이 없으면 dev.
+# CI 태그 빌드는 make VERSION=0.3.2 로 직접 준다. 버전만 바뀌었을 때는 make clean 뒤 다시 빌드한다.
+VERSION ?= $(patsubst v%,%,$(shell git describe --tags --always 2>/dev/null))
+ifeq ($(strip $(VERSION)),)
+VERSION := dev
+endif
+CFLAGS += -DNSS_VERSION=$(VERSION)
+
 # LED판: 컴파일러·windres 양쪽에 같은 매크로를 준다 (rc의 #ifdef로 켜짐 아이콘 포함)
 LEDDEF := -DNSS_LED
 

@@ -29,7 +29,13 @@ jobs:
           sudo apt-get install -y --no-install-recommends gcc-mingw-w64 make python3
 
       - name: Build (x64 + x86)
-        run: make
+        # 태그 빌드는 태그 이름을 버전으로 준다(트레이 메뉴 머리 줄). 그 밖에는 Makefile 기본값(git describe, 얕은 체크아웃이면 커밋 해시).
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            make VERSION="${GITHUB_REF_NAME#v}"
+          else
+            make
+          fi
 
       - name: Verify size budget (초경량 회귀 검사)
         run: |

@@ -12,6 +12,11 @@ if errorlevel 1 (
     exit /b 1
 )
 
+rem 트레이 메뉴 머리 줄의 버전: git 태그(v 제외), git이 없으면 dev
+set NSS_VER=dev
+for /f "delims=" %%v in ('git describe --tags --always 2^>nul') do set NSS_VER=%%v
+if "%NSS_VER:~0,1%"=="v" set NSS_VER=%NSS_VER:~1%
+
 if not exist build mkdir build
 if not exist dist  mkdir dist
 
@@ -19,7 +24,7 @@ rem ---- 일반판 ----
 rc /nologo /fo build\nShiftSpace.res res\nShiftSpace.rc
 if errorlevel 1 exit /b 1
 
-cl /nologo /utf-8 /O1 /GS- /DUNICODE /D_UNICODE ^
+cl /nologo /utf-8 /O1 /GS- /DUNICODE /D_UNICODE /DNSS_VERSION=%NSS_VER% ^
    src\nShiftSpace.c build\nShiftSpace.res ^
    /Fo:build\ /Fe:dist\nShiftSpace-x64.exe ^
    /link /SUBSYSTEM:WINDOWS /ENTRY:start /NODEFAULTLIB ^
@@ -30,7 +35,7 @@ rem ---- LED판 (NSS_LED: 켜짐 아이콘 리소스 + Raw Input 코드 포함) 
 rc /nologo /d NSS_LED /fo build\nShiftSpace-led.res res\nShiftSpace.rc
 if errorlevel 1 exit /b 1
 
-cl /nologo /utf-8 /O1 /GS- /DUNICODE /D_UNICODE /DNSS_LED ^
+cl /nologo /utf-8 /O1 /GS- /DUNICODE /D_UNICODE /DNSS_VERSION=%NSS_VER% /DNSS_LED ^
    src\nShiftSpace.c build\nShiftSpace-led.res ^
    /Fo:build\ /Fe:dist\nShiftSpace-led-x64.exe ^
    /link /SUBSYSTEM:WINDOWS /ENTRY:start /NODEFAULTLIB ^
