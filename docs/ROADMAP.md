@@ -22,6 +22,8 @@ nexa-shortcut 프로젝트의 **목표**와 그 목표를 이루기 위한 **할
 | — | **배포 채널 확보** — winget / Chocolatey 정식 등록 | 두 채널 설치 명령 동작 | ✅ 완료 (2026-07-30) |
 | — | **사용자 문서 창구** — 설치·자동 실행·문제 해결 안내 | [GitHub Wiki](https://github.com/SosomLab/nexa-shortcut/wiki) 8개 페이지 | ✅ 완료 (2026-08-02) |
 
+**다음 할 일**: 개발은 목표 2 **nexa-mapper**([5절](#5-목표-2--nexa-mapper-다음-개발-대상)). 배포 쪽은 [2절](#2-배포-채널--등록-완료-후속-과제-6건)의 후속 과제 6건.
+
 ### 모든 목표에 공통으로 적용되는 불변 원칙
 
 DESIGN.md의 "공통 초경량 원칙"이 곧 완료 기준의 일부다. 새 기능을 넣을 때마다 아래를 만족해야 한다.
@@ -35,12 +37,36 @@ DESIGN.md의 "공통 초경량 원칙"이 곧 완료 기준의 일부다. 새 �
 
 ---
 
-## 2. 배포 채널 — 등록 완료, 남은 과제 4건
+## 2. 배포 채널 — 등록 완료, 후속 과제 6건
 
 두 채널 모두 최초 등록 심사를 통과해 설치 명령이 동작한다. 상세는 [PACKAGING.md](PACKAGING.md) 참고.
-**2026-11-17 기준 설치되는 버전은 일반판이 양쪽 모두 0.3.0, LED판은 Chocolatey만 0.3.0.**
-같은 날 v0.3.1을 릴리스했다 — Chocolatey 2종과 winget 일반판(#482170)이 심사 큐에 있고, winget LED판은 신규 패키지 PR(#454772)이
-아직 열려 있어 0.3.1 제출을 보류했다.
+v0.3.1(2026-11-17)은 프로그램이 0.3.0과 같고 Chocolatey 패키지의 설치 방식만 바뀐 버전이다 (shim을 만들지 않음 · 제거 시 자동 실행 값 정리).
+
+**상태 (2026-11-17 23:08 조회)**
+
+| 패키지 | 설치되는 버전 | 0.3.1 |
+|---|---|---|
+| winget `SosomLab.nShiftSpace` | **0.3.1** | PR #482170 2026-11-17 20:49 병합 (제출 약 1시간 10분 뒤) |
+| Chocolatey `nshiftspace` | 0.3.0 | 제출됨 — 자동 검증·설치 테스트 통과, 모더레이터 심사 대기 |
+| Chocolatey `nshiftspace-led` | 0.3.0 | 위와 같음 |
+| winget `SosomLab.nShiftSpace.LED` | 미등록 | 0.3.0 최초 등록 PR #454772가 승인 대기 → 0.3.1은 guard가 보류 |
+
+### 후속 과제 (우선순위 순)
+
+1. [ ] **Chocolatey 0.3.1 승인 확인** — `nshiftspace`·`nshiftspace-led`. 승인되면 README·Wiki·PACKAGING 상태 갱신
+   (실적: 0.1.0 약 27일, 0.2.0·0.3.0 약 3일)
+2. [ ] **winget LED판** — #454772(0.3.0 신규 패키지) 병합 확인. 병합 뒤 Actions에서 태그 `v0.3.1`로 `build` 워크플로를
+   `force=true` 수동 실행해 0.3.1 제출 (사용자 승인 필요). guard의 `force=true` 경로와 LED판 제출 경로의 첫 실전이 된다
+3. [ ] **이 PC 설치본을 정식 게시본으로** — 지금은 시험용 로컬 0.3.1이 설치돼 있다. Chocolatey 승인 뒤
+   `choco upgrade nshiftspace-led --force` (사용자 승인 필요)
+4. [ ] **사용자 실측 3종** (0.3.1 설치본) — 트레이 아이콘이 보이는지 · Shift+Space 전환 · 다음 로그인 때 콘솔 창이 뜨지 않는지
+5. [ ] **일반판 `nshiftspace` 0.3.1 실물 설치·제거 시험** — 지금까지는 모의 시험과 pack으로만 확인. 제거 스크립트(`Run` 값 조건부 삭제)는
+   두 패키지 모두 실물로 돌린 적이 없다
+6. [ ] 자동 실행 절차를 실제 Windows PC에서 실측 검증 (특히 winget 별칭 생성에 개발자 모드가
+   필요한지 여부, 방법 C 예약 작업의 승격 실행 동작)
+
+<details>
+<summary>완료한 일 (12건)</summary>
 
 - [x] Chocolatey `nshiftspace` 0.1.0 모더레이션 승인 (2026-07-30 21:01)
 - [x] winget `SosomLab.nShiftSpace` 0.1.0 PR 병합 —
@@ -52,22 +78,17 @@ DESIGN.md의 "공통 초경량 원칙"이 곧 완료 기준의 일부다. 새 �
 - [x] winget 자동 제출 첫 실행 (v0.2.0, 2026-10-17) — **실패**: `wingetcreate`가 x64 zip을 x86 항목에 짝지음.
   워크플로 URL에 `|x64`/`|x86` 지정을 추가해 수정, 0.2.0은 수동 PR [#454746](https://github.com/microsoft/winget-pkgs/pull/454746)
 - [x] v0.3.0 태그에서 `|x64` 지정 재검증 — **또 실패** (zip+중첩 포터블은 `wingetcreate update`로 안 됨)
-- [x] **새 CI 방식 검증** — v0.3.1 태그(2026-11-17)에서 템플릿 렌더링 + `wingetcreate submit`이 일반판 PR #482170을 자동 생성.
-  `guard` 잡도 첫 실전에서 예상대로 판정 (Chocolatey 2종·winget 일반판 게시, winget LED판 보류). LED판 제출 경로와
-  guard의 제외 판정·`force=true` 경로는 아직 실전 미검증
-- [ ] v0.3.1 심사 확인 — Chocolatey `nshiftspace`·`nshiftspace-led` 0.3.1 승인, winget #482170 병합. 반영되면 README·Wiki·PACKAGING 상태 갱신
-- [ ] winget LED판 0.3.1 제출 — #454772(0.3.0) 병합 뒤 Actions에서 태그 `v0.3.1`로 `build` 워크플로를 `force=true` 수동 실행
-- [x] Chocolatey 승인 확인 — `nshiftspace` 0.2.0·0.3.0, `nshiftspace-led` 0.3.0 모두 `Approved` (2026-10-21 00:53, 제출 약 3일 뒤.
-  0.1.0 때는 약 27일)
-- [x] winget 일반판 PR 병합 확인 — #454746(0.2.0)·#454771(0.3.0) 2026-10-20 병합, `winget show`로 0.3.0 확인 (2026-11-17)
-- [ ] winget LED판 PR 병합 확인 — #454772(신규 패키지). 검증 통과(`Validation-Completed`), 모더레이터 승인 대기 (2026-11-17 조회).
-  병합되면 README·Wiki·PACKAGING의 LED판 상태 표시를 갱신
+- [x] Chocolatey 승인 확인 — `nshiftspace` 0.2.0·0.3.0, `nshiftspace-led` 0.3.0 모두 `Approved` (2026-10-21 00:53, 제출 약 3일 뒤)
+- [x] winget 일반판 PR 병합 확인 — #454746(0.2.0)·#454771(0.3.0) 2026-10-20 병합
 - [x] **Chocolatey shim으로 자동 실행하면 로그인 때 콘솔 창이 잠깐 뜨는 문제** (2026-11-17 원인 확정) — shim이 콘솔 프로그램이라
   `.gui` 마커로는 창 생성을 막지 못한다. **0.3.1에서 수정**: shim을 만들지 않고(`.ignore`) 시작 메뉴 바로가기를 두며,
-  shim을 가리키던 자동 실행 값을 실제 exe 경로로 옮긴다 (커밋 2e7ae67·b09e736). 2026-11-17 `nshiftspace-led` 0.3.0 → 0.3.1 실제 업그레이드
-  시험 통과. 채널 게시·심사 추적은 릴리스 뒤 별도. 상세는 [PACKAGING.md](PACKAGING.md) "채널별 동작 차이"
-- [ ] 자동 실행 절차를 실제 Windows PC에서 실측 검증 (특히 winget 별칭 생성에 개발자 모드가
-  필요한지 여부, 방법 C 예약 작업의 승격 실행 동작)
+  shim을 가리키던 자동 실행 값을 실제 exe 경로로 옮긴다 (커밋 2e7ae67·b09e736). `nshiftspace-led` 0.3.0 → 0.3.1 실제 업그레이드
+  시험 통과. 상세는 [PACKAGING.md](PACKAGING.md) "채널별 동작 차이"
+- [x] **새 CI 방식 검증** — v0.3.1 태그(2026-11-17)에서 템플릿 렌더링 + `wingetcreate submit`이 일반판 PR #482170을 자동 생성.
+  `guard` 잡도 첫 실전에서 예상대로 판정 (Chocolatey 2종·winget 일반판 게시, winget LED판 보류). guard의 제외 판정은 아직 실전 미검증
+- [x] winget 일반판 0.3.1 병합 확인 — #482170 2026-11-17 20:49, `winget show` 0.3.1
+
+</details>
 
 > ⚠️ 운영 규칙: **이미 게시한 태그는 재발행 금지** (릴리스 zip의 SHA256이 매니페스트에 고정됨).
 > 수정이 필요하면 새 버전으로 배포한다.
@@ -88,7 +109,7 @@ DESIGN.md의 "공통 초경량 원칙"이 곧 완료 기준의 일부다. 새 �
 
 ---
 
-## 3. v0.2.0 · v0.3.0 — LED판 · 자동 실행 메뉴 · 메모리 · LED판 별도 패키지 (2026-10-17 릴리스, 패키지 심사 중)
+## 3. v0.2.0 · v0.3.0 — LED판 · 자동 실행 메뉴 · 메모리 · LED판 별도 패키지 (2026-10-17 릴리스 · 채널 반영 완료, winget LED판만 심사 중)
 
 2026-10-17 `feat/led-indicator` 브랜치에서 구현해 main에 병합하고 같은 날 `v0.2.0` 태그로 릴리스했다.
 이어서 메모리 2차 개선과 LED판 별도 패키지를 main에서 작업해 같은 날 `v0.3.0`으로 릴리스했다 (아래 소절)
@@ -112,7 +133,7 @@ DESIGN.md의 "공통 초경량 원칙"이 곧 완료 기준의 일부다. 새 �
   별칭 경로가 기록되는지(별칭이 심볼릭 링크인지 복사본인지에 따라 다름), 재로그인 후 실제로 뜨는지
 - [x] `chocolateyuninstall.ps1`에서 `Run` 값 정리 여부 결정 — **정리한다** (2026-11-17). 값이 이 패키지의 tools 폴더 exe나
   옛 shim을 가리킬 때만 지운다. 0.3.1에 포함 (커밋 2e7ae67)
-- [~] 두 채널 반영 확인 후 README·Wiki·PACKAGING 상태 표 갱신 — 원고는 2026-11-17 갱신, **Wiki 재발행 대기**
+- [x] 두 채널 반영 확인 후 README·Wiki·PACKAGING 상태 표 갱신 — 2026-11-17 갱신·Wiki 발행. 이후 변동(0.3.1 심사, winget LED판)은 2절 후속 과제에서 추적
 
 ### v0.3.0 — 메모리 2차 개선 · LED판 별도 패키지
 
@@ -236,6 +257,8 @@ DESIGN.md의 "공통 초경량 원칙"이 곧 완료 기준의 일부다. 새 �
 - [x] 메모리 2차 개선 (2026-10-17, v0.3.0) — 메뉴 활성화 시 IME/TSF 부착이 재증가 원인. `ImmDisableIME` + 활동 2초 뒤 타이머
   트리밍으로 68~120K. import 4개 제거로 크기 동일 유지
 - [x] LED판 별도 패키지 명세·CI (2026-10-17, v0.3.0) — `nshiftspace-led`, `SosomLab.nShiftSpace.LED`
+- [x] v0.3.1 (2026-11-17) — Chocolatey 패키지가 shim을 만들지 않음(로그인 때 콘솔 창 문제 해결) · 제거 시 자동 실행 값 정리 ·
+  guard 잡과 winget 새 제출 방식(템플릿 렌더링 + `submit`) 첫 실전 · 개발/협업 세션 분담 규칙(루트 `CLAUDE.md`) 도입
 - [x] 자체 아이콘 내장 (198바이트 1bpp ICO, `tools/make_icon.py`)
 - [x] 중복 실행 방지, explorer 재시작 시 트레이 아이콘 복구
 - [x] 크로스 빌드(macOS mingw-w64) + Windows 빌드(MSYS2, MSVC) 경로 확보

@@ -5,6 +5,41 @@
 
 ---
 
+## 2026-11-17 — 내용 정리 · 진행사항 최신화: winget 0.3.1 병합 · Chocolatey 0.3.1 자동 검증 통과
+
+### 요청
+- 오늘 작업을 반영해 문서를 정리하고 현재 상태로 맞출 것.
+
+### 분석 내용
+- **23:08 조회**
+  - winget 일반판: PR [#482170](https://github.com/microsoft/winget-pkgs/pull/482170) **20:49 병합** (제출 약 1시간 10분 뒤). 라벨 `Validation-Completed`·`Moderator-Approved`·
+    `Publish-Pipeline-Succeeded`. `winget show SosomLab.nShiftSpace` 버전 **0.3.1**.
+  - Chocolatey `nshiftspace`·`nshiftspace-led` 0.3.1: 둘 다 `PackageStatus=Submitted`, `IsApproved=false`. 자동 검증 `PackageValidationResultStatus=Passing`(20:15),
+    설치 테스트 `PackageTestResultStatus=Passing`(20:29 / 20:31), `PackageScanStatus=Pending`. 모더레이터 심사 전이라 `choco install`은 아직 0.3.0을 받는다.
+  - winget LED판 [#454772](https://github.com/microsoft/winget-pkgs/pull/454772): 그대로 열림 (`Validation-Completed`, 리뷰 필요, 마지막 갱신 11-17 06:48).
+  - CI: main push 런 f18ac37(44066935746)·a7a8faf(44070283095) 모두 성공.
+- 문서 점검에서 나온 것
+  - CHANGELOG·PACKAGING의 경로 표기 3곳이 깨져 있었다 — `chocolatey\bin`, `…\bin\nShiftSpace-led-x64.exe`, `…\lib-bkp\nshiftspace-led`의
+    `\b`·`\n`이 제어 문자와 줄바꿈으로 들어가 있었다 (기록 스크립트의 문자열 이스케이프 실수).
+  - PACKAGING "shim과 콘솔" 항목 첫머리가 0.3.0까지의 동작(shim 생성·`.gui` 마커)을 현재형으로 쓰고 있었다.
+  - 오늘 한 Wiki 발행이 CHANGELOG에 빠져 있었다.
+
+### 설계 방향
+- 다음 개발 대상은 nexa-mapper(ROADMAP 5절). 배포 쪽은 후속 과제 6건으로 줄여 ROADMAP 2절에 우선순위 순으로 둔다:
+  Chocolatey 0.3.1 승인 확인 → #454772 병합 뒤 LED판 0.3.1 `force=true` 제출 → 이 PC 설치본을 정식 게시본으로 → 사용자 실측 3종 →
+  일반판 0.3.1 실물 설치·제거 시험 → 자동 실행 절차 실측.
+
+### 개발 내용 및 소스 위치
+- 커밋 a7a8faf (개발 세션) — winget 0.3.1 매니페스트 사본, 일반판만, CI 렌더 결과(#482170 제출분):
+  `packaging/winget/manifests/s/SosomLab/nShiftSpace/0.3.1`.
+- Wiki 발행 (2026-11-17, 사용자 승인) — `tools/publish-wiki.sh`, 0.3.1 릴리스 시점 원고. 이번 정리로 바뀐 원고(`Home.md`·`Roadmap.md`)의 발행은 별도.
+- `docs/ROADMAP.md` — 2절을 상태 표 + 후속 과제(우선순위 순) + 완료 항목 접기로 재구성, 1절에 다음 할 일, 3절 제목·상태 표 갱신 항목, 8절에 v0.3.1.
+- `docs/PACKAGING.md` — 상태 표(23:08 조회), "shim과 콘솔" 첫머리를 버전별로, 깨진 경로 표기, winget 구성 요소(0.3.1 사본·CI 설명), Chocolatey·winget 이력 행.
+- `docs/CHANGELOG.md` — 깨진 경로 표기, 오늘 항목들의 낡은 문장 3곳.
+- `README.md`, `docs/wiki/Home.md`·`Roadmap.md` — winget은 0.3.1 설치, Chocolatey는 0.3.1 심사 중.
+
+---
+
 ## 2026-11-17 — v0.3.1 릴리스 결과: 태그 런 전 잡 성공 · guard와 winget 새 제출 방식 첫 실전
 
 ### 요청
@@ -32,7 +67,7 @@
 ### 개발 내용 및 소스 위치
 - `docs/PACKAGING.md`(상태 표, guard 첫 실전, 구성 요소, Chocolatey·winget 이력), `docs/ROADMAP.md`(새 CI 방식 검증 완료, 심사 확인·LED 제출 과제),
   `README.md`, `docs/wiki/Home.md`·`Releasing.md`.
-- winget 0.3.1 매니페스트의 저장소 사본(`packaging/winget/manifests/…/0.3.1`)은 이 커밋에 없다 (개발 세션 소유).
+- winget 0.3.1 매니페스트의 저장소 사본은 뒤이어 커밋 a7a8faf(개발 세션)로 들어갔다 (위 항목).
 
 ---
 
@@ -46,7 +81,7 @@
 - 콘솔 창은 Chocolatey shim이 콘솔 프로그램이라 생긴다. shim이 있는 한 사용자가 그 경로를 자동 실행이나 바로가기에 쓸 수 있다.
 - Chocolatey 문서 기준: exe 옆에 같은 이름(대소문자 일치) + `.ignore` 빈 파일을 두면 shim을 만들지 않는다.
   `chocolateyUninstall.ps1`은 제거 때만, `chocolateyBeforeModify.ps1`은 업그레이드·제거 때(이전 버전 것이) 실행된다.
-  업그레이드 때 이전 버전의 shim이 지워지는지는 문서에 없다 — **미확인**.
+  업그레이드 때 이전 버전의 shim이 지워지는지는 문서에 없다 (아래 실제 업그레이드 시험에서 **지우지 않음**을 확인).
 - 메뉴로 켠 자동 실행 값이 제거 뒤에 남는 문제(ROADMAP 3절 과제)도 같은 스크립트에서 다룰 수 있다.
 - 이 PC의 `Run` 값은 사용자 승인을 받아 shim 경로에서 `"C:\ProgramData\chocolatey\lib\nshiftspace-led\tools\nShiftSpace-led-x64.exe"`로 바꿨다.
   다음 로그인 때 콘솔 창이 사라졌는지는 **미확인** (사용자 확인 예정).
@@ -70,8 +105,7 @@
 - 릴리스 전 실제 업그레이드 시험 (협업 세션, 사용자 승인) — `nshiftspace-led` 0.3.0 → 로컬에서 만든 0.3.1 nupkg (URL은 v0.3.0 릴리스 zip,
   실제 SHA256, 치환은 CI와 같은 `-Encoding utf8BOM` — BOM 유지 확인), choco 2.7.5. **7개 항목 통과**:
   1. `choco upgrade` 종료 코드 0, `--force` 재실행도 0.
-  2. `chocolateyin`에 shim 없음. 로그 "Removing shim …in
-ShiftSpace-led-x64.exe"는 `Uninstall-BinFile`이 낸 것 —
+  2. `chocolatey\bin`에 shim 없음. 로그 "Removing shim …\bin\nShiftSpace-led-x64.exe"는 `Uninstall-BinFile`이 낸 것 —
      **Chocolatey는 업그레이드 때 옛 shim을 미리 지우지 않으므로 직접 제거(b09e736)가 실제로 필요했다.**
   3. tools 폴더에 exe + `.ignore`, `.gui` 없음.
   4. 공용 시작 메뉴 `nShiftSpace LED.lnk` → tools 폴더 exe.
@@ -79,8 +113,7 @@ ShiftSpace-led-x64.exe"는 `Uninstall-BinFile`이 낸 것 —
   6. `Run` 값을 옛 shim 경로로 되돌리고 `--force` → tools 경로로 이전 ("Updated the 'Start at login' entry …").
   7. beforemodify로 프로세스 종료 → 시작 메뉴 바로가기로 재실행: 프로세스 경로 = tools 폴더 exe, 부모 explorer, `conhost.exe` 생성 0건.
   - 미확인: 콘솔 창이 보이지 않는지의 육안 확인, 트레이 아이콘·Shift+Space 동작, 다음 로그인 때의 동작 (사용자 확인).
-  - 경고 "Unable to move directory … (5) 액세스가 거부되었습니다: […\lib-bkp
-shiftspace-led\…]"가 두 번 모두 났다. Chocolatey가 파일 단위로
+  - 경고 "Unable to move directory … (5) 액세스가 거부되었습니다: […\lib-bkp\nshiftspace-led\…]"가 두 번 모두 났다. Chocolatey가 파일 단위로
     다시 옮겨 정상 진행했고 결과에는 영향이 없었다. 원인 미확인.
   - 일반판(`nshiftspace`)은 설치돼 있지 않아 모의 시험 + pack으로만 확인. 제거 스크립트는 실물로 실행하지 않았다.
   - 그 PC에는 로컬 0.3.1이 설치된 상태로 남았다 (정식 게시본으로 맞추려면 게시 뒤 `choco upgrade nshiftspace-led --force`).
@@ -95,7 +128,7 @@ shiftspace-led\…]"가 두 번 모두 났다. Chocolatey가 파일 단위로
 - 문서 (협업 세션): `docs/PACKAGING.md`("채널별 동작 차이"에 0.3.1 동작·한계·사전 검증·실제 업그레이드 시험), `docs/ROADMAP.md`(shim 과제 완료, `Run` 값 정리 결정 완료),
   `README.md`, `docs/wiki/`(`Installation.md`·`Autostart.md`·`Troubleshooting.md`·`Usage.md`: Chocolatey 실행 방법을 버전별로).
   `docs/wiki/Releasing.md`(태그 예시·guard 잡·패키지 스크립트 표), `docs/wiki/Home.md`(현재 버전).
-  채널 게시·심사 상태는 태그 런 결과를 본 뒤 따로 기록한다. Wiki 재발행·push는 릴리스 마무리 때.
+  채널 게시·심사 상태는 위 "v0.3.1 릴리스 결과" 항목에 있다.
 
 ---
 
