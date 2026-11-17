@@ -5,7 +5,7 @@
 
 ---
 
-## 2026-11-18 — 트레이 메뉴에 이름·버전 표시 · "시작 메뉴에 바로가기" 메뉴 (미릴리스 — 다음 버전, 0.3.2 예정)
+## 2026-11-18 — v0.3.2: 트레이 메뉴에 이름·버전 표시 · "시작 메뉴에 바로가기" 메뉴
 
 ### 요청
 - 트레이 메뉴에서 프로그램 이름과 버전을 볼 수 있게 할 것.
@@ -23,6 +23,8 @@
   `nShiftSpace.lnk`(LED판은 `nShiftSpace LED.lnk`)를 만들거나 지운다. 공용 시작 메뉴에 같은 이름이 있고 사용자 쪽에 없으면 체크된 채 비활성
   (공용 쪽은 관리자만 지울 수 있다 = Chocolatey 설치본).
 - ole32는 import하지 않고 항목을 누른 순간에만 `LoadLibrary`로 쓴다.
+- 바로가기를 만든 뒤 ole32 등이 프로세스에 남는 것(아래 실물 시험)은 **그대로 둔다** — 메뉴를 누를 때만 생기고, 작업 관리자 표시 수치에는
+  영향이 없으며, 다시 실행하면 없어진다. DESIGN·PACKAGING에 알려진 동작으로 적는다.
 
 ### 개발 내용 및 소스 위치
 - 커밋 7a3e413 (개발 세션) — `src/nShiftSpace.c`(머리 줄 `APP_TITLE`, `IDM_SHORTCUT` = 13, `shortcut_exists`·`create_shortcut`), `Makefile`·`build.bat`·
@@ -52,13 +54,18 @@
 
     평소 수치는 0.3.1과 같다. 바로가기를 한 번 만들면 작업 관리자 수치(사설 작업 집합)는 2초 뒤 트리밍으로 돌아오지만
     **커밋이 약 0.6MB 늘어난 채 남고, ole32.dll이 내려가지 않는다** — 모듈 25 → 37개 (`ole32`·`clbcatq`·`propsys`·`linkinfo`·`ntshrui` 등).
-    `FreeLibrary`(src/nShiftSpace.c:173) 뒤에도 남는 원인은 미확인 (추정: COM이 올린 셸 링크 구현 DLL들이 ole32를 참조). 개발 세션에 보고.
+    `FreeLibrary`(src/nShiftSpace.c:173) 뒤에도 남는 원인은 미확인 (추정: COM이 올린 셸 링크 구현 DLL들이 ole32를 참조). 개발 세션에 보고 → 그대로 두기로 결정 (위 설계 방향).
   - x86 두 개: 실행 4초 뒤 112K / 116K, 메뉴 표시·종료 정상.
   - 종료(`IDM_EXIT`)는 5개 실행 모두 종료 코드 0. 시험으로 만든 `.lnk`는 남지 않았고 `Run` 값·설치본 exe는 변하지 않았다. 설치본은 시작 메뉴 바로가기로 다시 실행.
   - 미확인: 메뉴가 화면에 보이는 모습(글자·회색 표시)의 육안 확인, 일반 권한으로 실행했을 때의 동작(시험은 관리자 권한 셸에서 실행),
     winget 별칭(`Links\nshiftspace.exe`)으로 실행했을 때 바로가기 대상이 어느 경로가 되는지, 4종 로컬 빌드(이 PC에 컴파일러 없음 — CI로 대신).
+- 커밋 419ee71 (개발 세션) — 패키지 설명의 exe 크기 문구를 실측에 맞춤: 일반판 약 7KB(6,656B) · LED판 약 8KB(7,680B).
+  `packaging/chocolatey/nshiftspace.nuspec`, `packaging/chocolatey-led/nshiftspace-led.nuspec`, winget `TEMPLATE.locale.en-US.yaml` 2개.
+- 릴리스 준비 (협업 세션) — "0.3.2 예정" 표기를 0.3.2로 확정, README·Wiki의 크기 수치를 6,656 / 6,656 / 7,680 / 7,680B로, wiki `Home.md` 현재 버전,
+  `Releasing.md` 태그 예시, ROADMAP에 LED판 크기 여유 512B 주의. 태그 직전 조회(2026-11-18 00:14): Chocolatey 0.3.1 두 패키지 `Submitted`(미승인),
+  winget LED판 #454772 열림 — 태그 런과 채널 게시 결과는 별도 항목으로 기록한다.
 - 문서 (협업 세션): `docs/DESIGN.md`(초경량 원칙의 라이브러리 줄, "시작 메뉴 바로가기 · 메뉴 머리 줄" 절), `docs/ROADMAP.md`(1절 1-d, 불변 원칙, 3절 "다음 버전"),
-  `docs/PACKAGING.md`(채널별 시작 메뉴 바로가기 표), `README.md`, `docs/wiki/Usage.md`·`Installation.md`·`Build.md`. Wiki 발행은 릴리스 때.
+  `docs/PACKAGING.md`(채널별 시작 메뉴 바로가기 표), `README.md`, `docs/wiki/Usage.md`·`Installation.md`·`Build.md`·`Home.md`·`Roadmap.md`·`Releasing.md`. Wiki 발행은 릴리스 뒤 사용자 승인을 받아서.
 
 ---
 

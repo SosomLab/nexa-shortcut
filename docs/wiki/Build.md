@@ -3,9 +3,9 @@
 소스는 [`src/nShiftSpace.c`](https://github.com/SosomLab/nexa-shortcut/blob/main/src/nShiftSpace.c)
 한 파일입니다. 아래 3가지 방법 중 환경에 맞는 것을 고르세요.
 
-결과물: `dist/nShiftSpace-x64.exe` **5,120바이트**, `dist/nShiftSpace-x86.exe` **5,632바이트**.
+결과물: `dist/nShiftSpace-x64.exe` **6,656바이트**, `dist/nShiftSpace-x86.exe` **6,656바이트**.
 [키보드 LED 표시판](Usage#키보드-led-표시판-선택)은 같은 소스를 `NSS_LED` 플래그로 빌드한
-`dist/nShiftSpace-led-x64.exe` **6,144바이트**, `dist/nShiftSpace-led-x86.exe` **6,656바이트**
+`dist/nShiftSpace-led-x64.exe` **7,680바이트**, `dist/nShiftSpace-led-x86.exe` **7,680바이트**
 
 | 방법 | 환경 | x64 | x86 |
 |---|---|---|---|
@@ -102,7 +102,7 @@ GitHub Actions CI도 동일하게 검증하며, **8KB를 초과하면 빌드를 
 |---|---|
 | `-nostdlib`, 진입점 `start` | CRT 미링크 — 수십 KB 절약 |
 | kernel32 / user32 / shell32 만 링크 (+ advapi32는 자동 실행 `Run` 값용 3개 함수만, imm32는 `ImmDisableIME` 하나) | import 테이블 최소화 |
-| ole32는 import하지 않고 바로가기 메뉴를 누를 때만 `LoadLibrary` (다음 버전) | 시작할 때 로드되지 않아 상주 메모리 유지 |
+| ole32는 import하지 않고 바로가기 메뉴를 누를 때만 `LoadLibrary` (0.3.2부터) | 시작할 때 로드되지 않아 상주 메모리 유지 |
 | 큰 구조체를 전역(`.bss`)에 배치 | 컴파일러의 `memset` 호출 생성 회피 |
 | 16×16 1bpp 단일 이미지 ICO (198바이트) | 다중 해상도 트루컬러 ICO는 수십 KB |
 | `RegisterHotKey` 사용 (훅 아님) | 코드 단순 + CPU 비용 0 |

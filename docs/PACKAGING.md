@@ -14,6 +14,7 @@ nShiftSpace의 Windows 패키지 관리자 배포 현황, 등록 절차, 상태 
 설치되는 버전은 **winget 일반판 0.3.1**, **Chocolatey 일반판·LED판 0.3.0**이다 (Chocolatey는 0.3.1이 승인되면 0.3.1). winget LED판은 PR이 병합돼야 설치된다.
 v0.3.1(2026-11-17 태그)은 GitHub Release에 zip 4종이 올라가 있다.
 0.3.1은 프로그램이 0.3.0과 같고 Chocolatey 패키지의 설치 방식만 바뀐 버전이다.
+v0.3.2(2026-11-18)는 프로그램에 메뉴 머리 줄과 "시작 메뉴에 바로가기" 메뉴를 넣은 버전이다 — 위 표는 0.3.2 태그 전 상태이고, 채널 게시 결과는 태그 런 뒤에 기록한다.
 
 두 채널 모두 GitHub Release의 zip(`nShiftSpace-x64.zip` / `nShiftSpace-x86.zip`, LED판은 `nShiftSpace-led-*.zip`)을
 다운로드해 설치하는 원격형 패키지다. LED판은 **별도 패키지 이름**으로 게시하고 기존 이름은 일반판을 유지한다
@@ -116,11 +117,13 @@ README에도 요약이 있으며, 여기서는 채널별 차이와 문제 해결
   | 채널 | 누가 만드나 | 위치 | 제거할 때 |
   |---|---|---|---|
   | Chocolatey (0.3.1부터) | 설치 스크립트 | 공용 `%ProgramData%\Microsoft\Windows\Start Menu\Programs\nShiftSpace.lnk` (LED판 `nShiftSpace LED.lnk`) | uninstall 스크립트가 지운다 |
-  | winget | 패키지는 만들지 않는다 (포터블). **다음 버전(0.3.2 예정)부터** 트레이 메뉴 "시작 메뉴에 바로가기"로 사용자가 만든다 | 사용자 `%APPDATA%\Microsoft\Windows\Start Menu\Programs\` (같은 이름) | **남는다** — `winget uninstall` 전에 메뉴에서 끈다 |
+  | winget | 패키지는 만들지 않는다 (포터블). **0.3.2부터** 트레이 메뉴 "시작 메뉴에 바로가기"로 사용자가 만든다 | 사용자 `%APPDATA%\Microsoft\Windows\Start Menu\Programs\` (같은 이름) | **남는다** — `winget uninstall` 전에 메뉴에서 끈다 |
   | zip 직접 | winget과 같음 | 같음 | exe를 지우기 전에 메뉴에서 끈다 |
 
-  다음 버전의 프로그램은 공용 쪽에 같은 이름의 바로가기가 있으면(Chocolatey 설치본) 메뉴 항목을 체크된 채 비활성으로 보여 준다.
+  0.3.2부터 프로그램은 공용 쪽에 같은 이름의 바로가기가 있으면(Chocolatey 설치본) 메뉴 항목을 체크된 채 비활성으로 보여 준다.
   메뉴로 만든 바로가기는 실행 중인 exe 경로(`GetModuleFileName`)를 가리킨다 — winget 별칭으로 실행했을 때 어느 경로가 되는지는 미확인.
+  알려진 동작: 바로가기를 한 번 만들면 ole32 등이 프로세스에 남아 커밋 메모리가 약 0.6MB 늘어난다. 작업 관리자 표시 수치는 그대로이고
+  프로그램을 다시 실행하면 없어진다 (그대로 두기로 결정, 2026-11-18).
 - **시작 프로그램 등록**: 두 채널 모두 자동 등록하지 않는다. 사용자가 프로그램 트레이 메뉴
   "로그인 시 자동 실행"으로 켤 수 있다 (HKCU `Run` 값, v0.2.0부터). 수동 절차는 아래
   ["설치 후 자동 실행 설정"](#설치-후-자동-실행-설정) 절 참고.

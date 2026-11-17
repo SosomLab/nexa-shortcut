@@ -3,7 +3,7 @@
 ## 한 줄 요약
 
 ```bash
-git tag v0.3.1 && git push origin v0.3.1
+git tag v0.3.2 && git push origin v0.3.2
 ```
 
 이 한 번으로 **GitHub Release → Chocolatey 게시 → winget 업데이트 PR**까지 자동 진행됩니다.
@@ -11,9 +11,9 @@ git tag v0.3.1 && git push origin v0.3.1
 ## 자동화 흐름
 
 ```
-git push origin v0.3.1
+git push origin v0.3.2
    │
-   ├─ build    빌드 + 8KB 크기 회귀 검사 → Release에 zip 4종 첨부 (일반·LED × x64·x86)
+   ├─ build    빌드(태그 이름이 트레이 메뉴의 버전 표시가 됨) + 8KB 크기 회귀 검사 → Release에 zip 4종 첨부 (일반·LED × x64·x86)
    ├─ guard    패키지별 게시 판정 — 같은 버전이 이미 등록돼 있으면 제외, 직전 버전이 심사 대기 중이면 보류
    ├─ chocolatey      체크섬 주입 → choco pack → choco push  (시크릿 CHOCO_API_KEY)
    ├─ chocolatey-led  LED판 nshiftspace-led 동일 절차

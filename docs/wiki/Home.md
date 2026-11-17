@@ -16,10 +16,10 @@
 
 | 항목 | 값 |
 |---|---|
-| 파일 크기 | **5KB** (x64 5,120바이트. 원조 jwShiftSpaceKey.exe는 12KB) · [키보드 LED 표시판](Usage#키보드-led-표시판-선택) 6KB |
+| 파일 크기 | **6.5KB** (6,656바이트. 원조 jwShiftSpaceKey.exe는 12KB) · [키보드 LED 표시판](Usage#키보드-led-표시판-선택) 7.5KB |
 | 메모리 | 작업 관리자 기준 약 0.1MB |
 | 지원 | Windows 10 / 11, x64 · x86 |
-| 현재 버전 | **0.3.1** (2026-11-17, [Releases](https://github.com/SosomLab/nexa-shortcut/releases/tag/v0.3.1)) — 프로그램은 0.3.0과 같고 Chocolatey 패키지 설치 방식만 바뀌었습니다. winget은 0.3.1이 설치되고, Chocolatey는 심사가 끝날 때까지 0.3.0이 설치됩니다 |
+| 현재 버전 | **0.3.2** (2026-11-18, [Releases](https://github.com/SosomLab/nexa-shortcut/releases/tag/v0.3.2)) — 트레이 메뉴에 이름·버전 표시와 "시작 메뉴에 바로가기" 메뉴가 생겼습니다. winget·Chocolatey는 채널 심사가 끝나면 올라가며, 그 전까지 winget은 0.3.1, Chocolatey는 0.3.0이 설치됩니다 |
 | 상주 방식 | 트레이 아이콘 ('가·A' 픽셀 아트, 198바이트 아이콘 내장) |
 
 ### 30초 설치
